@@ -1,36 +1,138 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Twerk Mongolia
 
-## Getting Started
+Улаанбаатар дахь бүжгийн студийн вэб платформ: танилцуулга сайт, хичээлийн
+хуваарь ба бүртгэл, онлайн дэлгүүр, админ удирдлага.
 
-First, run the development server:
+**Next.js 16 · React 19 · Tailwind v4 · Supabase (Postgres + Auth + Storage) · Vercel**
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+Дэлгэрэнгүй архитектур: [docs/PLAN.md](docs/PLAN.md)
+
+---
+
+## Хурдан эхлүүлэх
+
+### 1. Supabase проект
+
+[supabase.com](https://supabase.com) дээр проект үүсгэнэ. Дараа нь **SQL Editor**
+дотор дараах файлуудыг ЭНЭ ДАРААЛЛААР ажиллуулна:
+
+```
+supabase/migrations/20260827000001_schema.sql     -- хүснэгтүүд
+supabase/migrations/20260827000002_functions.sql  -- функц, trigger
+supabase/migrations/20260827000003_policies.sql   -- RLS
+supabase/seed.sql                                 -- жишээ өгөгдөл (заавал биш)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+`supabase` CLI суулгасан бол:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+supabase link --project-ref <project-ref>
+supabase db push
+psql "$DATABASE_URL" -f supabase/seed.sql
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 2. Орчны хувьсагч
 
-## Learn More
+`.env.local` дотор Supabase → Settings → API хэсгээс:
 
-To learn more about Next.js, take a look at the following resources:
+```
+NEXT_PUBLIC_SUPABASE_URL=https://xxxx.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
+SUPABASE_SERVICE_ROLE_KEY=eyJ...        # server-only, хэзээ ч NEXT_PUBLIC_ болгохгүй
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 3. Ажиллуулах
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+npm install
+npm run dev      # http://localhost:3000
+```
 
-## Deploy on Vercel
+### 4. Өөрийгөө админ болгох
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Сайтаар бүртгүүлээд Supabase SQL Editor дээр:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```sql
+update profiles set role = 'admin' where id = (
+  select id from auth.users where email = 'таны@имэйл.mn'
+);
+```
+
+Дараа нь `/admin` нээгдэнэ. (Эрхийг өөрөө өөрчлөхийг `guard_profile_role`
+trigger хориглодог тул энэ алхмыг DB-ээс хийнэ.)
+
+---
+
+## Бүтэц
+
+```
+src/
+  proxy.ts                  session шинэчлэлт + хэлний redirect (Next 16-д middleware БИШ)
+  app/
+    [locale]/               mn | en
+      (marketing)/          нүүр, тухай, хичээлүүд, багш, галерей, FAQ, холбоо барих
+      (booking)/schedule/   хуваарь, суудал захиалга
+      (shop)/               дэлгүүр, сагс, checkout, захиалга
+      (account)/            профайл, миний хичээлүүд, миний захиалгууд
+      (auth)/               нэвтрэх, бүртгүүлэх, нууц үг сэргээх
+    admin/                  удирдлага (хэлгүй, зөвхөн монголоор)
+    auth/callback/          OAuth / и-мэйл баталгаажуулалт
+    api/payments/webhook/   төлбөрийн provider-ийн webhook
+  actions/                  Server Action-ууд (эрхийн шалгалт бүрд нь эхэлдэг)
+  lib/
+    supabase/               server / client / admin client + схемийн төрлүүд
+    auth/dal.ts             getUser, requireUser, requireStaff, requireAdmin
+    data.ts                 уншилтын нэгдсэн цэг
+    i18n/                   mn / en толь бичиг
+    cart.ts                 cookie дэх сагс
+    payments/               provider adapter (одоогоор mock)
+supabase/migrations/        схем, функц, RLS
+```
+
+## Аюулгүй байдлын гурван давхарга
+
+1. **`src/proxy.ts`** — session cookie шинэчлэх + урьдчилсан шүүлт. DB-д хандахгүй.
+2. **`src/lib/auth/dal.ts`** — хуудас, Server Action бүрийн эхэнд `requireUser()` /
+   `requireStaff()`. Server Action нь UI-гүйгээр шууд POST-оор дуудагдаж болдог.
+3. **RLS + `security definer` функцууд** — Postgres өөрөө татгалзана.
+
+Эмзэг логик JS дээр биш, DB дотор:
+
+| Функц | Юуг баталгаажуулдаг |
+|---|---|
+| `book_session` | Суудлын багтаамж — мөрийг `for update`-ээр түгжинэ, давхар захиалга үүсэхгүй |
+| `place_order` | Үнэ, нөөц — client-ийн илгээсэн дүнд итгэхгүй, нөөцийг атомаар хасна |
+| `cancel_order` | Цуцлахад нөөцийг буцаана |
+| `guard_profile_role` | Хэрэглэгч өөрийгөө admin болгохоос сэргийлнэ |
+| `sync_session_booked_count` | Эзэлсэн суудлын тоог үргэлж зөв байлгана |
+
+## Vercel дээр байршуулах
+
+1. Repo-г Vercel-д холбоно.
+2. Дээрх орчны хувьсагчдыг Production болон Preview-д тавина.
+   `NEXT_PUBLIC_SITE_URL` -ыг бодит домэйнээр солино.
+3. Supabase → Authentication → URL Configuration дотор
+   `https://<домэйн>/auth/callback` -ыг Redirect URL болгож нэмнэ.
+4. Google OAuth хэрэглэх бол Supabase → Authentication → Providers дээр асаана.
+
+## Скриптүүд
+
+```bash
+npm run dev      # хөгжүүлэлт
+npm run build    # production build
+npm run lint     # eslint
+npx tsc --noEmit # төрлийн шалгалт
+```
+
+## Одоогоор хийгдээгүй
+
+- **Төлбөрийн gateway** — хойш тавьсан. Захиалга `pending_payment` төлөвт
+  үүсээд админ гараар «Төлөгдсөн» болгоно. `src/lib/payments/` дотор Bonum-тай
+  нийцтэй adapter болон mock provider бэлэн байгаа
+  (`src/lib/payments/README.md`).
+- **И-мэйл мэдэгдэл** (Resend) ба сануулгын cron.
+- **Дараалал (waitlist)** — хүснэгт бэлэн, UI хийгдээгүй.
+- **Зураг байршуулах UI** — `media` bucket болон RLS бэлэн; админ дээр одоогоор
+  URL гараар оруулна.
+# misheel
