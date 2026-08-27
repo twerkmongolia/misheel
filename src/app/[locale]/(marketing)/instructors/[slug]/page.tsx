@@ -1,0 +1,66 @@
+import { notFound } from 'next/navigation'
+import { Empty, PageHeader, Section } from '@/components/ui'
+import { Media } from '@/components/site/media'
+import { SessionCard } from '@/components/site/SessionCard'
+import { getDictionary, loc, isLocale } from '@/lib/i18n'
+import { getInstructors, getMyBookedSessionIds, getUpcomingSessions } from '@/lib/data'
+import { getUser } from '@/lib/auth/dal'
+
+export default async function InstructorPage({
+  params,
+}: {
+  params: Promise<{ locale: string; slug: string }>
+}) {
+  const { locale, slug } = await params
+  if (!isLocale(locale)) notFound()
+
+  const t = getDictionary(locale)
+  const instructors = await getInstructors(true)
+  const instructor = instructors.find((item) => item.slug === slug)
+  if (!instructor || !instructor.is_active) notFound()
+
+  const [sessions, user] = await Promise.all([getUpcomingSessions(50), getUser()])
+  const booked = await getMyBookedSessionIds(user?.id ?? null)
+  const mine = sessions.filter((session) => session.instructor_id === instructor.id).slice(0, 6)
+
+  return (
+    <div className="flex flex-col gap-10">
+      <PageHeader title={instructor.name} />
+
+      <div className="grid gap-8 md:grid-cols-[1fr_1.4fr]">
+        <Media src={instructor.photo_url} alt={instructor.name} ratio="aspect-[4/5]" priority />
+        <div className="flex flex-col gap-4">
+          <p className="text-lg leading-relaxed text-foreground-soft">{loc(instructor, 'bio', locale)}</p>
+          {instructor.instagram && (
+            <a
+              href={`https://instagram.com/${instructor.instagram}`}
+              target="_blank"
+              rel="noreferrer noopener"
+              className="self-start text-sm text-foreground underline decoration-line-strong underline-offset-4 transition-colors hover:decoration-foreground"
+            >
+              @{instructor.instagram}
+            </a>
+          )}
+        </div>
+      </div>
+
+      <Section title={t.home.upcoming}>
+        {mine.length === 0 ? (
+          <Empty>{t.schedule.noSessions}</Empty>
+        ) : (
+          <div className="grid gap-3 sm:grid-cols-2">
+            {mine.map((session) => (
+              <SessionCard
+                key={session.id}
+                session={session}
+                locale={locale}
+                booked={booked.has(session.id)}
+                back={`/${locale}/instructors/${slug}`}
+              />
+            ))}
+          </div>
+        )}
+      </Section>
+    </div>
+  )
+}

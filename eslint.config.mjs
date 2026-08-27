@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // `npm run check:build` -ийн гаралт. Үүсгэсэн код тул шалгах шаардлагагүй.
+    ".next-check/**",
   ]),
 ]);
 
