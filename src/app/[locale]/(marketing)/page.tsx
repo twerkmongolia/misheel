@@ -19,7 +19,7 @@ import {
  * Админ `site_content` дээрх `videos` мөрийг засаагүй үед харагдах бичлэгүүд.
  * Тэнд `id_1`, `id_2` талбарт бүтэн YouTube холбоос буулгасан ч ажиллана.
  */
-const FALLBACK_VIDEO_IDS = ['u261YyMWm0g', 'ju-HSfPFFxE']
+const FALLBACK_VIDEO_IDS = ['u261YyMWm0g', 'ju-HSfPFFxE', 'U7GUiQBVIs0']
 
 export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
@@ -84,10 +84,12 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             </div>
           </div>
 
+          {/* Багийн зураг хэвтээ, өргөн эгнээтэй — босоо хүрээнд хийвэл
+              урд талын бүжигчин тасарна. Тиймээс 4:3, ирмэгээс өчүүхэн зүснэ. */}
           <Media
-            src="/media/studio-6.svg"
+            src="/media/hero.jpg"
             alt={String(hero.title ?? '')}
-            ratio="aspect-[4/5]"
+            ratio="aspect-[4/3]"
             priority
           />
         </div>
@@ -111,7 +113,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           Заалны уур амьсгалыг үг хэлж чадахгүй — хөдөлгөөнийг харуулна. */}
       {videos.length > 0 && (
         <Section eyebrow="Видео" title={t.home.videosTitle}>
-          <div className="grid gap-6 sm:grid-cols-2">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {videos.map((video) => (
               <VideoEmbed
                 key={video.id}

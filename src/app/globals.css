@@ -69,12 +69,77 @@
   /* Зураггүй орлуулагчийн суурь */
   --media-base: light-dark(#E9E7EE, #0B0910);
 
+  /* Нийтийн сайтад «өргөлт» гэж тусдаа өнгө БАЙХГҮЙ — монохром хэвээр.
+     Зөвхөн `.admin-shell` дотор ногооноор дарж бичнэ (доор). */
+  --brand: var(--foreground);
+  --brand-ink: var(--background);
+  --brand-soft: var(--surface-2);
+
   --radius-card: 1.25rem;
 }
 
 /* Хэрэглэгчийн шууд сонголт — системийнхийг давна */
 :root[data-theme='light'] { color-scheme: light; }
 :root[data-theme='dark'] { color-scheme: dark; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Удирдлагын хэсэг
+
+   Нийтийн сайтаас ТУСДАА орчин. Хоёр ялгаа:
+
+   1. Анхдагчаар ГЭРЭЛТЭЙ. Шөнийн студийн уур амьсгал нь маркетингийн
+      хуудсанд зохимжтой ч, өдөржин хүснэгт уншиж, тоо шивдэг ажлын
+      орчинд гэрэл илүү тохиромжтой. Горимоо өөрөө сонгоно (өөрийн
+      cookie-той, сайтынхаас хамааралгүй).
+
+   2. Ногоон өргөлттэй. Нийтийн сайт монохром хэвээр — үүнийг зөвхөн
+      энэ хүрээнд задлав: удирдлагад «үндсэн үйлдэл хаана байна» гэдгийг
+      хэлбэрээр биш өнгөөр заах нь хурдан.
+
+   ⚠️ `light-dark()` нь ТУХАЙН ЗАРЛАСАН элемент дээрээ шийдэгддэг — хэрэглэсэн
+   элемент дээр биш. Өөрөөр хэлбэл `:root` дээр зарласан токеныг энд
+   `color-scheme` сольсноор эргүүлж БОЛОХГҮЙ: тэдгээр нь `:root` дээрээ аль
+   хэдийн шийдэгдчихсэн байдаг. (Эхний оролдлогод яг ийм алдаа гарсан —
+   цайвар дэвсгэр дээр цагаан текст.) Тиймээс палитрыг БҮТНЭЭР нь энд
+   дахин зарлана.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.admin-shell[data-scheme='light'] { color-scheme: light; }
+.admin-shell[data-scheme='dark'] { color-scheme: dark; }
+
+.admin-shell {
+  /* Хуудас цайвар саарал, карт цэвэр цагаан — картууд өөрөө өргөгдөж харагдана */
+  --background: light-dark(#F5F6F7, #000000);
+  --surface: light-dark(#FFFFFF, #0A0A0A);
+  --surface-2: light-dark(#F1F2F4, #141414);
+  --surface-3: light-dark(#E4E7EA, #1E1E1E);
+
+  --line: light-dark(#E6E8EB, #232323);
+  --line-strong: light-dark(#CDD1D6, #3A3A3A);
+
+  --foreground: light-dark(#0C1116, #FFFFFF);
+  --foreground-soft: light-dark(#3F4750, #B4B4B4);
+  --muted: light-dark(#6B7480, #757575);
+  --faint: light-dark(#A3ABB4, #4A4A4A);
+
+  --button: light-dark(#0C1116, #FFFFFF);
+  --button-ink: light-dark(#FFFFFF, #000000);
+
+  --accent: light-dark(#0C1116, #FFFFFF);
+  --accent-ink: light-dark(#FFFFFF, #000000);
+  --accent-soft: light-dark(#EDEFF2, #1A1A1A);
+
+  --good: light-dark(#15653F, #4ADE80);
+  --good-soft: light-dark(#E6F3EB, #0E2A1C);
+  --warn: light-dark(#8A6100, #B4B4B4);
+  --warn-soft: light-dark(#FBF3DF, #141414);
+  --danger: light-dark(#9B2226, #F87171);
+  --danger-soft: light-dark(#FBEAEA, #2A1112);
+
+  --brand: light-dark(#15653F, #4ADE80);
+  --brand-ink: light-dark(#FFFFFF, #052E1B);
+  --brand-soft: light-dark(#E6F3EB, #0E2A1C);
+}
 
 @theme inline {
   --color-background: var(--background);
@@ -99,6 +164,9 @@
   --color-danger: var(--danger);
   --color-danger-soft: var(--danger-soft);
   --color-scrim: var(--scrim);
+  --color-brand: var(--brand);
+  --color-brand-ink: var(--brand-ink);
+  --color-brand-soft: var(--brand-soft);
 
   --font-sans: var(--font-body), ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-display), ui-sans-serif, system-ui, sans-serif;

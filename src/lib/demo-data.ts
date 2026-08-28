@@ -523,8 +523,8 @@ const contentRows: Record<string, [Record<string, string | number>, Record<strin
   ],
   booking: [{ cancel_cutoff_hours: 6 }, { cancel_cutoff_hours: 6 }],
   videos: [
-    { id_1: 'u261YyMWm0g', title_1: '', id_2: 'ju-HSfPFFxE', title_2: '' },
-    { id_1: 'u261YyMWm0g', title_1: '', id_2: 'ju-HSfPFFxE', title_2: '' },
+    { id_1: 'u261YyMWm0g', title_1: '', id_2: 'ju-HSfPFFxE', title_2: '', id_3: 'U7GUiQBVIs0', title_3: '' },
+    { id_1: 'u261YyMWm0g', title_1: '', id_2: 'ju-HSfPFFxE', title_2: '', id_3: 'U7GUiQBVIs0', title_3: '' },
   ],
 }
 

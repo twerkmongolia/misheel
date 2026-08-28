@@ -37,14 +37,40 @@ export async function login(_state: State, formData: FormData): Promise<State> {
   }
 
   const supabase = await createClient()
-  const { error } = await supabase.auth.signInWithPassword(parsed.data)
+  const { data, error } = await supabase.auth.signInWithPassword(parsed.data)
 
-  if (error) {
+  if (error || !data.user) {
     return { error: 'И-мэйл эсвэл нууц үг буруу байна.' }
   }
 
   revalidatePath('/', 'layout')
-  redirect(safeNext(formData.get('next'), locale))
+
+  const next = formData.get('next')
+
+  /*
+   * Удирдлагын эрхтэй хүн нэвтрэхэд шууд хяналтын самбар руу орно —
+   * нийтийн сайтын `account` хуудсаар дамжихгүй.
+   *
+   * `next` байвал түүнийг хүндэтгэнэ: хэрэглэгч тодорхой хуудас руу орох
+   * гэж байгаад нэвтрэлт шаардсан тул тэр санааг таслах учиргүй.
+   *
+   * Эрхийг `getProfile()` -ээр биш, дөнгөж авсан `data.user.id` -ээр уншина.
+   * `getProfile` нь хүсэлтийн туршид кэшлэгддэг тул нэвтрэхээс өмнөх
+   * (хоосон) утгаа буцааж мэдэнэ.
+   */
+  if (!next) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', data.user.id)
+      .maybeSingle()
+
+    if (profile?.role === 'staff' || profile?.role === 'admin') {
+      redirect('/admin')
+    }
+  }
+
+  redirect(safeNext(next, locale))
 }
 
 const signupSchema = credentials.extend({

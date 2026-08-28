@@ -35,8 +35,8 @@ insert into site_content (key, value_mn, value_en) values
 ('shop',    jsonb_build_object('shipping_fee', 5000, 'bank', 'Хаан банк · 5000 1234 5678 · Твөрк Монголиа ХХК'),
             jsonb_build_object('shipping_fee', 5000, 'bank', 'Khan Bank · 5000 1234 5678 · Twerk Mongolia LLC')),
 -- Нүүр хуудасны бичлэгүүд. id талбарт бүтэн YouTube холбоос буулгасан ч болно.
-('videos',  jsonb_build_object('id_1', 'u261YyMWm0g', 'title_1', '', 'id_2', 'ju-HSfPFFxE', 'title_2', ''),
-            jsonb_build_object('id_1', 'u261YyMWm0g', 'title_1', '', 'id_2', 'ju-HSfPFFxE', 'title_2', ''))
+('videos',  jsonb_build_object('id_1', 'u261YyMWm0g', 'title_1', '', 'id_2', 'ju-HSfPFFxE', 'title_2', '', 'id_3', 'U7GUiQBVIs0', 'title_3', ''),
+            jsonb_build_object('id_1', 'u261YyMWm0g', 'title_1', '', 'id_2', 'ju-HSfPFFxE', 'title_2', '', 'id_3', 'U7GUiQBVIs0', 'title_3', ''))
 on conflict (key) do nothing;
 
 -- ── Байршил ────────────────────────────────────────────────────────────────

@@ -54,13 +54,23 @@ npm run dev      # http://localhost:3000
 Сайтаар бүртгүүлээд Supabase SQL Editor дээр:
 
 ```sql
+alter table profiles disable trigger profiles_guard_role;
+
 update profiles set role = 'admin' where id = (
   select id from auth.users where email = 'таны@имэйл.mn'
 );
+
+alter table profiles enable trigger profiles_guard_role;
 ```
 
-Дараа нь `/admin` нээгдэнэ. (Эрхийг өөрөө өөрчлөхийг `guard_profile_role`
-trigger хориглодог тул энэ алхмыг DB-ээс хийнэ.)
+Дараа нь `/admin` нээгдэнэ.
+
+> **Триггерийг заавал унтраана.** `guard_profile_role` нь `is_admin()` -ээр
+> шалгадаг бөгөөд тэр нь `auth.uid()` уншина. SQL Editor болон `service_role`
+> түлхүүрээр хандахад `auth.uid()` нь `null` — өөрөөр хэлбэл эхний админ
+> үүсгэх гэсэн ямар ч оролдлого `42501 Эрх өөрчлөх боломжгүй` алдаагаар
+> унана. Энэ бол «эхний админ хаанаас гарах вэ» гэсэн тахиа-өндөгний асуудал.
+> Нэг админ бий болмогц дараагийнхыг нь админ өөрөө хэвийн олгоно.
 
 ---
 
