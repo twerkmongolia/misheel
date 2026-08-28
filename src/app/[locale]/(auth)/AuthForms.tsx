@@ -30,7 +30,9 @@ export function LoginForm({ t, locale, next }: Props) {
         {t.auth.loginTitle}
       </Button>
 
-      <div className="flex justify-between text-sm">
+      {/* Монгол өгүүлбэрүүд урт тул нарийн дэлгэцэд хооронд нь давхарлана —
+          баганаар эхэлж, зай хүрэлцсэн үед л мөрөндөө зэрэгцүүлнэ. */}
+      <div className="flex flex-col gap-3 text-sm sm:flex-row sm:items-center sm:justify-between">
         <Link href={`/${locale}/forgot-password`} className="text-muted hover:text-foreground">
           {t.auth.forgot}
         </Link>

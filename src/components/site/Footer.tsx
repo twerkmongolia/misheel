@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import Link from 'next/link'
 import { content, getDictionary, type Locale } from '@/lib/i18n'
 import { getSiteContent } from '@/lib/data'
@@ -12,7 +13,9 @@ export async function Footer({ locale }: { locale: Locale }) {
   const linkClass = 'text-foreground-soft transition-colors hover:text-foreground'
 
   return (
-    <footer className="relative mt-24 overflow-hidden border-t border-line">
+    // Доод самбар хөвж байдаг тул төгсгөлийн мөрүүд түүний ард дарагдахгүйн
+    // тулд гар утсанд нэмэлт зай — самбарын өндөр + амьсгал.
+    <footer className="relative mt-24 overflow-hidden border-t border-line pb-24 lg:pb-0">
       {/* Хуудсын төгсгөлд сүүлчийн гэрэл */}
       <div className="glow glow-soft -bottom-40 left-1/2 h-72 w-[36rem] -translate-x-1/2" />
 
@@ -92,8 +95,25 @@ export async function Footer({ locale }: { locale: Locale }) {
         </address>
       </div>
 
-      <div className="mx-auto w-full max-w-6xl border-t border-line/60 px-5 py-6">
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 border-t border-line/60 px-5 py-6 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-xs text-muted">© {new Date().getFullYear()} Twerk Mongolia</p>
+
+        <a
+          href="https://tsstark.com"
+          target="_blank"
+          rel="noreferrer noopener"
+          className="group flex items-center gap-2 text-xs text-muted transition-colors hover:text-foreground"
+        >
+          powered by
+          <Image
+            src="/media/tsstark-logo.png"
+            alt=""
+            width={264}
+            height={264}
+            className="logo-invert h-6 w-6 opacity-80 transition-opacity group-hover:opacity-100"
+          />
+          <span className="font-medium">TS Stark</span>
+        </a>
       </div>
     </footer>
   )

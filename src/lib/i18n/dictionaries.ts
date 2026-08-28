@@ -5,6 +5,7 @@ const mn = {
   nav: {
     home: 'Нүүр',
     about: 'Бидний тухай',
+    aboutShort: 'Тухай',
     classes: 'Хичээлүүд',
     schedule: 'Хуваарь',
     booking: 'Бүртгэл',
@@ -20,6 +21,7 @@ const mn = {
     logout: 'Гарах',
     cart: 'Сагс',
     menu: 'Цэс',
+    theme: 'Өнгөний горим',
   },
   common: {
     save: 'Хадгалах',
@@ -168,7 +170,6 @@ const mn = {
     forgot: 'Нууц үгээ мартсан уу?',
     noAccount: 'Бүртгэлгүй юу?',
     hasAccount: 'Бүртгэлтэй юу?',
-    google: 'Google-ээр нэвтрэх',
     checkEmail: 'И-мэйл хаягаа шалгана уу — баталгаажуулах холбоос илгээлээ.',
     resetTitle: 'Нууц үг сэргээх',
     resetSent: 'Нууц үг сэргээх холбоосыг и-мэйлээр илгээлээ.',
@@ -215,6 +216,7 @@ const en: Dictionary = {
   nav: {
     home: 'Home',
     about: 'About',
+    aboutShort: 'About',
     classes: 'Classes',
     schedule: 'Schedule',
     booking: 'Booking',
@@ -230,6 +232,7 @@ const en: Dictionary = {
     logout: 'Log out',
     cart: 'Cart',
     menu: 'Menu',
+    theme: 'Color mode',
   },
   common: {
     save: 'Save',
@@ -378,7 +381,6 @@ const en: Dictionary = {
     forgot: 'Forgotten your password?',
     noAccount: 'No account yet?',
     hasAccount: 'Already registered?',
-    google: 'Continue with Google',
     checkEmail: 'Check your email — we sent a confirmation link.',
     resetTitle: 'Reset password',
     resetSent: 'We emailed you a reset link.',

@@ -23,10 +23,46 @@ export const metadata: Metadata = {
   description: 'Улаанбаатар дахь twerk бүжгийн студи — хичээлийн хуваарь, бүртгэл, дэлгүүр.',
 }
 
+/**
+ * Хуудас будагдахаас ӨМНӨ хэрэглэгчийн сонгосон горимыг тавина.
+ *
+ * Систем дагасан тохиолдлыг CSS (`color-scheme: light dark`) дангаараа
+ * барьдаг тул энэ скрипт зөвхөн ШУУД сонголт хийсэн хүнд хэрэгтэй. Хэрэв
+ * үүнийг effect дотор хийвэл эхний хүрээнд буруу горим анивчина.
+ */
+const themeScript = `try{var t=localStorage.getItem('theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch(e){}`
+
+/**
+ * Серверт `text/javascript`, клиентэд `text/plain`.
+ *
+ * React нь бүрдэл дотор `<script>` зурагдахад хөгжүүлэлтийн горимд сануулга
+ * өгдөг — DOM шинэчлэлтээр орсон script хөтөч дээр ажилладаггүй учраас.
+ * Бидний script-ийн ажил бол зөвхөн ЭХНИЙ HTML тул энэ ялгаа хэвийн.
+ * Төрлийг сольж сануулгыг таслана (§ Next.js preventing-flash-before-hydration).
+ */
+function InlineScript({ html }: { html: string }) {
+  return (
+    <script
+      type={typeof window === 'undefined' ? 'text/javascript' : 'text/plain'}
+      suppressHydrationWarning
+      dangerouslySetInnerHTML={{ __html: html }}
+    />
+  )
+}
+
 export default function RootLayout({ children }: LayoutProps<'/'>) {
   return (
-    <html lang="mn" className={`${display.variable} ${body.variable} h-full`}>
-      <body className="flex min-h-full flex-col">{children}</body>
+    // Скрипт `<html>` -ийн шинжийг гараар өөрчилдөг тул hydration-ы
+    // сануулгыг дарна — энэ бол зориудын зөрүү.
+    <html
+      lang="mn"
+      suppressHydrationWarning
+      className={`${display.variable} ${body.variable} h-full`}
+    >
+      <body className="flex min-h-full flex-col">
+        <InlineScript html={themeScript} />
+        {children}
+      </body>
     </html>
   )
 }

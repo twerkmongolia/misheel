@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
-import { defaultLocale, isLocale, locales, pickLocale } from '@/lib/i18n/config'
+import { defaultLocale, isLocale, LOCALE_COOKIE, locales } from '@/lib/i18n/config'
 
 /**
  * Next 16-д Middleware нь Proxy болж нэрлэгдсэн — файл нь `src/proxy.ts`.
@@ -75,7 +75,10 @@ export async function proxy(request: NextRequest) {
   }
 
   if (!first || !isLocale(first)) {
-    const locale = pickLocale(request.headers.get('accept-language'))
+    // Монгол руу. Хөтчийн хэлийг ҮЛ асууна — зөвхөн хэрэглэгч өөрөө сольсон
+    // бол тэр сонголтыг нь хүндэтгэнэ.
+    const saved = request.cookies.get(LOCALE_COOKIE)?.value
+    const locale = saved && isLocale(saved) ? saved : defaultLocale
     const target = new URL(`/${locale}${pathname === '/' ? '' : pathname}${search}`, request.url)
     return NextResponse.redirect(target)
   }
@@ -91,6 +94,15 @@ export async function proxy(request: NextRequest) {
   // Нэвтэрсэн хүнийг login/signup хуудаснаас буцаана
   if (userId && (segment === 'login' || segment === 'signup')) {
     return NextResponse.redirect(new URL(`/${first}/account`, request.url))
+  }
+
+  // Сонголтыг санана — дараагийн удаа `/` шууд тэр хэлээр нээгдэнэ.
+  if (request.cookies.get(LOCALE_COOKIE)?.value !== first) {
+    response.cookies.set(LOCALE_COOKIE, first, {
+      path: '/',
+      maxAge: 60 * 60 * 24 * 365,
+      sameSite: 'lax',
+    })
   }
 
   return response

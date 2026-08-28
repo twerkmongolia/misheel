@@ -3,57 +3,78 @@
 /* ═══════════════════════════════════════════════════════════════════════════
    Twerk Mongolia — монохром
 
-   Хар суурь, цагаан текст. Өнгө огт байхгүй.
+   Өнгө огт байхгүй. Харанхуй горимд хар суурь + цагаан текст, гэрэлтэй
+   горимд яг эсрэгээр. Хоёулаа ижил ШАТЛАЛТАЙ — зөвхөн тэнхлэг нь эргэнэ.
 
    Өнгөгүй систем дээр эрэмбийг ЮУ үүсгэх вэ:
-     · гэрэлтүүлэлт  — цагаан → саарал → бүдэг саарал (4 шат)
-     · дүүргэлт      — дүүрсэн цагаан = үндсэн үйлдэл, хүрээтэй = хоёрдогч
+     · гэрэлтүүлэлт  — тод → саарал → бүдэг саарал (4 шат)
+     · дүүргэлт      — дүүрсэн = үндсэн үйлдэл, хүрээтэй = хоёрдогч
      · хүрээний хэв  — тасархай = идэвхгүй, тод = анхаарал шаардсан
      · үсгийн жин    — 800 → 600 → 400
      · зай           — ойрхон = холбоотой, хол = тусдаа
 
    Тиймээс өнгө нэмэх нь энэ системийг эвдэнэ. Төлөв заахдаа ХЭЛБЭР
    ашиглана — өнгө биш.
-   ═══════════════════════════════════════════════════════════════════════════ */
+
+   ── Горим хэрхэн сонгогдох вэ ───────────────────────────────────────────
+   `light-dark()` нь `color-scheme` -ээс уншина. Тиймээс палитрыг НЭГ л
+   удаа бичээд, доор зөвхөн `color-scheme` -ийг сольдог. Хос тодорхойлолт,
+   media query-ийн давхардал байхгүй.
+
+     · `<html>` дээр data-theme байхгүй → `light dark` → систем шийднэ
+       (CSS дангаараа — анивчилтгүй, JS шаардахгүй)
+     · data-theme="light" / "dark"      → хэрэглэгчийн сонголт давна
+   ═══════════════════════════════════════════════════════════════════════ */
 
 :root {
-  color-scheme: dark;
+  color-scheme: light dark;
 
-  /* Суурь — хараас дээш өргөгдөх дараалал */
-  --background: #000000;
-  --surface: #0A0A0A;
-  --surface-2: #141414;
-  --surface-3: #1E1E1E;
+  /* Суурь — суурь өнгөнөөс дээш өргөгдөх дараалал */
+  --background: light-dark(#FFFFFF, #000000);
+  --surface: light-dark(#FAFAFA, #0A0A0A);
+  --surface-2: light-dark(#F1F1F1, #141414);
+  --surface-3: light-dark(#E6E6E6, #1E1E1E);
 
   /* Шугам */
-  --line: #232323;
-  --line-strong: #3A3A3A;
+  --line: light-dark(#E3E3E3, #232323);
+  --line-strong: light-dark(#C4C4C4, #3A3A3A);
 
   /* Текстийн 4 шат */
-  --foreground: #FFFFFF;
-  --foreground-soft: #B4B4B4;
-  --muted: #757575;
-  --faint: #4A4A4A;
+  --foreground: light-dark(#000000, #FFFFFF);
+  --foreground-soft: light-dark(#454545, #B4B4B4);
+  --muted: light-dark(#6E6E6E, #757575);
+  --faint: light-dark(#A8A8A8, #4A4A4A);
 
-  /* Үйлдэл — цагаан. Хар дэвсгэр дээрх хамгийн хүчтэй ялгаа. */
-  --button: #FFFFFF;
-  --button-ink: #000000;
+  /* Үйлдэл — суурьтайгаа хамгийн хүчтэй ялгарах өнгө */
+  --button: light-dark(#000000, #FFFFFF);
+  --button-ink: light-dark(#FFFFFF, #000000);
 
-  /* Өмнөх «өргөлт» -ийг цагаанаар орлуулав */
-  --accent: #FFFFFF;
-  --accent-ink: #000000;
-  --accent-soft: #1A1A1A;
+  /* Өмнөх «өргөлт» -ийг монохромоор орлуулав */
+  --accent: light-dark(#000000, #FFFFFF);
+  --accent-ink: light-dark(#FFFFFF, #000000);
+  --accent-soft: light-dark(#F0F0F0, #1A1A1A);
 
   /* Төлөвүүд — өнгөөр биш, гэрэлтүүлэлтээр ялгарна */
-  --good: #FFFFFF;
-  --good-soft: #171717;
-  --warn: #B4B4B4;
-  --warn-soft: #141414;
-  --danger: #FFFFFF;
-  --danger-soft: #1A1A1A;
+  --good: light-dark(#000000, #FFFFFF);
+  --good-soft: light-dark(#F2F2F2, #171717);
+  --warn: light-dark(#454545, #B4B4B4);
+  --warn-soft: light-dark(#F4F4F4, #141414);
+  --danger: light-dark(#000000, #FFFFFF);
+  --danger-soft: light-dark(#F2F2F2, #1A1A1A);
+
+  /* Бүрхүүл — гар утасны цэсний ард. Хоёр горимд ч бараан үлдэнэ:
+     дээр нь гарч ирэх самбарыг тусгаарлах үүрэгтэй. */
+  --scrim: light-dark(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.72));
+
+  /* Зураггүй орлуулагчийн суурь */
+  --media-base: light-dark(#E9E7EE, #0B0910);
 
   --radius-card: 1.25rem;
 }
+
+/* Хэрэглэгчийн шууд сонголт — системийнхийг давна */
+:root[data-theme='light'] { color-scheme: light; }
+:root[data-theme='dark'] { color-scheme: dark; }
 
 @theme inline {
   --color-background: var(--background);
@@ -77,6 +98,7 @@
   --color-warn-soft: var(--warn-soft);
   --color-danger: var(--danger);
   --color-danger-soft: var(--danger-soft);
+  --color-scrim: var(--scrim);
 
   --font-sans: var(--font-body), ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-display), ui-sans-serif, system-ui, sans-serif;
@@ -84,12 +106,24 @@
 
 /* ── Суурь ────────────────────────────────────────────────────────────── */
 
+html {
+  /* Наалдмал навбар, хөвдөг доод самбар — хаяг доторх # холбоос эдгээрийн
+     ард дарагдахгүй */
+  scroll-padding-top: 5rem;
+  scroll-padding-bottom: 6rem;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   position: relative;
+  /* Гар утсанд хэвтээ гүйлт = эвдэрсэн зохиомж. `hidden` биш `clip` —
+     `hidden` нь body-г гүйлтийн сав болгож, наалдмал навбарыг эвддэг. */
+  overflow-x: clip;
+  /* iOS дээрх саарал анивчилт — апп шиг мэдрэмжийг алдагдуулдаг */
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* Маш нарийн ширхэглэг — том хар талбай хавтгай харагдахаас сэргийлнэ */
@@ -103,9 +137,14 @@ body::before {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
-body > * {
-  position: relative;
-  z-index: 1;
+/* `@layer base` дотор байх ЁСТОЙ. Давхаргагүй дүрэм нь Tailwind-ийн
+   `@layer utilities` -ийг үл харгалзан дардаг тул энэ нь `sticky`, `fixed`,
+   `z-*` зэрэг utility-г чимээгүйхэн устгаж байсан. */
+@layer base {
+  body > * {
+    position: relative;
+    z-index: 1;
+  }
 }
 
 h1, h2, h3, h4 {
@@ -115,12 +154,12 @@ h1, h2, h3, h4 {
 }
 
 ::selection {
-  background: #FFFFFF;
-  color: #000000;
+  background: var(--foreground);
+  color: var(--background);
 }
 
 :focus-visible {
-  outline: 2px solid #FFFFFF;
+  outline: 2px solid var(--foreground);
   outline-offset: 3px;
   border-radius: 4px;
 }
@@ -136,17 +175,18 @@ h1, h2, h3, h4 {
 
 /* ── Гэрэл ────────────────────────────────────────────────────────────── */
 
-/* Цагаан прожектор. Өнгөгүй тул зөвхөн орон зайн мэдрэмж өгнө. */
+/* Прожектор. Өнгөгүй тул зөвхөн орон зайн мэдрэмж өгнө. Харанхуйд гэрэл
+   цацна, гэрэлтэй горимд сүүдэр тусгана — хоёуланд нь гүн үүсгэнэ. */
 .glow {
   position: absolute;
   border-radius: 50%;
   filter: blur(100px);
   pointer-events: none;
   z-index: -1;
-  background: rgba(255, 255, 255, 0.07);
+  background: light-dark(rgba(0, 0, 0, 0.06), rgba(255, 255, 255, 0.07));
 }
 
-.glow-soft { background: rgba(255, 255, 255, 0.04); }
+.glow-soft { background: light-dark(rgba(0, 0, 0, 0.035), rgba(255, 255, 255, 0.04)); }
 
 /* ── Хайрцаг ──────────────────────────────────────────────────────────── */
 
@@ -178,11 +218,37 @@ h1, h2, h3, h4 {
   background: linear-gradient(90deg, var(--line-strong), transparent);
 }
 
-/* Идэвхтэй цэсний зүйл — доогуур цагаан зураас */
+/* Идэвхтэй цэсний зүйл */
 .nav-active {
   color: var(--foreground);
   background: var(--surface-2);
 }
+
+/* ── Горимын товчны дүрс ──────────────────────────────────────────────── */
+
+/* `light-dark()` нь зөвхөн өнгөнд ажилладаг тул `display` -ийг сонгогчоор
+   удирдана. Ингэснээр товч серверээс ямар ч төлөвийг таамаглах шаардлагагүй
+   — hydration зөрөх, эсвэл буруу дүрс анивчих асуудал гарахгүй. */
+.when-light { display: none; }
+.when-dark { display: block; }
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme='dark']) .when-light { display: block; }
+  :root:not([data-theme='dark']) .when-dark { display: none; }
+}
+
+:root[data-theme='light'] .when-light { display: block; }
+:root[data-theme='light'] .when-dark { display: none; }
+
+/* Хар зурлагатай, дэвсгэргүй лого — харанхуй дээр харагдахгүй тул эргүүлнэ.
+   Дүрсний өнгө нь цэвэр хар/цагаан тул `invert` гажуудал үүсгэхгүй. */
+.logo-invert { filter: invert(1); }
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme='dark']) .logo-invert { filter: none; }
+}
+
+:root[data-theme='light'] .logo-invert { filter: none; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

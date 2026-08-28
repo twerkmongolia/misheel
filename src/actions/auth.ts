@@ -88,24 +88,6 @@ export async function signup(_state: State, formData: FormData): Promise<State> 
   redirect(`/${locale}/account`)
 }
 
-export async function signInWithGoogle(formData: FormData): Promise<void> {
-  const locale = localeFrom(formData)
-  const supabase = await createClient()
-
-  const { data, error } = await supabase.auth.signInWithOAuth({
-    provider: 'google',
-    options: {
-      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? ''}/auth/callback?next=/${locale}/account`,
-    },
-  })
-
-  if (error || !data.url) {
-    redirect(`/${locale}/login?error=oauth`)
-  }
-
-  redirect(data.url)
-}
-
 export async function requestPasswordReset(_state: State, formData: FormData): Promise<State> {
   const locale = localeFrom(formData)
   const email = z.string().email().safeParse(formData.get('email'))

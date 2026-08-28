@@ -52,7 +52,7 @@ export function Media({
         background:
           `radial-gradient(120% 100% at 20% 0%, oklch(0.42 0.17 ${hue} / 0.9), transparent 60%), ` +
           `radial-gradient(90% 90% at 90% 100%, oklch(0.34 0.12 ${(hue + 55) % 360} / 0.85), transparent 65%), ` +
-          `#0B0910`,
+          `var(--media-base)`,
       }}
     />
   )

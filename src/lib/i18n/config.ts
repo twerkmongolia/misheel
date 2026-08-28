@@ -1,18 +1,17 @@
 export const locales = ['mn', 'en'] as const
 export type Locale = (typeof locales)[number]
+/**
+ * Үндсэн хэл — МОНГОЛ.
+ *
+ * Хөтчийн `Accept-Language` -ийг зориудаар ҮЛ ХАРГАЛЗАНА. Улаанбаатарын
+ * студийн сайт англи хэлтэй хөтөч дээр ч монголоор нээгдэх ёстой; англи
+ * хувилбар нь хэрэглэгчийн шууд сонголт байна.
+ */
 export const defaultLocale: Locale = 'mn'
+
+/** Хэрэглэгч хэлээ сольсон бол тэр сонголтыг эндээс санана. */
+export const LOCALE_COOKIE = 'locale'
 
 export function isLocale(value: string): value is Locale {
   return (locales as readonly string[]).includes(value)
-}
-
-/** `Accept-Language` толгойгоос хэлийг таана. */
-export function pickLocale(acceptLanguage: string | null): Locale {
-  if (!acceptLanguage) return defaultLocale
-  for (const part of acceptLanguage.split(',')) {
-    const tag = part.split(';')[0]?.trim().toLowerCase() ?? ''
-    if (tag.startsWith('mn')) return 'mn'
-    if (tag.startsWith('en')) return 'en'
-  }
-  return defaultLocale
 }
