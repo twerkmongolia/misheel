@@ -31,7 +31,7 @@ export default async function MyOrdersPage({ params }: { params: Promise<{ local
     : []
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-10">
       <PageHeader title={t.shop.myOrders} />
 
       {orders.length === 0 ? (

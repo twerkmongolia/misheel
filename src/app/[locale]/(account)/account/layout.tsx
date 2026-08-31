@@ -1,5 +1,5 @@
-import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { NavLink } from '@/components/site/NavLink'
 import { getDictionary, isLocale } from '@/lib/i18n'
 
 export default async function AccountLayout({
@@ -14,18 +14,21 @@ export default async function AccountLayout({
 
   const t = getDictionary(locale)
   const tabs = [
-    { href: `/${locale}/account`, label: t.auth.profile },
-    { href: `/${locale}/account/bookings`, label: t.booking.myBookings },
-    { href: `/${locale}/account/orders`, label: t.shop.myOrders },
+    // Профайл нь эцэг зам тул `exact`: дэд хуудсууд дээр идэвхтэй болохгүй.
+    { href: `/${locale}/account`, label: t.auth.profile, exact: true },
+    { href: `/${locale}/account/bookings`, label: t.booking.myBookings, exact: false },
+    { href: `/${locale}/account/orders`, label: t.shop.myOrders, exact: false },
   ]
 
   return (
-    <div className="flex flex-col gap-8">
-      <nav className="flex gap-1 border-b border-line pb-2 text-sm">
+    <div className="shell flex flex-col gap-12 pt-12 sm:pt-16">
+      {/* Табууд — дүүрсэн товч биш, доогуур зураастай текст. Сайтын дээд
+          навигацитай ЯГ нэг дүрэм (§ globals.css `.nav-item`). */}
+      <nav className="flex gap-7 border-b border-line">
         {tabs.map((tab) => (
-          <Link key={tab.href} href={tab.href} className="rounded-lg px-3 py-2 hover:bg-surface-2">
+          <NavLink key={tab.href} href={tab.href} exact={tab.exact} className="nav-item t-small">
             {tab.label}
-          </Link>
+          </NavLink>
         ))}
       </nav>
       {children}

@@ -10,7 +10,7 @@ export default async function SignupPage({ params }: { params: Promise<{ locale:
 
   return (
     <>
-      <h1 className="text-2xl font-semibold">{t.auth.signupTitle}</h1>
+      <h1 className="t-h2">{t.auth.signupTitle}</h1>
       <SignupForm t={t} locale={locale} />
     </>
   )
