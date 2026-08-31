@@ -10,6 +10,9 @@ import { youtubeEmbedUrl, youtubeThumbnail, youtubeWatchUrl } from '@/lib/youtub
  * Хуудас ачаалахад YouTube-ийн плейер ЗАГВАРЫГ ачаалахгүй: эхлээд зөвхөн
  * зураг харагдана. Энэ нь хоёр зүйлийг өгнө — хуудас хамаагүй хурдан
  * нээгдэнэ, мөн хэрэглэгч дарах хүртэл YouTube cookie тавихгүй.
+ *
+ * Тоглуулах товч нь дугуй — энэ систем дэх цөөхөн дугуй хэлбэрийн нэг.
+ * Учир нь дугуй энд ЧИМЭГ биш УТГА: тоглуулах гэсэн бүх нийтийн тэмдэг.
  */
 export function VideoEmbed({
   id,
@@ -27,8 +30,8 @@ export function VideoEmbed({
   const [thumbnail, setThumbnail] = useState(() => youtubeThumbnail(id, 'max'))
 
   return (
-    <figure className="group flex flex-col gap-3">
-      <div className="card zoom-in relative aspect-video overflow-hidden p-0 transition-colors group-hover:border-line-strong">
+    <figure className="group flex flex-col gap-4">
+      <div className="media aspect-video border border-line transition-colors duration-300 group-hover:border-line-strong">
         {playing ? (
           <iframe
             src={youtubeEmbedUrl(id, true)}
@@ -42,23 +45,30 @@ export function VideoEmbed({
             type="button"
             onClick={() => setPlaying(true)}
             aria-label={title ?? playLabel}
-            className="group absolute inset-0 h-full w-full cursor-pointer"
+            className="absolute inset-0 h-full w-full cursor-pointer"
           >
             <Image
               src={thumbnail}
               alt=""
               fill
-              sizes="(max-width: 768px) 100vw, 50vw"
+              sizes="(max-width: 768px) 100vw, 55vw"
               onError={() => setThumbnail(youtubeThumbnail(id, 'hq'))}
               className="card-media object-cover"
             />
-            <span className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/15 to-black/25 transition-opacity duration-300 group-hover:opacity-80" />
+            <span
+              aria-hidden
+              className="absolute inset-0 bg-black/25 transition-opacity duration-500 group-hover:opacity-60"
+            />
 
-            {/* Тоглуулах товч — цагаан дугуй, дотор нь гурвалжин. Гадуур нь
-                шилэн цагираг: зурагны аль ч хэсэгт таарсан товч тод үлдэнэ. */}
-            <span className="absolute top-1/2 left-1/2 flex h-[4.5rem] w-[4.5rem] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-white/25 bg-white/10 backdrop-blur-sm transition-transform duration-500 ease-out group-hover:scale-125">
-              <span className="flex h-14 w-14 items-center justify-center rounded-full bg-button shadow-[0_8px_24px_-8px_rgb(0_0_0/0.6)] transition-transform duration-300 ease-out group-hover:scale-110 group-active:scale-95">
-                <svg viewBox="0 0 24 24" className="ml-1 h-6 w-6 fill-button-ink" aria-hidden="true">
+            {/* Гурван давхар хариу: гадна цагираг тэлж, дотоод дугуй өргөгдөж,
+                сум өөрөө өчүүхэн урагшилна. */}
+            <span className="absolute top-1/2 left-1/2 grid h-20 w-20 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-white/25 transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-110">
+              <span className="grid h-14 w-14 place-items-center rounded-full bg-button transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-105 group-active:scale-95">
+                <svg
+                  viewBox="0 0 24 24"
+                  className="ml-0.5 h-5 w-5 fill-button-ink"
+                  aria-hidden="true"
+                >
                   <path d="M8 5v14l11-7z" />
                 </svg>
               </span>
@@ -67,16 +77,16 @@ export function VideoEmbed({
         )}
       </div>
 
-      <figcaption className="flex flex-wrap items-baseline justify-between gap-2 px-1">
-        <span className="text-sm font-medium">{title}</span>
+      <figcaption className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
+        <span className="t-small font-medium">{title}</span>
 
         <a
           href={youtubeWatchUrl(id)}
           target="_blank"
           rel="noreferrer noopener"
-          className="shrink-0 text-xs text-muted underline-offset-4 transition-colors hover:text-foreground hover:underline"
+          className="lnk t-label shrink-0 text-muted hover:text-foreground"
         >
-          {watchLabel} ↗
+          {watchLabel}
         </a>
       </figcaption>
     </figure>

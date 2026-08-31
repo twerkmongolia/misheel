@@ -43,24 +43,24 @@ export default async function OrderPage({
   const bank = content(site.get('shop'), locale).bank
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="shell flex flex-col gap-14 pt-12 sm:pt-16">
       <PageHeader title={`${t.shop.orderNo} ${order.order_no}`} />
 
       <div className="flex flex-wrap items-center gap-3">
         <Badge tone={tones[order.status]}>{t.orderStatus[order.status]}</Badge>
-        <span className="text-sm text-muted">{formatDateTime(order.created_at, locale)}</span>
+        <span className="t-small text-muted">{formatDateTime(order.created_at, locale)}</span>
       </div>
 
       {order.status === 'pending_payment' && (
         <Card className="flex flex-col gap-3">
           <h2 className="font-semibold">{t.shop.bankTransfer}</h2>
-          <p className="text-sm text-foreground-soft">{t.shop.payInstructions}</p>
+          <p className="t-small text-foreground-soft">{t.shop.payInstructions}</p>
           {bank && <p className="font-mono text-sm">{bank}</p>}
           <div className="flex items-baseline gap-2">
-            <span className="text-sm text-muted">{t.common.total}</span>
-            <span className="font-display text-2xl font-bold tabular-nums">{formatMnt(order.total)}</span>
+            <span className="t-small text-muted">{t.common.total}</span>
+            <span className="font-display t-h2 tabular-nums">{formatMnt(order.total)}</span>
           </div>
-          <p className="text-sm text-muted">
+          <p className="t-small text-muted">
             Гүйлгээний утга: <span className="font-mono">{order.order_no}</span>
           </p>
         </Card>

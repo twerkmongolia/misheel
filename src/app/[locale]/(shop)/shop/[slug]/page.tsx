@@ -22,7 +22,7 @@ export default async function ProductPage({
   const firstInStock = available.find((variant) => variant.stock_qty > 0)
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="shell flex flex-col gap-14 pt-12 sm:pt-16">
       <PageHeader title={loc(product, 'name', locale)} />
 
       <div className="grid gap-10 md:grid-cols-2">
@@ -43,7 +43,7 @@ export default async function ProductPage({
         </div>
 
         <div className="flex flex-col gap-5">
-          <p className="font-display text-3xl font-bold tabular-nums">{formatMnt(product.minPrice)}</p>
+          <p className="font-display t-h2 tabular-nums">{formatMnt(product.minPrice)}</p>
           <p className="leading-relaxed text-foreground-soft">{loc(product, 'desc', locale)}</p>
 
           {!product.inStock ? (

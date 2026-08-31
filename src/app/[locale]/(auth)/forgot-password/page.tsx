@@ -14,7 +14,7 @@ export default async function ForgotPasswordPage({
 
   return (
     <>
-      <h1 className="text-2xl font-semibold">{t.auth.resetTitle}</h1>
+      <h1 className="t-h2">{t.auth.resetTitle}</h1>
       <ForgotPasswordForm t={t} locale={locale} />
     </>
   )

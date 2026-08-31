@@ -34,7 +34,7 @@ export default async function MyBookingsPage({
 
   if (!isSupabaseConfigured()) {
     return (
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-10">
         <PageHeader title={t.booking.myBookings} />
         <Empty>{t.booking.noBookings}</Empty>
       </div>
@@ -89,7 +89,7 @@ export default async function MyBookingsPage({
         <Link href={`/${locale}/schedule/${row.session.id}`} className="font-medium hover:text-foreground">
           {row.classType ? loc(row.classType, 'name', locale) : '—'}
         </Link>
-        <p className="text-sm text-muted tabular-nums">
+        <p className="t-small text-muted tabular-nums">
           {weekdayShort(row.session.starts_at, locale)} · {formatDate(row.session.starts_at, locale)} ·{' '}
           {formatTime(row.session.starts_at)}
           {row.instructor ? ` · ${row.instructor.name}` : ''}
@@ -116,7 +116,7 @@ export default async function MyBookingsPage({
   )
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-10">
       <PageHeader title={t.booking.myBookings} />
 
       {search.cancelled && <Alert tone="neutral">{t.booking.cancelled}</Alert>}

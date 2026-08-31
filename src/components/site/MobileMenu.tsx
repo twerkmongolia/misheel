@@ -4,7 +4,7 @@ import { useEffect, useState, useSyncExternalStore } from 'react'
 import { createPortal } from 'react-dom'
 import { usePathname } from 'next/navigation'
 import { NavLink } from './NavLink'
-import { TAB, TAB_ACTIVE, TAB_IDLE } from './tab'
+import { TAB, TAB_ACTIVE, TAB_IDLE, TAB_LABEL } from './tab'
 
 export type MenuItem = { href: string; label: string }
 
@@ -63,8 +63,13 @@ export function MobileMenu({
     }
   }, [open])
 
+  // Мөр бүр өөрийн шугам дээр сууна — хайрцаг биш ЖАГСААЛТ. Гарчиг нь
+  // serif: цэс бол хуудасны агуулгын жагсаалт, удирдлагын самбар биш.
   const row =
-    'flex items-center justify-between gap-3 rounded-2xl px-4 py-3.5 text-[17px] font-medium transition-colors active:scale-[0.99]'
+    'group flex items-center justify-between gap-3 border-b border-line py-4 ' +
+    'font-display text-[1.375rem] font-medium tracking-[-0.02em] leading-none ' +
+    'text-foreground-soft transition-colors duration-200 ' +
+    'aria-[current=page]:text-foreground active:text-foreground'
 
   /**
    * Хаана — гэхдээ зөвхөн хаа нэгтээ ХӨТЛӨХ зүйл дарагдсан үед.
@@ -99,25 +104,25 @@ export function MobileMenu({
         role="dialog"
         aria-modal="true"
         aria-label={label}
-        className={`absolute inset-y-0 right-0 flex h-[100dvh] w-[86%] max-w-sm flex-col overflow-y-auto overscroll-contain border-l border-line bg-surface transition-transform duration-300 ease-out ${
+        className={`absolute inset-y-0 right-0 flex h-[100dvh] w-[88%] max-w-sm flex-col overflow-y-auto overscroll-contain border-l border-line bg-background transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
           open ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
         <div className="flex items-center justify-between px-4 pt-[max(1rem,env(safe-area-inset-top))] pb-2">
-          <p className="text-xs font-semibold tracking-[0.18em] text-muted uppercase">{label}</p>
+          <p className="t-label text-muted">{label}</p>
           <button
             type="button"
             onClick={() => setOpen(false)}
             aria-label={label}
-            className="grid h-11 w-11 place-items-center rounded-full text-foreground-soft transition-colors hover:bg-surface-2 hover:text-foreground"
+            className="icon-btn h-11 w-11"
           >
             <svg
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
-              strokeWidth="1.6"
-              strokeLinecap="round"
-              className="h-5 w-5"
+              strokeWidth="1.35"
+              strokeLinecap="square"
+              className="h-[18px] w-[18px]"
               aria-hidden="true"
             >
               <path d="M6 6l12 12M18 6L6 18" />
@@ -126,7 +131,7 @@ export function MobileMenu({
         </div>
 
         {/* Холбоос дарагдмагц хаана — нэг хуудсан дээрээ үлдсэн ч гэсэн */}
-        <nav className="flex flex-col gap-1 px-3 pb-2" onClick={closeIfNavigating}>
+        <nav className="flex flex-col px-5 pt-4 pb-2" onClick={closeIfNavigating}>
           {primary.map((item) => (
             <NavLink key={item.href} href={item.href} className={row}>
               {item.label}
@@ -134,10 +139,10 @@ export function MobileMenu({
             </NavLink>
           ))}
 
-          <div className="mx-4 my-3 h-px bg-line" />
+          <div className="h-8" />
 
           {secondary.map((item) => (
-            <NavLink key={item.href} href={item.href} className={`${row} text-[15px]`}>
+            <NavLink key={item.href} href={item.href} className={`${row} text-[1.0625rem]`}>
               {item.label}
               <Chevron />
             </NavLink>
@@ -147,7 +152,7 @@ export function MobileMenu({
         {footer && (
           <div
             onClick={closeIfNavigating}
-            className="mt-auto flex flex-col gap-2 border-t border-line px-4 pt-4 pb-[max(1.25rem,env(safe-area-inset-bottom))]"
+            className="mt-auto flex flex-col gap-2.5 border-t border-line px-5 pt-6 pb-[max(1.5rem,env(safe-area-inset-bottom))]"
           >
             {footer}
           </div>
@@ -184,7 +189,7 @@ export function MobileMenu({
             }`}
           />
         </span>
-        {label}
+        <span className={TAB_LABEL}>{label}</span>
       </button>
 
       {mounted && createPortal(panel, document.body)}
@@ -198,10 +203,10 @@ function Chevron() {
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="h-4 w-4 shrink-0 text-faint"
+      strokeWidth="1.4"
+      strokeLinecap="square"
+      strokeLinejoin="miter"
+      className="h-3.5 w-3.5 shrink-0 text-faint transition-transform duration-300 ease-out group-hover:translate-x-1"
       aria-hidden="true"
     >
       <path d="M9 5l7 7-7 7" />

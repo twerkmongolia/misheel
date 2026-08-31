@@ -24,7 +24,7 @@ export default async function InstructorPage({
   const mine = sessions.filter((session) => session.instructor_id === instructor.id).slice(0, 6)
 
   return (
-    <div className="flex flex-col gap-10">
+    <div className="shell flex flex-col gap-16 pt-12 sm:pt-16">
       <PageHeader title={instructor.name} />
 
       <div className="grid gap-8 md:grid-cols-[1fr_1.4fr]">

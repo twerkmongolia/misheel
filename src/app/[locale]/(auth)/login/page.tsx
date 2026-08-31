@@ -18,7 +18,7 @@ export default async function LoginPage({
 
   return (
     <>
-      <h1 className="text-2xl font-semibold">{t.auth.loginTitle}</h1>
+      <h1 className="t-h2">{t.auth.loginTitle}</h1>
       {search.error && <Alert tone="danger">{t.booking.errors.UNKNOWN}</Alert>}
 
       <LoginForm t={t} locale={locale} next={next} />

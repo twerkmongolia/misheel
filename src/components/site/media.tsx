@@ -13,8 +13,8 @@ import { join } from 'node:path'
  * Зөвхөн ЛОКАЛ `/media/**` -ийг шалгана. Supabase Storage болон бусад
  * гадаад URL нь энэ файлын системд байхгүй тул хөндөхгүй өнгөрнө.
  *
- * `Media` -г зөвхөн серверийн бүрэлдэхүүн хэсгүүд дууддаг (`'use client'`
- * файл ганц ч байхгүй) тул `node:fs` энд аюулгүй.
+ * `Media` -г зөвхөн серверийн бүрэлдэхүүн хэсгүүд дууддаг тул `node:fs`
+ * энд аюулгүй.
  */
 function localMissing(src: string): boolean {
   if (!src.startsWith('/media/')) return false
@@ -25,11 +25,14 @@ function localMissing(src: string): boolean {
 }
 
 /**
- * Зураг, эсвэл түүнгүй үед орлуулагч.
+ * Зураг.
  *
- * Монохром систем тул орлуулагч нь зөвхөн саарлын шатлалаар зурагдана.
- * `seed` -ээс хамаарч зураасны өнцөг болон гэрлийн эх үүсвэрийн байрлал
- * өөрчлөгдөх тул зэрэгцээ хайрцгууд ялгаатай харагдана — өнгө нэмэлгүйгээр.
+ * Хайрцагт хийгддэггүй — зураг ӨӨРӨӨ хайрцаг. Тиймээс хүрээ, сүүдэр
+ * байхгүй: зөвхөн зүсэлт, 3px булан, доторх хөдөлгөөн.
+ *
+ * `overlay` нь ЗӨВХӨН дээр нь текст суух үед. Бүх зурагт уналт нэмэх нь
+ * барааны гэрэл зургийг шалтгаангүй харлуулна — уналт бол уншигдацын
+ * хэрэгсэл, хэв маягийн чимэг биш.
  */
 export function Media({
   src,
@@ -38,6 +41,8 @@ export function Media({
   className = '',
   seed = 0,
   priority = false,
+  overlay = false,
+  sizes = '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw',
 }: {
   src?: string | null
   alt: string
@@ -45,27 +50,29 @@ export function Media({
   className?: string
   seed?: number
   priority?: boolean
+  overlay?: boolean
+  sizes?: string
 }) {
   if (src && !localMissing(src)) {
     return (
-      <div
-        className={`relative overflow-hidden rounded-2xl border border-line bg-surface-2 ${ratio} ${className}`}
-      >
+      <div className={`media ${ratio} ${className}`}>
         <Image
           src={src}
           alt={alt}
           fill
           priority={priority}
-          sizes="(max-width: 768px) 100vw, 33vw"
+          sizes={sizes}
           className="card-media object-cover"
         />
-        {/* Доод талын бараан уналт — зураг дээр текст тавихад уншигдана */}
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/45 to-transparent" />
+        {overlay && <div aria-hidden className="scrim pointer-events-none absolute inset-0" />}
       </div>
     )
   }
 
-  // Гурван тэнхлэгээр л хувирна: зураасны өнцөг, гэрлийн байрлал, түүний өндөр.
+  // ── Орлуулагч ───────────────────────────────────────────────────────────
+  // Өнгөгүй систем тул зөвхөн саарлын шатлал. `seed` нь зураасны өнцөг,
+  // гэрлийн эх үүсвэрийн байрлалыг л сольж, ӨНГИЙГ огт хөнддөггүй —
+  // зэрэгцээ хайрцгууд ялгаатай ч нэг гэр бүлийн харагдана.
   const angle = 20 + (seed % 6) * 26
   const lightX = 15 + (seed % 4) * 24
   const lightY = (seed % 3) * 14
@@ -73,7 +80,7 @@ export function Media({
   return (
     <div
       aria-hidden
-      className={`overflow-hidden rounded-2xl border border-line ${ratio} ${className}`}
+      className={`media ${ratio} ${className}`}
       style={{
         background:
           `repeating-linear-gradient(${angle}deg, var(--media-hatch) 0 1px, transparent 1px 10px), ` +
@@ -81,6 +88,8 @@ export function Media({
           `radial-gradient(90% 80% at 100% 100%, var(--media-sheen), transparent 70%), ` +
           `var(--media-base)`,
       }}
-    />
+    >
+      {overlay && <div aria-hidden className="scrim pointer-events-none absolute inset-0" />}
+    </div>
   )
 }

@@ -14,37 +14,52 @@ export default async function ClassesPage({ params }: { params: Promise<{ locale
   const classTypes = await getClassTypes()
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="shell flex flex-col gap-14 pt-12 sm:pt-16">
       <PageHeader title={t.nav.classes} lead={t.schedule.subtitle} />
 
       {classTypes.length === 0 ? (
         <Empty>{t.common.empty}</Empty>
       ) : (
-        <div className="grid gap-6 sm:grid-cols-2">
+        // Хайрцаг биш ШУГАМ. Зураг өөрөө хайрцаг тул дээр нь хүрээ нэмэх
+        // нь давхардал — доогуур татсан нэг зураас хангалттай.
+        <div className="grid gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3" data-stagger>
           {classTypes.map((classType, index) => (
             <Link
               key={classType.id}
               href={`/${locale}/classes/${classType.slug}`}
-              className="card card-link flex flex-col gap-4 p-5"
+              className="group flex flex-col gap-5"
+              data-rv
             >
               <Media
                 src={classType.cover_url}
                 alt={loc(classType, 'name', locale)}
                 seed={index}
-                ratio="aspect-[16/9]"
+                ratio="aspect-[4/3]"
+                sizes="(max-width: 640px) 100vw, 33vw"
               />
-              <div className="flex items-center gap-2">
-                <Badge tone="accent">{t.level[classType.level]}</Badge>
-                <span className="text-sm text-muted">
-                  {classType.duration_min}
-                  {t.common.minutes}
-                </span>
+
+              <div className="flex flex-col gap-3 border-t border-line pt-4">
+                <div className="flex items-baseline justify-between gap-4">
+                  <h2 className="t-h3 transition-opacity duration-200 group-hover:opacity-60">
+                    {loc(classType, 'name', locale)}
+                  </h2>
+                  <span className="t-small shrink-0 font-semibold tabular-nums">
+                    {formatMnt(classType.base_price)}
+                  </span>
+                </div>
+
+                <p className="t-small line-clamp-2 text-muted">
+                  {loc(classType, 'desc', locale)}
+                </p>
+
+                <div className="mt-1 flex items-center gap-3">
+                  <Badge tone="warn">{t.level[classType.level]}</Badge>
+                  <span className="t-meta text-faint">
+                    {classType.duration_min}
+                    {t.common.minutes}
+                  </span>
+                </div>
               </div>
-              <h2 className="text-lg font-semibold group-hover:text-foreground">
-                {loc(classType, 'name', locale)}
-              </h2>
-              <p className="text-sm text-foreground-soft">{loc(classType, 'desc', locale)}</p>
-              <p className="mt-auto font-medium tabular-nums">{formatMnt(classType.base_price)}</p>
             </Link>
           ))}
         </div>

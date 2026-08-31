@@ -32,16 +32,16 @@ export function ThemeToggle({ label, className = '' }: { label: string; classNam
       onClick={toggle}
       aria-label={label}
       title={label}
-      className={`grid h-11 w-11 place-items-center rounded-full text-foreground-soft transition-colors hover:bg-surface-2 hover:text-foreground ${className}`}
+      className={`icon-btn ${className}`}
     >
       {/* Харанхуйд нар харагдана — дарвал гэрэлтэй болно */}
       <svg
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-        className="when-dark h-[19px] w-[19px]"
+        strokeWidth="1.35"
+        strokeLinecap="square"
+        className="when-dark h-[17px] w-[17px]"
         aria-hidden="true"
       >
         <circle cx="12" cy="12" r="4" />
@@ -53,10 +53,10 @@ export function ThemeToggle({ label, className = '' }: { label: string; classNam
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className="when-light h-[19px] w-[19px]"
+        strokeWidth="1.35"
+        strokeLinecap="square"
+        strokeLinejoin="miter"
+        className="when-light h-[17px] w-[17px]"
         aria-hidden="true"
       >
         <path d="M20 13.4A8.2 8.2 0 0 1 10.6 4a8.2 8.2 0 1 0 9.4 9.4Z" />

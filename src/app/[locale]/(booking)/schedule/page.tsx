@@ -68,7 +68,7 @@ export default async function SchedulePage({
   }
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="shell flex flex-col gap-14 pt-12 sm:pt-16">
       <PageHeader title={t.schedule.title} lead={t.schedule.subtitle} />
 
       {search.booked && <Alert tone="good">{t.booking.success}</Alert>}
@@ -140,7 +140,7 @@ export default async function SchedulePage({
         <div className="flex flex-col gap-8">
           {[...days.entries()].map(([key, daySessions]) => (
             <section key={key} className="flex flex-col gap-3">
-              <h2 className="flex items-baseline gap-2 border-b border-line pb-2 text-lg font-semibold">
+              <h2 className="flex items-baseline gap-2 border-b border-line pb-2 t-h3">
                 {weekdayLong(daySessions[0]!.starts_at, locale)}
                 <span className="text-sm font-normal text-muted tabular-nums">
                   {formatDate(daySessions[0]!.starts_at, locale)}

@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useChromeScroll } from './useChromeScroll'
-import { TAB, TAB_ACTIVE, TAB_IDLE } from './tab'
+import { TAB, TAB_ACTIVE, TAB_IDLE, TAB_LABEL } from './tab'
 
 export type TabIcon = 'home' | 'calendar' | 'bag' | 'star'
 export type TabItem = { href: string; label: string; icon: TabIcon }
@@ -31,11 +31,14 @@ export function BottomNav({
 
   return (
     <div
-      className={`fixed inset-x-0 bottom-0 z-40 px-3 pb-[max(0.7rem,env(safe-area-inset-bottom))] transition-transform duration-300 ease-out lg:hidden ${
-        hidden ? 'translate-y-[calc(100%+1.5rem)]' : 'translate-y-0'
+      className={`fixed inset-x-0 bottom-0 z-40 transition-transform duration-500 ease-out lg:hidden ${
+        hidden ? 'translate-y-full' : 'translate-y-0'
       }`}
     >
-      <nav className="mx-auto flex max-w-md items-stretch gap-0.5 rounded-[1.6rem] border border-line bg-surface/85 p-1.5 shadow-[0_10px_40px_-12px_rgb(0_0_0_/_0.45)] backdrop-blur-xl">
+      {/* Хөвдөг бөмбөлөг биш ТУУЗ. Дэлгэцийн ирмэгт тулсан самбар нь агуулгын
+          үргэлжлэл мэт уншигдана — хөвдөг хайрцаг нь дээр нь тавьсан өөр
+          програм мэт харагддаг. */}
+      <nav className="flex items-stretch border-t border-line bg-background/92 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl backdrop-saturate-150">
         {tabs.map((tab) => {
           // `/mn` нь зөвхөн яг тэр хуудсанд, бусад нь дэд замуудад ч идэвхтэй
           const isHome = tab.href.split('/').filter(Boolean).length === 1
@@ -49,7 +52,7 @@ export function BottomNav({
               className={`${TAB} ${active ? TAB_ACTIVE : TAB_IDLE}`}
             >
               <TabIcon name={tab.icon} filled={active} />
-              {tab.label}
+              <span className={TAB_LABEL}>{tab.label}</span>
             </Link>
           )
         })}
@@ -92,10 +95,10 @@ function TabIcon({ name, filled }: { name: TabIcon; filled: boolean }) {
       viewBox="0 0 24 24"
       fill={filled && FILLABLE.has(name) ? 'currentColor' : 'none'}
       stroke="currentColor"
-      strokeWidth={filled ? 1.9 : 1.5}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="h-[22px] w-[22px]"
+      strokeWidth={filled ? 1.6 : 1.3}
+      strokeLinecap="square"
+      strokeLinejoin="miter"
+      className="h-5 w-5"
       aria-hidden="true"
     >
       {paths[name]}

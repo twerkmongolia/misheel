@@ -1,10 +1,11 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import type { CSSProperties, ReactNode } from 'react'
-import { ButtonLink, Empty, Eyebrow } from '@/components/ui'
+import { Arrow, ButtonLink, Empty, Eyebrow } from '@/components/ui'
 import { Media } from '@/components/site/media'
 import { SessionRow } from '@/components/site/SessionRow'
 import { VideoEmbed } from '@/components/site/VideoEmbed'
+import { Stat } from '@/components/site/Stat'
 import { content, getDictionary, loc, isLocale } from '@/lib/i18n'
 import { formatMnt } from '@/lib/format'
 import { youtubeId } from '@/lib/youtube'
@@ -22,55 +23,75 @@ import {
  */
 const FALLBACK_VIDEO_IDS = ['u261YyMWm0g', 'ju-HSfPFFxE', 'U7GUiQBVIs0']
 
-/** `--d` нь CSS хувьсагч — TS-д стандарт биш тул энд хөрвүүлнэ. */
-const delay = (ms: number) => ({ '--d': `${ms}ms` }) as CSSProperties
+/* ───────────────────────────────────────────────────────────────────────────
+   БҮЛЭГ
 
-/**
- * Нүүрний нэг бүлэг.
- *
- * `ui/Section` -ээс ялгаатай нь ДУГААРТАЙ бөгөөд гарчиг нь зүүн талын
- * наалдмал заагчтай хос болж ажиллана: заагч дээрх «02» болон энд байгаа
- * «02» хоёр нэг зүйлийг заана. Тиймээс нүүрэнд өөрийн гэсэн хувилбар
- * хэрэгтэй — бусад хуудасны `Section` -ийг хөндөхгүй.
- */
-function Block({
+   Нүүр хуудас бол ЖАГСААЛТ биш, ДУГААРЛАСАН бүлгүүд. Бүлэг бүр гарчиг,
+   хажуудаа нэг өгүүлбэр, доогуураа шугамтай — сэтгүүлийн бүлгийн нээлт.
+
+   Гарчиг зүүн талын 7 багана, тайлбар баруун талын 4 багана дээр сууна.
+   Хоорондоо ЗАЙТАЙ: уншигч гарчгийг уншаад доош биш, хажуу тийш нүдээ
+   шилжүүлнэ. Ингэснээр толгой хэсэг хуудсыг битүүлэхгүй, зөвхөн нээнэ.
+   ─────────────────────────────────────────────────────────────────────── */
+function Chapter({
   id,
   index,
   title,
+  note,
   action,
   children,
 }: {
   id: string
   index: string
   title: ReactNode
+  note?: ReactNode
   action?: ReactNode
   children: ReactNode
 }) {
   return (
-    <section id={id} className="scroll-mt-28">
-      <div className="reveal underline-grow flex flex-wrap items-end justify-between gap-x-6 gap-y-3 border-b border-line pb-5">
-        <h2 className="flex items-baseline gap-4 text-[clamp(1.75rem,4vw,2.5rem)] leading-none font-bold">
-          <span className="font-display text-sm font-medium text-faint tabular-nums">{index}</span>
-          {title}
-        </h2>
-        {action}
+    <section id={id} className="shell scroll-mt-28 pt-[var(--bay)]">
+      <div className="g12 items-end gap-y-7">
+        <div className="col-span-12 flex flex-col gap-5 lg:col-span-7" data-rv>
+          <Eyebrow>
+            {index}
+            <span aria-hidden className="mx-2 text-faint">
+              /
+            </span>
+            {title}
+          </Eyebrow>
+          <h2 className="t-h2">{title}</h2>
+        </div>
+
+        {note && (
+          <p
+            className="t-small col-span-12 max-w-[42ch] text-muted lg:col-span-4 lg:col-start-9"
+            data-rv
+          >
+            {note}
+          </p>
+        )}
       </div>
-      <div className="pt-8">{children}</div>
+
+      <div className="hr mt-9" data-rv="line" />
+
+      <div className="flex flex-col gap-10 pt-12">
+        {children}
+        {action && (
+          <div className="flex justify-start" data-rv>
+            {action}
+          </div>
+        )}
+      </div>
     </section>
   )
 }
 
-/** Бүлгүүд рүү үсрэх сум — давтагдах тул нэг дор */
+/** Бүлгийн төгсгөлийн холбоос — сум нь hover дээр чиглэлээ заана */
 function More({ href, children }: { href: string; children: ReactNode }) {
   return (
-    <Link
-      href={href}
-      className="group inline-flex items-center gap-1.5 text-sm text-foreground-soft transition-colors hover:text-foreground"
-    >
+    <Link href={href} className="btn btn-line">
       {children}
-      <span aria-hidden className="transition-transform group-hover:translate-x-1">
-        →
-      </span>
+      <Arrow />
     </Link>
   )
 }
@@ -107,147 +128,168 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     .split(' ')
     .filter(Boolean)
 
-  /* Заагчид зөвхөн ӨГӨГДӨЛТЭЙ бүлгүүд орно — хоосон холбоос заахгүй */
-  const blocks = [
-    { id: 'schedule', label: t.home.upcoming, show: true },
-    { id: 'classes', label: t.home.classesTitle, show: classTypes.length > 0 },
-    { id: 'instructors', label: t.home.instructorsTitle, show: instructors.length > 0 },
-    { id: 'videos', label: t.home.videosTitle, show: videos.length > 0 },
-    { id: 'shop', label: t.home.shopTitle, show: products.length > 0 },
-  ].filter((block) => block.show)
+  /* Дугаарлалт нь ӨГӨГДӨЛТЭЙ бүлгүүдийг л тоолно — хоосон бүлэг дугаар
+     эзэлбэл дараалал тасарч, «02 дараа нь 04» болно. */
+  const chapters = [
+    { id: 'schedule', show: true },
+    { id: 'classes', show: classTypes.length > 0 },
+    { id: 'instructors', show: instructors.length > 0 },
+    { id: 'videos', show: videos.length > 0 },
+    { id: 'shop', show: products.length > 0 },
+  ].filter((chapter) => chapter.show)
 
-  const numberOf = (id: string) =>
-    String(blocks.findIndex((block) => block.id === id) + 1).padStart(2, '0')
+  const no = (id: string) =>
+    String(chapters.findIndex((chapter) => chapter.id === id) + 1).padStart(2, '0')
 
   return (
     <div className="flex flex-col">
-      {/* ══ Баатар ═══════════════════════════════════════════════════════
-          Хуудасны баганаас ГАРНА. Текст зүүн ирмэгийн баганадаа эгнэсэн
-          хэвээр ч, зураг баруун тийш дэлгэцээс цааш үргэлжилнэ — заал энэ
-          хүрээнд багтахгүй гэдгийг зохиомж өөрөө хэлнэ. */}
-      <section className="bleed relative -mt-10 pt-10 sm:-mt-14 sm:pt-14">
-        <div className="glow -top-28 left-[8%] h-80 w-80" />
-        <div className="glow glow-soft top-10 right-[6%] h-72 w-96" />
+      {/* ══════════════════════════════════════════════════════════════════
+          БААТАР
+
+          Давхарласан зохиомж: ард нь шалны тор, дунд нь гэрэл, урд нь
+          гарчиг ба зураг. Гарчиг зүүн 6 багана дээр, зураг баруун 6 багана
+          дээр — тэгш хуваалт БИШ: зураг дэлгэцийн ирмэг хүртэл гарч,
+          хуудсын хүрээнээс мултарна. Заал энэ дэлгэцэнд багтахгүй гэдгийг
+          зохиомж өөрөө хэлнэ.
+
+          Утсан дээр давхарлал утгагүй — босоо дараалал болж задарна:
+          гарчиг, тайлбар, үйлдэл, дараа нь зураг бүтэн өргөнөөр.
+          ══════════════════════════════════════════════════════════════════ */}
+      <section className="relative pt-10 sm:pt-16 lg:pt-20">
+        <div className="glow -top-32 left-[6%] h-96 w-96" />
+        <div className="glow glow-soft top-24 right-[4%] h-80 w-[28rem]" />
         <div
           aria-hidden
-          className="hairlines pointer-events-none absolute inset-x-0 -top-10 -z-10 h-[620px] opacity-70"
+          className="mesh pointer-events-none absolute inset-x-0 -top-24 -z-10 h-[46rem] opacity-70"
         />
 
-        <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,46%)] lg:gap-12">
-          {/* Зүүн багана — хуудасны ирмэгтэй эгнэнэ */}
-          <div className="flex flex-col items-start gap-6 px-4 sm:px-5 lg:pr-4 lg:pl-[max(1.25rem,calc(50vw-34.75rem))]">
-            <span
-              className="rise inline-flex items-center gap-2.5 rounded-full border border-line bg-surface/60 py-1.5 pr-4 pl-3 backdrop-blur-sm"
-              style={delay(0)}
-            >
-              <span className="relative flex h-1.5 w-1.5 shrink-0">
-                <span className="ping-ring absolute inline-flex h-full w-full rounded-full bg-foreground" />
-                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-foreground" />
+        <div className="shell">
+          <div className="g12 items-center gap-y-12">
+            {/* ── Мэдэгдэл ─────────────────────────────────────────────── */}
+            <div className="col-span-12 flex flex-col items-start gap-8 lg:col-span-6">
+              <span className="enter flex items-center gap-3">
+                <span className="relative flex h-1.5 w-1.5 shrink-0">
+                  <span className="ping-ring absolute inline-flex h-full w-full rounded-full bg-foreground" />
+                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-foreground" />
+                </span>
+                <span className="t-label text-muted">Улаанбаатар</span>
               </span>
-              <Eyebrow>Улаанбаатар</Eyebrow>
-            </span>
 
-            {/* Үг бүрийг тусад нь мөрлөнө — өнгөгүй тул хэмжээ өөрөө мэдэгдэл болно.
-                Сүүлийн үг зурлагатай: хоёр дахь шатыг өнгөгүйгээр үүсгэнэ. */}
-            <h1 className="text-[clamp(3rem,8.2vw,5.5rem)] leading-[0.85] font-bold">
-              {heroWords.map((word, index) => (
-                <span
-                  key={word + index}
-                  style={delay(90 + index * 95)}
-                  className={`rise block ${
-                    heroWords.length > 1 && index === heroWords.length - 1 ? 'text-outline' : ''
-                  }`}
-                >
-                  {word}
-                </span>
-              ))}
-            </h1>
+              {/* Мөр бүр өөрийн цонхтой; текст доороосоо өргөгдөж орж ирнэ.
+                  Зүсэгдсэн ирмэг нь хэвлэлийн хуудас нээгдэж буй мэдрэмж
+                  өгнө — тунгалагжих аргаас хамаагүй хүчтэй нээлт. */}
+              <h1 className="t-display enter-mask" style={{ '--d': '80ms' } as CSSProperties}>
+                {heroWords.map((word, index) => (
+                  <span key={word + index} className="mask-line">
+                    <span className={index === heroWords.length - 1 ? 't-it' : undefined}>
+                      {word}
+                    </span>
+                  </span>
+                ))}
+              </h1>
 
-            <p
-              className="rise max-w-[34ch] text-xl leading-snug text-foreground-soft"
-              style={delay(90 + heroWords.length * 95)}
-            >
-              {hero.subtitle}
-            </p>
-            <p
-              className="rise max-w-[46ch] text-foreground-soft/80"
-              style={delay(160 + heroWords.length * 95)}
-            >
-              {hero.body}
-            </p>
+              <div
+                className="enter flex max-w-[46ch] flex-col gap-4"
+                style={{ '--d': '380ms' } as CSSProperties}
+              >
+                <p className="t-lead text-foreground-soft">{hero.subtitle}</p>
+                <p className="t-small text-muted">{hero.body}</p>
+              </div>
 
-            <div
-              className="rise flex flex-wrap items-center gap-3 pt-2"
-              style={delay(230 + heroWords.length * 95)}
-            >
-              <ButtonLink href={`/${locale}/schedule`} className="group px-6 py-3">
-                {hero.cta ?? t.nav.schedule}
-                <span aria-hidden className="transition-transform group-hover:translate-x-1">
-                  →
-                </span>
-              </ButtonLink>
-              <ButtonLink href={`/${locale}/classes`} variant="secondary" className="px-6 py-3">
-                {t.nav.classes}
-              </ButtonLink>
+              {/* Утсан дээр товчнууд БҮТЭН өргөнөөр дараалан сууна: хоёр
+                  урт шошготой товч 390px -д зэрэгцэхгүй, зэрэгцүүлэх гэвэл
+                  хүрээ халина. `xs` -ээс дээш л мөр болно. */}
+              <div
+                className="enter flex w-full flex-col gap-3 min-[420px]:w-auto min-[420px]:flex-row min-[420px]:flex-wrap min-[420px]:items-center"
+                style={{ '--d': '480ms' } as CSSProperties}
+              >
+                <ButtonLink href={`/${locale}/schedule`} className="btn-lg">
+                  {hero.cta ?? t.nav.schedule}
+                  <Arrow />
+                </ButtonLink>
+                <ButtonLink href={`/${locale}/classes`} variant="secondary" className="btn-lg">
+                  {t.nav.classes}
+                </ButtonLink>
+              </div>
             </div>
-          </div>
 
-          {/* Баруун багана — дэлгэцээс цааш. Зураг хэвтээ, өргөн эгнээтэй тул
-              4:3 хэвээр: босоо зүсэлт урд талын бүжигчнийг тасална. */}
-          <div className="rise px-4 sm:px-5 lg:px-0" style={delay(300)}>
-            <div className="lg:w-[calc(100%+4rem)]">
-              <Media
-                src="/media/hero.jpg"
-                alt={String(hero.title ?? '')}
-                ratio="aspect-[4/3]"
-                className="zoom-in lg:rounded-l-[1.75rem] lg:rounded-r-none lg:border-r-0"
-                priority
-              />
+            {/* ── Зураг ───────────────────────────────────────────────────
+                Зүсэлтээр нээгдэнэ: бүтэн зураг доороос дээш илчлэгдэнэ.
+                Дотор нь параллакс — хуудас гүйхэд зураг өөрийн хүрээндээ
+                удаанаар хөдөлж, гүн үүсгэнэ. Зөвхөн ЭНЭ зурагт: бүх зүйл
+                өөр хурдтай хөдөлбөл хуудас сэлгэцэлж уншихад хэцүү болно.
+
+                4:3 харьцаа санаатай — зураг нь хэвтээ, өргөн эгнээтэй тул
+                босоо хүрээнд хийвэл урд талын бүжигчин тасарна. */}
+            <div
+              className="enter-clip bleed-r col-span-12 lg:col-span-6"
+              style={{ '--d': '260ms' } as CSSProperties}
+            >
+              <div className="media aspect-[4/3]">
+                {/* Параллаксын хүрээ — зураг өөрийн цонхноос 12% өндөр тул
+                    гүйлтийн туршид дотроо гулсах зайтай. Зөвхөн энэ зурагт. */}
+                <div className="drift absolute inset-0 -top-[6%] h-[112%]">
+                  <Media
+                    src="/media/hero.jpg"
+                    alt={String(hero.title ?? '')}
+                    ratio="h-full w-full"
+                    className="rounded-none"
+                    sizes="(max-width: 1024px) 100vw, 50vw"
+                    priority
+                  />
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Тоон үзүүлэлт нь тусдаа хэсэг БИШ — баатрын доод ирмэгийн шугам.
-            Гарчиг ба хуудасны биеийг тусгаарлана. */}
+        {/* ── Үзүүлэлт ───────────────────────────────────────────────────
+            Тусдаа хэсэг БИШ — баатрын доод ирмэгийн шугам. Гарчиг ба
+            хуудасны биеийг тусгаарлана. Тоо нь харагдмагцаа тэгээс дээш
+            тоологдоно: бичсэн тоо бол баримт, тоологдсон тоо бол хэмжээ. */}
         {about.stat_students && (
-          <div className="mt-14 border-y border-line sm:mt-16">
-            <dl className="bleed-inner stagger grid divide-y divide-line sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+          <div className="shell mt-20 sm:mt-28">
+            <div className="hr" data-rv="line" />
+            <dl className="grid grid-cols-1 sm:grid-cols-3" data-stagger>
               {stats.map(([value, label], index) => (
                 <div
                   key={String(label)}
-                  className={`flex items-baseline gap-4 py-7 transition-colors hover:bg-surface/60 sm:flex-col sm:gap-2 sm:py-9 ${
-                    index === 0 ? 'sm:pr-8' : index === 1 ? 'sm:px-8' : 'sm:pl-8'
-                  }`}
+                  data-rv
+                  className={`flex flex-col gap-2 border-b border-line py-7 sm:gap-4 sm:border-b-0 sm:py-10 ${
+                    index > 0 ? 'sm:border-l sm:border-line sm:pl-8' : ''
+                  } ${index < 2 ? 'sm:pr-8' : ''}`}
                 >
-                  <dt className="order-2 text-sm text-muted sm:order-none">{label}</dt>
-                  <dd className="font-display order-1 text-4xl leading-none font-bold tabular-nums sm:order-none sm:text-5xl">
-                    {value}
+                  <dd className="t-num text-[3rem] sm:text-[4rem]">
+                    <Stat value={String(value)} />
                   </dd>
+                  <dt className="t-label text-muted">{label}</dt>
                 </div>
               ))}
             </dl>
+            <div className="hr" data-rv="line" />
           </div>
         )}
       </section>
 
       {/* ══ Хичээлийн нэрсийн тууз ═══════════════════════════════════════
           Чимэглэл — уншигчид биш, хэмнэлд зориулав. Тиймээс `aria-hidden`:
-          яг ижил нэрс доор жагсаалт болж дахин гарна. */}
+          яг ижил нэрс доор жагсаалт болж дахин гарна. Налуу serif нь
+          хөдөлгөөнд өөр эрч өгнө — босоо үсэг гүйхэд хатуу харагддаг. */}
       {classTypes.length > 0 && (
         <section
           aria-hidden
-          className="marquee edge-fade bleed relative overflow-hidden border-b border-line py-6"
+          className="marquee edge-fade bleed relative mt-[var(--bay)] overflow-hidden border-y border-line py-7"
         >
           <div className="marquee-track">
             {[0, 1].map((half) => (
-              <div key={half} className="flex shrink-0 items-center gap-7 pr-7">
+              <div key={half} className="flex shrink-0 items-center gap-10 pr-10">
                 {classTypes.map((classType) => (
                   <span
                     key={classType.id}
-                    className="font-display flex items-center gap-7 text-2xl font-bold whitespace-nowrap text-foreground-soft sm:text-3xl"
+                    className="font-display flex items-center gap-10 text-[1.75rem] leading-none font-medium tracking-[-0.02em] whitespace-nowrap text-foreground-soft italic sm:text-[2.5rem]"
                   >
                     {loc(classType, 'name', locale)}
-                    <span className="text-faint">✦</span>
+                    <span aria-hidden className="h-1 w-1 rounded-full bg-faint not-italic" />
                   </span>
                 ))}
               </div>
@@ -256,237 +298,241 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         </section>
       )}
 
-      {/* ══ Хуудасны бие ═════════════════════════════════════════════════
-          Нэг баганад дараалсан хэсгүүдийн оронд ХОЁР БАГАНА: зүүн талд
-          наалдмал агуулга, баруун талд бүлгүүд. Ингэснээр уншигч гүйлгэх
-          үедээ «энэ хуудсанд өөр юу байна» гэдгийг байнга хардаг — доош
-          гүйлгэж туршихгүй. Нарийн дэлгэцэд заагч ажиллахгүй тул алга
-          болж, бүлгүүд ердийн багана болно. */}
-      <div className="grid gap-x-14 gap-y-24 pt-20 sm:gap-y-28 lg:grid-cols-[11rem_minmax(0,1fr)] lg:pt-24">
-        <aside className="hidden lg:block">
-          <nav className="sticky top-28 flex flex-col gap-4">
-            <p className="text-[11px] font-semibold tracking-[0.2em] text-faint uppercase">
-              {t.nav.menu}
-            </p>
-            <ol className="flex flex-col gap-2.5">
-              {blocks.map((block, index) => (
-                <li key={block.id}>
-                  <a
-                    href={`#${block.id}`}
-                    className="group flex items-baseline gap-2.5 text-sm text-muted transition-colors hover:text-foreground"
-                  >
-                    <span className="font-display text-[11px] text-faint tabular-nums transition-colors group-hover:text-foreground-soft">
-                      {String(index + 1).padStart(2, '0')}
-                    </span>
-                    {block.label}
-                  </a>
-                </li>
-              ))}
-            </ol>
+      {/* ══ 01 · Ойрын хичээлүүд ══════════════════════════════════════════
+          Тор биш ЖАГСААЛТ. Цаг бүр нэг баганад буудаг тул нүд доошоо шууд
+          гүйж, хичээлүүдийг харьцуулна. */}
+      <Chapter
+        id="schedule"
+        index={no('schedule')}
+        title={t.home.upcoming}
+        note={t.home.scheduleNote}
+        action={<More href={`/${locale}/schedule`}>{t.home.upcomingAll}</More>}
+      >
+        {sessions.length === 0 ? (
+          <Empty>{t.schedule.noSessions}</Empty>
+        ) : (
+          <ul className="border-t border-line">
+            {sessions.map((session) => (
+              <SessionRow key={session.id} session={session} locale={locale} />
+            ))}
+          </ul>
+        )}
+      </Chapter>
 
-            <div className="rule mt-3" />
-
-            <Link
-              href={`/${locale}/contact`}
-              className="group inline-flex items-center gap-1.5 text-sm text-foreground-soft transition-colors hover:text-foreground"
-            >
-              {t.nav.contact}
-              <span aria-hidden className="transition-transform group-hover:translate-x-1">
-                →
-              </span>
-            </Link>
-          </nav>
-        </aside>
-
-        <div className="flex flex-col gap-24 sm:gap-28">
-          {/* ── Ойрын хичээлүүд ── тор биш, ЖАГСААЛТ ────────────────── */}
-          <Block
-            id="schedule"
-            index={numberOf('schedule')}
-            title={t.home.upcoming}
-            action={<More href={`/${locale}/schedule`}>{t.home.upcomingAll}</More>}
+      {/* ══ 02 · Хичээлийн төрлүүд ════════════════════════════════════════
+          Хэвтээ зам. Тор нь «бүгд ижил жинтэй» гэж хэлдэг бол зам нь
+          «үргэлжилсэн цуглуулга» гэж хэлнэ — галерейн хана. Мөн дэлгэцийн
+          ирмэгээс цааш үргэлжилснээр гүйлгэхийг өөрөө урина. */}
+      {classTypes.length > 0 && (
+        <Chapter
+          id="classes"
+          index={no('classes')}
+          title={t.home.classesTitle}
+          note={t.home.classesNote}
+          action={<More href={`/${locale}/classes`}>{t.common.all}</More>}
+        >
+          <div
+            className="rail bleed flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2"
+            data-rv
           >
-            {sessions.length === 0 ? (
-              <Empty>{t.schedule.noSessions}</Empty>
-            ) : (
-              <ul className="stagger -mt-2 divide-y divide-line border-b border-line">
-                {sessions.map((session) => (
-                  <SessionRow key={session.id} session={session} locale={locale} />
-                ))}
-              </ul>
-            )}
-          </Block>
+            {/* Захын зайг зам дотор нь хийнэ — эхний хайрцаг баганадаа
+                эгнэж, сүүлийнх нь ирмэгт наалдахгүй. */}
+            <span aria-hidden className="w-[var(--shell-pad)] shrink-0" />
 
-          {/* ── Хичээлийн төрлүүд ── хэвтээ зам ─────────────────────── */}
-          {classTypes.length > 0 && (
-            <Block
-              id="classes"
-              index={numberOf('classes')}
-              title={t.home.classesTitle}
-              action={<More href={`/${locale}/classes`}>{t.common.all}</More>}
-            >
-              <div className="rail reveal -mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 sm:-mx-5 sm:px-5 lg:mx-0 lg:px-0">
-                {classTypes.map((classType, index) => (
-                  <Link
-                    key={classType.id}
-                    href={`/${locale}/classes/${classType.slug}`}
-                    className="card card-link sheen group relative w-[72vw] shrink-0 snap-start overflow-hidden p-0 sm:w-[19rem]"
-                  >
-                    <Media
-                      src={classType.cover_url}
-                      alt={loc(classType, 'name', locale)}
-                      seed={index}
-                      ratio="aspect-[3/4]"
-                      className="zoom-in rounded-none border-0"
-                    />
-                    <div aria-hidden className="tile-scrim pointer-events-none absolute inset-0" />
-
-                    <span className="absolute top-4 left-4 rounded-full border border-white/20 bg-black/40 px-2.5 py-1 text-[10px] font-semibold tracking-[0.16em] text-white/85 uppercase backdrop-blur-sm">
-                      {t.level[classType.level]}
-                    </span>
-
-                    <div className="absolute inset-x-0 bottom-0 flex flex-col gap-1 p-5 text-white">
-                      <p className="font-display text-xl leading-tight font-bold">
-                        {loc(classType, 'name', locale)}
-                      </p>
-                      <p className="text-xs text-white/70 tabular-nums">
-                        {classType.duration_min}
-                        {t.common.minutes} · {formatMnt(classType.base_price)}
-                      </p>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </Block>
-          )}
-
-          {/* ── Багш нар ── шатласан хөрөг ───────────────────────────── */}
-          {instructors.length > 0 && (
-            <Block
-              id="instructors"
-              index={numberOf('instructors')}
-              title={t.home.instructorsTitle}
-              action={<More href={`/${locale}/instructors`}>{t.common.all}</More>}
-            >
-              <div className="stagger grid gap-5 sm:grid-cols-3">
-                {instructors.slice(0, 3).map((instructor, index) => (
-                  <Link
-                    key={instructor.id}
-                    href={`/${locale}/instructors/${instructor.slug}`}
-                    className={`card card-link sheen group relative overflow-hidden p-0 ${
-                      /* Шатлал — эгнээ хавтгай биш, шатаар бууна */
-                      index === 1 ? 'sm:mt-10' : index === 2 ? 'sm:mt-20' : ''
-                    }`}
-                  >
-                    <Media
-                      src={instructor.photo_url}
-                      alt={instructor.name}
-                      seed={index + 2}
-                      ratio="aspect-[4/5]"
-                      className="zoom-in rounded-none border-0"
-                    />
-                    <div aria-hidden className="tile-scrim pointer-events-none absolute inset-0" />
-
-                    <div className="absolute inset-x-0 bottom-0 p-5 text-white">
-                      <p className="font-display text-lg font-bold">{instructor.name}</p>
-                      <p className="mt-1 line-clamp-2 text-xs text-white/70">
-                        {loc(instructor, 'bio', locale)}
-                      </p>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </Block>
-          )}
-
-          {/* ── Бичлэгүүд ── нэг том, бусад нь дэргэд ────────────────── */}
-          {videos.length > 0 && (
-            <Block id="videos" index={numberOf('videos')} title={t.home.videosTitle}>
-              <div className="reveal grid gap-5 lg:grid-cols-[1.55fr_1fr]">
-                <VideoEmbed
-                  id={videos[0].id}
-                  title={videos[0].title}
-                  playLabel={t.home.playVideo}
-                  watchLabel={t.home.watchOnYoutube}
+            {classTypes.map((classType, index) => (
+              <Link
+                key={classType.id}
+                href={`/${locale}/classes/${classType.slug}`}
+                className="card card-link sheen group relative w-[76vw] shrink-0 snap-start overflow-hidden p-0 sm:w-[21rem]"
+              >
+                <Media
+                  src={classType.cover_url}
+                  alt={loc(classType, 'name', locale)}
+                  seed={index}
+                  ratio="aspect-[3/4]"
+                  className="rounded-none"
+                  sizes="(max-width: 640px) 76vw, 21rem"
+                  overlay
                 />
-                {videos.length > 1 && (
-                  <div className="flex flex-col gap-5">
-                    {videos.slice(1).map((video) => (
-                      <VideoEmbed
-                        key={video.id}
-                        id={video.id}
-                        title={video.title}
-                        playLabel={t.home.playVideo}
-                        watchLabel={t.home.watchOnYoutube}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
-            </Block>
-          )}
 
-          {/* ── Дэлгүүр ── зэрэгцээ хос, шугамаар тусгаарласан ───────── */}
-          {products.length > 0 && (
-            <Block
-              id="shop"
-              index={numberOf('shop')}
-              title={t.home.shopTitle}
-              action={<More href={`/${locale}/shop`}>{t.nav.shop}</More>}
-            >
-              <div className="stagger grid gap-x-5 sm:grid-cols-2">
-                {products.slice(0, 4).map((product, index) => (
-                  <Link
-                    key={product.id}
-                    href={`/${locale}/shop/${product.slug}`}
-                    className="card-link group flex flex-col gap-4 border-b border-line py-6 first:pt-0 sm:[&:nth-child(2)]:pt-0"
-                  >
-                    <Media
-                      src={product.images[0]?.url}
-                      alt={loc(product, 'name', locale)}
-                      seed={index + 1}
-                      ratio="aspect-[5/4]"
-                      className="zoom-in"
-                    />
-                    <div className="flex items-baseline justify-between gap-3">
-                      <p className="font-semibold transition-colors group-hover:text-foreground-soft">
-                        {loc(product, 'name', locale)}
-                      </p>
-                      <p className="shrink-0 text-sm text-muted tabular-nums">
-                        {formatMnt(product.minPrice)}
-                      </p>
-                    </div>
-                  </Link>
+                <span className="tag tag-line absolute top-4 left-4 border-white/25 text-white/85 backdrop-blur-sm">
+                  {t.level[classType.level]}
+                </span>
+
+                <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 p-5 text-white">
+                  <div className="min-w-0">
+                    <p className="font-display text-[1.375rem] leading-tight font-medium tracking-[-0.02em]">
+                      {loc(classType, 'name', locale)}
+                    </p>
+                    <p className="t-meta mt-1.5 text-white/65">
+                      {classType.duration_min}
+                      {t.common.minutes} · {formatMnt(classType.base_price)}
+                    </p>
+                  </div>
+                  <span className="shrink-0 translate-x-2 text-white opacity-0 transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-0 group-hover:opacity-100">
+                    <Arrow className="h-4 w-4" />
+                  </span>
+                </div>
+              </Link>
+            ))}
+
+            <span aria-hidden className="w-[var(--shell-pad)] shrink-0" />
+          </div>
+        </Chapter>
+      )}
+
+      {/* ══ 03 · Багш нар ═════════════════════════════════════════════════
+          Хөрөг эгнээ хавтгай биш ШАТААР бууна. Гурван ижил хайрцаг зэрэгцвэл
+          каталог болно; шатлал нь тэднийг хүн болгож, эгнээнд хэмнэл өгнө. */}
+      {instructors.length > 0 && (
+        <Chapter
+          id="instructors"
+          index={no('instructors')}
+          title={t.home.instructorsTitle}
+          note={t.home.instructorsNote}
+          action={<More href={`/${locale}/instructors`}>{t.common.all}</More>}
+        >
+          <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-3" data-stagger>
+            {instructors.slice(0, 3).map((instructor, index) => (
+              <Link
+                key={instructor.id}
+                href={`/${locale}/instructors/${instructor.slug}`}
+                data-rv
+                className={`group relative block ${
+                  /* Утсан дээр хоёр багана — гурав дахь нь бүтэн өргөнөөр.
+                     Шатлал зөвхөн өргөн дэлгэцэд утгатай. */
+                  index === 2 ? 'col-span-2 lg:col-span-1' : ''
+                } ${index === 1 ? 'lg:mt-14' : index === 2 ? 'lg:mt-28' : ''}`}
+              >
+                <div className="media sheen aspect-[4/5] border border-line transition-colors duration-300 group-hover:border-line-strong">
+                  <Media
+                    src={instructor.photo_url}
+                    alt={instructor.name}
+                    seed={index + 2}
+                    ratio="absolute inset-0"
+                    className="rounded-none border-0"
+                    sizes="(max-width: 640px) 50vw, 33vw"
+                    overlay
+                  />
+                  <div className="absolute inset-x-0 bottom-0 p-5 text-white">
+                    <p className="font-display text-[1.25rem] leading-tight font-medium tracking-[-0.02em]">
+                      {instructor.name}
+                    </p>
+                    {/* Товч намтар нь hover дээр ГАРЧ ирнэ: тайван үедээ
+                        зураг дангаараа ярина, сонирхсон үед нь дэлгэрнэ. */}
+                    <p className="t-meta mt-1.5 line-clamp-2 max-h-0 overflow-hidden text-white/70 opacity-0 transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:max-h-16 group-hover:opacity-100">
+                      {loc(instructor, 'bio', locale)}
+                    </p>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </Chapter>
+      )}
+
+      {/* ══ 04 · Бичлэгүүд ════════════════════════════════════════════════
+          Нэг том, хажууд нь хоёр жижиг. Тэнцүү гурав нь «сонголт» гэж
+          хэлдэг бол энэ нь «эхлээд үүнийг үз» гэж хэлнэ. */}
+      {videos.length > 0 && (
+        <Chapter
+          id="videos"
+          index={no('videos')}
+          title={t.home.videosTitle}
+          note={t.home.videosNote}
+        >
+          <div className="g12 gap-y-6" data-rv>
+            <div className="col-span-12 lg:col-span-7">
+              <VideoEmbed
+                id={videos[0].id}
+                title={videos[0].title}
+                playLabel={t.home.playVideo}
+                watchLabel={t.home.watchOnYoutube}
+              />
+            </div>
+            {videos.length > 1 && (
+              <div className="col-span-12 flex flex-col gap-6 lg:col-span-4 lg:col-start-9">
+                {videos.slice(1).map((video) => (
+                  <VideoEmbed
+                    key={video.id}
+                    id={video.id}
+                    title={video.title}
+                    playLabel={t.home.playVideo}
+                    watchLabel={t.home.watchOnYoutube}
+                  />
                 ))}
               </div>
-            </Block>
-          )}
-        </div>
-      </div>
+            )}
+          </div>
+        </Chapter>
+      )}
 
-      {/* ══ Төгсгөлийн уриалга ═══════════════════════════════════════════
-          Хуудас жагсаалтаар дуусах ёсгүй. Хайрцаг ч биш — бүтэн өргөн тууз:
-          сонголт нэг л үлдсэн гэдгийг зохиомж хэлнэ. */}
-      <section className="bleed relative isolate mt-28 -mb-10 overflow-hidden border-t border-line py-20 sm:-mb-14 sm:py-28">
-        <div className="glow -top-24 left-1/2 h-72 w-[30rem] -translate-x-1/2" />
-        <div aria-hidden className="hairlines pointer-events-none absolute inset-0 opacity-60" />
+      {/* ══ 05 · Дэлгүүр ══════════════════════════════════════════════════
+          Хайрцаг биш ШУГАМААР тусгаарлагдсан бүртгэл. Барааны зураг өөрөө
+          хайрцаг тул дээр нь хүрээ нэмэх нь давхардал. */}
+      {products.length > 0 && (
+        <Chapter
+          id="shop"
+          index={no('shop')}
+          title={t.home.shopTitle}
+          note={t.home.shopNote}
+          action={<More href={`/${locale}/shop`}>{t.nav.shop}</More>}
+        >
+          <div className="grid grid-cols-2 gap-x-4 gap-y-10 sm:gap-x-6 lg:grid-cols-4" data-stagger>
+            {products.slice(0, 4).map((product, index) => (
+              <Link
+                key={product.id}
+                href={`/${locale}/shop/${product.slug}`}
+                className="group flex flex-col gap-4"
+                data-rv
+              >
+                <Media
+                  src={product.images[0]?.url}
+                  alt={loc(product, 'name', locale)}
+                  seed={index + 1}
+                  ratio="aspect-[4/5]"
+                  sizes="(max-width: 640px) 50vw, 25vw"
+                />
+                <div className="flex items-baseline justify-between gap-3 border-t border-line pt-3">
+                  <p className="t-small font-medium transition-opacity duration-200 group-hover:opacity-60">
+                    {loc(product, 'name', locale)}
+                  </p>
+                  <p className="t-meta shrink-0 text-muted">{formatMnt(product.minPrice)}</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </Chapter>
+      )}
 
-        <div className="bleed-inner reveal relative flex flex-col items-center gap-6 text-center">
-          <Eyebrow>{t.brand}</Eyebrow>
-          <h2 className="max-w-[18ch] text-[clamp(2rem,6vw,4rem)] leading-[0.92] font-bold">
-            {t.about.ctaTitle}
-          </h2>
-          <p className="max-w-[46ch] text-foreground-soft">{t.about.ctaBody}</p>
-          <div className="flex flex-wrap justify-center gap-3 pt-2">
-            <ButtonLink href={`/${locale}/schedule`} className="group px-6 py-3">
-              {t.schedule.book}
-              <span aria-hidden className="transition-transform group-hover:translate-x-1">
-                →
-              </span>
-            </ButtonLink>
-            <ButtonLink href={`/${locale}/contact`} variant="secondary" className="px-6 py-3">
-              {t.nav.contact}
-            </ButtonLink>
+      {/* ══ Төгсгөлийн уриалга ════════════════════════════════════════════
+          Хуудас жагсаалтаар дуусах ёсгүй. Бүтэн өргөн тууз, ганц мэдэгдэл,
+          ганц үндсэн үйлдэл — сонголт нэг л үлдсэнийг зохиомж хэлнэ. */}
+      <section className="bleed relative isolate mt-[var(--bay)] overflow-hidden border-y border-line py-24 sm:py-32">
+        <div className="glow -top-32 left-1/2 h-80 w-[34rem] -translate-x-1/2" />
+        <div aria-hidden className="mesh pointer-events-none absolute inset-0 opacity-60" />
+
+        <div className="shell relative">
+          <div className="g12 items-end gap-y-8">
+            <h2 className="t-h1 col-span-12 max-w-[16ch] lg:col-span-7" data-rv>
+              {t.about.ctaTitle}
+            </h2>
+
+            <div
+              className="col-span-12 flex flex-col items-start gap-7 lg:col-span-4 lg:col-start-9"
+              data-rv
+            >
+              <p className="t-small max-w-[40ch] text-muted">{t.about.ctaBody}</p>
+              <div className="flex w-full flex-col gap-3 min-[420px]:w-auto min-[420px]:flex-row min-[420px]:flex-wrap">
+                <ButtonLink href={`/${locale}/schedule`} className="btn-lg">
+                  {t.schedule.book}
+                  <Arrow />
+                </ButtonLink>
+                <ButtonLink href={`/${locale}/contact`} variant="ghost" className="btn-lg">
+                  {t.nav.contact}
+                </ButtonLink>
+              </div>
+            </div>
           </div>
         </div>
       </section>

@@ -26,7 +26,7 @@ export default async function ClassDetailPage({
   const mine = sessions.filter((session) => session.class_type_id === classType.id).slice(0, 6)
 
   return (
-    <div className="flex flex-col gap-10">
+    <div className="shell flex flex-col gap-16 pt-12 sm:pt-16">
       <PageHeader title={loc(classType, 'name', locale)} lead={loc(classType, 'desc', locale)} />
 
       <div className="grid gap-8 md:grid-cols-[1fr_1.1fr]">
@@ -38,17 +38,17 @@ export default async function ClassDetailPage({
         />
         <dl className="flex flex-col gap-4">
           <div className="flex items-center gap-3">
-            <dt className="w-28 text-sm text-muted">{t.schedule.filterLevel}</dt>
+            <dt className="w-28 t-small text-muted">{t.schedule.filterLevel}</dt>
             <dd>
               <Badge tone="accent">{t.level[classType.level]}</Badge>
             </dd>
           </div>
           <div className="flex items-center gap-3">
-            <dt className="w-28 text-sm text-muted">{t.common.minutes}</dt>
+            <dt className="w-28 t-small text-muted">{t.common.minutes}</dt>
             <dd className="tabular-nums">{classType.duration_min}</dd>
           </div>
           <div className="flex items-center gap-3">
-            <dt className="w-28 text-sm text-muted">{t.common.price}</dt>
+            <dt className="w-28 t-small text-muted">{t.common.price}</dt>
             <dd className="font-medium tabular-nums">{formatMnt(classType.base_price)}</dd>
           </div>
           <ButtonLink href={`/${locale}/schedule`} className="mt-2 self-start">

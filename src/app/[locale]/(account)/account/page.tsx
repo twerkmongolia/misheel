@@ -13,7 +13,7 @@ export default async function AccountPage({ params }: { params: Promise<{ locale
   const profile = await getProfile()
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-10">
       <PageHeader title={t.auth.profile} lead={user.email ?? undefined} />
       {profile ? (
         <ProfileForm t={t} profile={profile} />

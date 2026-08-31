@@ -81,7 +81,7 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
   const points = [t.about.what.free, t.about.what.health, t.about.what.why]
 
   return (
-    <div className="flex flex-col gap-24">
+    <div className="shell flex flex-col gap-24 pt-12 sm:pt-16">
       {/* ── Танилцуулга ──────────────────────────────────────────────────
           Гарчиг нь ганц үг — өнгөгүй систем дээр хэмжээ өөрөө мэдэгдэл. */}
       <section className="relative">
@@ -106,7 +106,7 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
               <span className="font-display text-sm font-bold text-muted tabular-nums">
                 {String(index + 1).padStart(2, '0')}
               </span>
-              <h3 className="text-lg font-semibold">{point.title}</h3>
+              <h3 className="t-h3">{point.title}</h3>
               <p className="text-sm leading-relaxed text-foreground-soft">{point.body}</p>
             </Card>
           ))}
@@ -189,8 +189,8 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
                 className="flex flex-col gap-3 border-b border-line py-6 first:border-t sm:flex-row sm:items-center sm:gap-8"
               >
                 <div className="flex min-w-0 shrink-0 flex-col gap-0.5 sm:w-44">
-                  <span className="font-display text-lg font-bold">{show.name}</span>
-                  <span className="text-xs text-muted tabular-nums">
+                  <span className="font-display t-h3">{show.name}</span>
+                  <span className="t-meta text-muted tabular-nums">
                     {show.date ?? (note || ' ')}
                   </span>
                 </div>
@@ -202,7 +202,7 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
                         <span className="text-2xl leading-none font-semibold tabular-nums">
                           {format(show.min)}–{format(show.max)}
                         </span>
-                        <span className="text-sm text-muted">{t.about.showsAudience}</span>
+                        <span className="t-small text-muted">{t.about.showsAudience}</span>
                       </div>
 
                       {/* Замын өндөр нимгэн, төгсгөл нь бөөрөнхий. Хоёр
@@ -223,10 +223,10 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
                       </div>
                     </>
                   ) : (
-                    <span className="text-sm text-muted">{t.about.showsNoData}</span>
+                    <span className="t-small text-muted">{t.about.showsNoData}</span>
                   )}
 
-                  {show.date && note && <p className="text-sm text-muted">{note}</p>}
+                  {show.date && note && <p className="t-small text-muted">{note}</p>}
                 </div>
 
                 {show.women !== null && (
@@ -241,7 +241,7 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
                         style={{ width: `${100 - show.women}%` }}
                       />
                     </div>
-                    <span className="text-xs text-muted tabular-nums">
+                    <span className="t-meta text-muted tabular-nums">
                       {show.women}% {t.about.showsWomen} · {100 - show.women}% {t.about.showsMen}
                     </span>
                   </div>
@@ -265,7 +265,7 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
                   ratio="aspect-square"
                 />
                 <p className="font-medium">{instructor.name}</p>
-                <p className="text-sm text-muted">{loc(instructor, 'bio', locale)}</p>
+                <p className="t-small text-muted">{loc(instructor, 'bio', locale)}</p>
               </Card>
             ))}
           </div>
@@ -275,7 +275,7 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
       {/* ── Дуудлага ─────────────────────────────────────────────────── */}
       <section className="flex flex-col items-start gap-5 rounded-3xl border border-line bg-surface p-8 sm:p-12">
         <Eyebrow>{t.brand}</Eyebrow>
-        <h2 className="max-w-[20ch] text-3xl font-bold sm:text-4xl">{t.about.ctaTitle}</h2>
+        <h2 className="max-w-[20ch] t-h2 sm:text-4xl">{t.about.ctaTitle}</h2>
         <p className="max-w-[52ch] text-foreground-soft">{t.about.ctaBody}</p>
         <div className="flex flex-wrap gap-3 pt-1">
           <ButtonLink href={`/${locale}/schedule`}>{t.nav.schedule}</ButtonLink>

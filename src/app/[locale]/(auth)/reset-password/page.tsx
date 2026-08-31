@@ -14,7 +14,7 @@ export default async function ResetPasswordPage({
 
   return (
     <>
-      <h1 className="text-2xl font-semibold">{t.auth.newPassword}</h1>
+      <h1 className="t-h2">{t.auth.newPassword}</h1>
       <ResetPasswordForm t={t} locale={locale} />
     </>
   )

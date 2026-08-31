@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import { Header } from '@/components/site/Header'
 import { Footer } from '@/components/site/Footer'
+import { Reveal } from '@/components/site/Reveal'
 import { isLocale } from '@/lib/i18n/config'
 
 export default async function LocaleLayout({
@@ -16,8 +17,19 @@ export default async function LocaleLayout({
   return (
     <>
       <Header locale={locale} />
-      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-10 sm:px-5 sm:py-14">{children}</main>
+
+      {/*
+        `main` дээр хажуугийн зай БАЙХГҮЙ. Зай нь `.shell` дээр амьдардаг тул
+        хуудас өөрөө шийднэ: аль хэсэг баганад багтах, аль нь дэлгэцийн ирмэг
+        хүртэл гарахыг. Зайг `main` дээр тавьбал бүтэн өргөн тууз бүр
+        сөрөг захаар тэмцэх шаардлагатай болно.
+      */}
+      <main className="flex-1 pb-24">{children}</main>
+
       <Footer locale={locale} />
+
+      {/* Гүйлтийн хөдөлгөөний ажиглагч — DOM зурагдсаны дараа залгагдана */}
+      <Reveal />
     </>
   )
 }

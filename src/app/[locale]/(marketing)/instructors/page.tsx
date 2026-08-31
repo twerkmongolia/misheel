@@ -13,31 +13,44 @@ export default async function InstructorsPage({ params }: { params: Promise<{ lo
   const instructors = await getInstructors()
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="shell flex flex-col gap-14 pt-12 sm:pt-16">
       <PageHeader title={t.nav.instructors} />
 
       {instructors.length === 0 ? (
         <Empty>{t.common.empty}</Empty>
       ) : (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        // Хөрөг эгнээ хавтгай биш ШАТААР бууна — гурван ижил хайрцаг
+        // зэрэгцвэл каталог болно; шатлал нь эгнээнд хэмнэл өгнө.
+        <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-3" data-stagger>
           {instructors.map((instructor, index) => (
             <Link
               key={instructor.id}
               href={`/${locale}/instructors/${instructor.slug}`}
-              className="card card-link relative overflow-hidden p-0"
+              data-rv
+              className={`group relative block ${index % 3 === 1 ? 'lg:mt-14' : ''} ${
+                index % 3 === 2 ? 'lg:mt-28' : ''
+              }`}
             >
-              <Media
-                src={instructor.photo_url}
-                alt={instructor.name}
-                seed={index}
-                ratio="aspect-[4/5]"
-                className="rounded-none border-0"
-              />
-              <div className="absolute inset-x-0 bottom-0 p-5">
-                <p className="font-display text-lg font-bold">{instructor.name}</p>
-                <p className="mt-1 line-clamp-2 text-xs text-foreground-soft/85">
-                  {loc(instructor, 'bio', locale)}
-                </p>
+              <div className="media sheen aspect-[4/5] border border-line transition-colors duration-300 group-hover:border-line-strong">
+                <Media
+                  src={instructor.photo_url}
+                  alt={instructor.name}
+                  seed={index}
+                  ratio="absolute inset-0"
+                  className="rounded-none"
+                  sizes="(max-width: 640px) 50vw, 33vw"
+                  overlay
+                />
+                <div className="absolute inset-x-0 bottom-0 p-5 text-white">
+                  <p className="font-display text-[1.25rem] leading-tight font-medium tracking-[-0.02em]">
+                    {instructor.name}
+                  </p>
+                  {/* Намтар нь hover дээр ГАРЧ ирнэ — тайван үедээ зураг
+                      дангаараа ярина. */}
+                  <p className="t-meta mt-1.5 line-clamp-2 max-h-0 overflow-hidden text-white/70 opacity-0 transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:max-h-16 group-hover:opacity-100">
+                    {loc(instructor, 'bio', locale)}
+                  </p>
+                </div>
               </div>
             </Link>
           ))}
