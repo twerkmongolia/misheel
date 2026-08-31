@@ -4,7 +4,13 @@ import Link from 'next/link'
 import { usePathname, useSearchParams } from 'next/navigation'
 import { isLocale, locales, type Locale } from '@/lib/i18n/config'
 
-/** Одоогийн замын хэлний segment-ийг сольж, бусад хэсгийг хадгална. */
+/**
+ * Хэл сонгогч.
+ *
+ * Товч биш ЖАГСААЛТ: хоёр код ташуу зураасаар тусгаарлагдана. Идэвхтэйг
+ * дэвсгэрээр биш гэрэлтүүлэлтээр заана — навбарын бусад зүйлстэй ижил
+ * дүрэм. Одоогийн замын хэлний segment-ийг сольж, бусад хэсгийг хадгална.
+ */
 export function LocaleSwitch({ current }: { current: Locale }) {
   const pathname = usePathname()
   const search = useSearchParams().toString()
@@ -13,23 +19,29 @@ export function LocaleSwitch({ current }: { current: Locale }) {
   const query = search ? `?${search}` : ''
 
   return (
-    <div className="flex items-center gap-0.5 text-xs font-medium">
-      {locales.map((locale) => {
+    <div className="t-label flex items-center gap-1.5">
+      {locales.map((locale, index) => {
         const next = [...segments]
         if (isLocale(next[1] ?? '')) next[1] = locale
         else next.splice(1, 0, locale)
 
         return (
-          <Link
-            key={locale}
-            href={`${next.join('/')}${query}`}
-            aria-current={locale === current ? 'true' : undefined}
-            className={`rounded px-2 py-1 uppercase transition-colors ${
-              locale === current ? 'bg-surface-2 text-foreground' : 'text-muted hover:text-foreground'
-            }`}
-          >
-            {locale}
-          </Link>
+          <span key={locale} className="flex items-center gap-1.5">
+            {index > 0 && (
+              <span aria-hidden className="text-faint">
+                /
+              </span>
+            )}
+            <Link
+              href={`${next.join('/')}${query}`}
+              aria-current={locale === current ? 'true' : undefined}
+              className={`transition-colors duration-200 ${
+                locale === current ? 'text-foreground' : 'text-faint hover:text-foreground-soft'
+              }`}
+            >
+              {locale}
+            </Link>
+          </span>
         )
       })}
     </div>
