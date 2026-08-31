@@ -46,7 +46,7 @@ export default async function SessionPage({
   const full = session.seatsLeft === 0
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="shell flex flex-col gap-14 pt-12 sm:pt-16">
       <PageHeader
         title={session.classType ? loc(session.classType, 'name', locale) : t.nav.schedule}
         lead={session.classType ? loc(session.classType, 'desc', locale) : undefined}
@@ -66,10 +66,10 @@ export default async function SessionPage({
         <Card className="flex flex-col gap-5">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <p className="text-sm text-muted">
+              <p className="t-small text-muted">
                 {weekdayLong(session.starts_at, locale)} · {formatDate(session.starts_at, locale)}
               </p>
-              <p className="font-display text-2xl font-bold tabular-nums">
+              <p className="font-display t-h2 tabular-nums">
                 {formatTime(session.starts_at)}–{formatTime(session.ends_at)}
               </p>
             </div>

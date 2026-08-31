@@ -42,7 +42,7 @@ export default async function CheckoutPage({
 
   if (lines.length === 0) {
     return (
-      <div className="flex flex-col gap-8">
+      <div className="shell flex flex-col gap-14 pt-12 sm:pt-16">
         <PageHeader title={t.shop.checkout} />
         <Empty>{t.shop.cartEmpty}</Empty>
       </div>
@@ -50,7 +50,7 @@ export default async function CheckoutPage({
   }
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="shell flex flex-col gap-14 pt-12 sm:pt-16">
       <PageHeader title={t.shop.checkout} />
 
       {search.error && <Alert tone="danger">{orderErrorMessage(t, search.error)}</Alert>}
@@ -58,7 +58,7 @@ export default async function CheckoutPage({
       <div className="grid gap-10 lg:grid-cols-[1.4fr_1fr]">
         <form action={placeOrder} className="flex flex-col gap-4">
           <input type="hidden" name="locale" value={locale} />
-          <h2 className="text-lg font-semibold">{t.shop.shippingInfo}</h2>
+          <h2 className="t-h3">{t.shop.shippingInfo}</h2>
 
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label={t.shop.name}>

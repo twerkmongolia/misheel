@@ -30,7 +30,7 @@ export default async function CartPage({ params }: { params: Promise<{ locale: s
 
   if (lines.length === 0) {
     return (
-      <div className="flex flex-col gap-8">
+      <div className="shell flex flex-col gap-14 pt-12 sm:pt-16">
         <PageHeader title={t.shop.cart} />
         <Empty>{t.shop.cartEmpty}</Empty>
         <ButtonLink href={`/${locale}/shop`} className="self-start">
@@ -73,7 +73,7 @@ export default async function CartPage({ params }: { params: Promise<{ locale: s
   )
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="shell flex flex-col gap-14 pt-12 sm:pt-16">
       <PageHeader title={t.shop.cart} />
 
       <div className="grid items-start gap-8 lg:grid-cols-[1.7fr_1fr]">
@@ -102,13 +102,13 @@ export default async function CartPage({ params }: { params: Promise<{ locale: s
                     >
                       {loc(line.product, 'name', locale)}
                     </Link>
-                    <p className="mt-0.5 text-sm text-muted">
+                    <p className="mt-0.5 t-small text-muted">
                       {[line.variant.size, line.variant.color].filter(Boolean).join(' · ') ||
                         line.variant.sku}
                     </p>
                   </div>
 
-                  <p className="font-display shrink-0 text-lg font-bold tabular-nums">
+                  <p className="font-display shrink-0 t-h3 tabular-nums">
                     {formatMnt(line.variant.price * line.qty)}
                   </p>
                 </div>
@@ -122,7 +122,7 @@ export default async function CartPage({ params }: { params: Promise<{ locale: s
                 <div className="mt-1 flex flex-wrap items-center gap-4">
                   {stepper(line.variant.id, line.qty, line.variant.stock_qty)}
 
-                  <span className="text-xs text-muted tabular-nums">
+                  <span className="t-meta text-muted tabular-nums">
                     {formatMnt(line.variant.price)} × {line.qty}
                   </span>
 
@@ -131,7 +131,7 @@ export default async function CartPage({ params }: { params: Promise<{ locale: s
                     <input type="hidden" name="locale" value={locale} />
                     <button
                       type="submit"
-                      className="text-sm text-muted underline decoration-transparent underline-offset-4 transition-colors hover:text-foreground hover:decoration-foreground"
+                      className="t-small text-muted underline decoration-transparent underline-offset-4 transition-colors hover:text-foreground hover:decoration-foreground"
                     >
                       {t.shop.remove}
                     </button>
@@ -159,7 +159,7 @@ export default async function CartPage({ params }: { params: Promise<{ locale: s
 
           <div className="flex items-baseline justify-between border-t border-line pt-4">
             <span className="font-semibold">{t.common.total}</span>
-            <span className="font-display text-2xl font-bold tabular-nums">
+            <span className="font-display t-h2 tabular-nums">
               {formatMnt(subtotal + shippingFee)}
             </span>
           </div>
@@ -170,7 +170,7 @@ export default async function CartPage({ params }: { params: Promise<{ locale: s
 
           <Link
             href={`/${locale}/shop`}
-            className="text-center text-sm text-muted underline-offset-4 transition-colors hover:text-foreground hover:underline"
+            className="text-center t-small text-muted underline-offset-4 transition-colors hover:text-foreground hover:underline"
           >
             {t.shop.continueShopping}
           </Link>

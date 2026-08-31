@@ -25,16 +25,17 @@ export default async function ShopPage({
     : products
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="shell flex flex-col gap-14 pt-12 sm:pt-16">
       <PageHeader title={t.shop.title} />
 
       {categories.length > 1 && (
-        <nav className="flex flex-wrap gap-2 text-sm">
+        /* Ангилал бол ШҮҮЛТҮҮР, товч биш. Доогуур зураастай текст нь дээд
+           навигацитай нэг дүрэм — сайт даяар «идэвхтэй = зураас». */
+        <nav className="flex flex-wrap items-center gap-x-7 gap-y-3 border-b border-line">
           <Link
             href={`/${locale}/shop`}
-            className={`rounded-lg border px-3 py-1.5 ${
-              search.category ? 'border-line text-foreground-soft' : 'border-accent bg-accent-soft text-accent'
-            }`}
+            aria-current={search.category ? undefined : 'page'}
+            className="nav-item t-small"
           >
             {t.common.all}
           </Link>
@@ -42,11 +43,8 @@ export default async function ShopPage({
             <Link
               key={category}
               href={`/${locale}/shop?category=${encodeURIComponent(category)}`}
-              className={`rounded-lg border px-3 py-1.5 ${
-                search.category === category
-                  ? 'border-accent bg-accent-soft text-accent'
-                  : 'border-line text-foreground-soft'
-              }`}
+              aria-current={search.category === category ? 'page' : undefined}
+              className="nav-item t-small"
             >
               {category}
             </Link>
@@ -57,19 +55,21 @@ export default async function ShopPage({
       {shown.length === 0 ? (
         <Empty>{t.common.empty}</Empty>
       ) : (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-2 gap-x-4 gap-y-12 sm:gap-x-6 lg:grid-cols-4" data-stagger>
           {shown.map((product, index) => (
             <Link
               key={product.id}
               href={`/${locale}/shop/${product.slug}`}
-              className="card card-link flex flex-col gap-4 p-4"
+              className="group flex flex-col gap-4"
+              data-rv
             >
               <div className="relative">
                 <Media
                   src={product.images[0]?.url}
                   alt={loc(product, 'name', locale)}
                   seed={index}
-                  ratio="aspect-square"
+                  ratio="aspect-[4/5]"
+                  sizes="(max-width: 640px) 50vw, 25vw"
                 />
                 {!product.inStock && (
                   <span className="absolute top-3 left-3">
@@ -77,9 +77,11 @@ export default async function ShopPage({
                   </span>
                 )}
               </div>
-              <div className="px-1 pb-1">
-                <p className="font-semibold">{loc(product, 'name', locale)}</p>
-                <p className="mt-1 text-sm text-muted tabular-nums">{formatMnt(product.minPrice)}</p>
+              <div className="flex items-baseline justify-between gap-3 border-t border-line pt-3">
+                <p className="t-small font-medium transition-opacity duration-200 group-hover:opacity-60">
+                  {loc(product, 'name', locale)}
+                </p>
+                <p className="t-meta shrink-0 text-muted">{formatMnt(product.minPrice)}</p>
               </div>
             </Link>
           ))}
