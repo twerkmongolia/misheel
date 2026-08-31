@@ -27,6 +27,7 @@ export type NavIcon =
   | 'menu'
   | 'globe'
   | 'close'
+  | 'shield'
 
 const paths: Record<NavIcon, React.ReactNode> = {
   dashboard: (
@@ -176,6 +177,12 @@ const paths: Record<NavIcon, React.ReactNode> = {
   ),
   menu: <path d="M4 7h16M4 12h16M4 17h16" />,
   close: <path d="m6 6 12 12M18 6 6 18" />,
+  shield: (
+    <>
+      <path d="M12 3.2 5 6v5.6c0 4 2.8 7.6 7 9.2 4.2-1.6 7-5.2 7-9.2V6l-7-2.8Z" />
+      <path d="m9.2 12 2 2 3.6-3.6" />
+    </>
+  ),
   globe: (
     <>
       <circle cx="12" cy="12" r="8.6" />

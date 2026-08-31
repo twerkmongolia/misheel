@@ -22,12 +22,11 @@ const ui = Inter({
 
 /**
  * Цэсийг бүлэглэв — холбоосууд нэг урт багана болвол нүд алдана.
- * Бүлэг бүр нэг ажлын төрлийг хариуцна: хичээл → худалдаа.
- */
-/**
+ * Бүлэг бүр нэг ажлын төрлийг хариуцна: хичээл → худалдаа → тохиргоо.
+ *
  * `tab: true` = утасны доод тааз дээр гарна. Дөрөв нь зориуд — таван зайны
  * тавь дахь нь «Цэс». Өдөр тутам хамгийн олон нээгддэг дөрвийг сонгов;
- * үлдсэн нь (багш, хэрэглэгч) цэсний самбар дотор.
+ * үлдсэн нь (багш, хэрэглэгч, админ) цэсний самбар дотор.
  */
 const groups: NavGroup[] = [
   {
@@ -54,6 +53,12 @@ const groups: NavGroup[] = [
   },
 ]
 
+/** Зөвхөн админд харагдах хэсэг — ажилтан эрх олгож чадахгүй. */
+const adminGroup: NavGroup = {
+  label: 'Тохиргоо',
+  items: [{ href: '/admin/access', label: 'Админ', icon: 'shield' }],
+}
+
 /**
  * Удирдлагын хэсэг хэзээ ч урьдчилан бүтээгдэхгүй — хэрэглэгч бүрд өөр.
  * (cacheComponents унтраалттай тул route segment config ажиллана.)
@@ -69,9 +74,13 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const collapsed = store.get('tm_admin_nav')?.value === '1'
   const scheme = store.get('tm_admin_scheme')?.value === 'dark' ? 'dark' : 'light'
 
+  // Цэсийг эрхээр нь шүүнэ. Хуудас өөрөө ч `requireAdmin()` -тэй тул энэ нь
+  // зөвхөн харагдац — хамгаалалт биш.
+  const nav = profile.role === 'admin' ? [...groups, adminGroup] : groups
+
   return (
     <AdminShell
-      groups={groups}
+      groups={nav}
       profile={{ name: profile.full_name ?? 'Админ', role: profile.role }}
       defaultCollapsed={collapsed}
       defaultScheme={scheme}
