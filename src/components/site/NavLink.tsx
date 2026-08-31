@@ -6,34 +6,32 @@ import { usePathname } from 'next/navigation'
 /**
  * Цэсний холбоос — одоо байгаа хуудсаа тэмдэглэнэ.
  *
- * Өнгөгүй систем тул идэвхтэй төлөвийг бүдэг дүүргэлт болон текстийн
- * тодролоор заана. Хэрэглэгч хаана байгаагаа мэдэхгүй байх нь навигацийн
- * хамгийн түгээмэл дутагдал.
+ * Идэвхтэйг ДҮҮРГЭЛТЭЭР биш ЗУРААСААР заана (§ globals.css `.nav-item`).
+ * Дүүргэлт нь навбарыг товчны эгнээ мэт харагдуулдаг; доогуур зураас нь
+ * «та энд байна» гэдгийг хэлээд, hover дээр баруунаас зүүн тийш татагдаж
+ * ирснээр чиглэл ч бас өгнө.
  */
 export function NavLink({
   href,
   children,
   className = '',
+  exact = false,
 }: {
   href: string
   children: React.ReactNode
   className?: string
+  /** Дэд замуудыг идэвхтэйд тооцохгүй — эцэг таб дээр хэрэгтэй. */
+  exact?: boolean
 }) {
   const pathname = usePathname()
 
   // `/mn` нь зөвхөн яг тэр хуудсанд, бусад нь дэд замуудад ч идэвхтэй
   const segments = href.split('/').filter(Boolean)
   const isHome = segments.length === 1
-  const active = isHome ? pathname === href : pathname.startsWith(href)
+  const active = isHome || exact ? pathname === href : pathname.startsWith(href)
 
   return (
-    <Link
-      href={href}
-      aria-current={active ? 'page' : undefined}
-      className={`${className} ${
-        active ? 'nav-active' : 'text-foreground-soft hover:bg-surface-2 hover:text-foreground'
-      }`}
-    >
+    <Link href={href} aria-current={active ? 'page' : undefined} className={className}>
       {children}
     </Link>
   )
