@@ -3,6 +3,12 @@ import Link from 'next/link'
 import { content, getDictionary, type Locale } from '@/lib/i18n'
 import { getSiteContent } from '@/lib/data'
 
+/**
+ * Хуудасны хөл — сэтгүүлийн colophon.
+ *
+ * Хамгийн доод мөрөнд аварга нэр. Уншихад биш: хуудас дуусахдаа тамга
+ * дардаг. Зурлагаар зурагдсан тул дэвсгэрийг дардаггүй, зөвхөн зааглана.
+ */
 export async function Footer({ locale }: { locale: Locale }) {
   const t = getDictionary(locale)
 
@@ -11,100 +17,111 @@ export async function Footer({ locale }: { locale: Locale }) {
   const info = content(site.get('contact'), locale)
   const hero = content(site.get('hero'), locale)
 
-  const linkClass =
-    'inline-flex w-fit items-center text-foreground-soft transition-colors hover:text-foreground'
-  const headingClass = 'mb-1 text-[11px] font-semibold tracking-[0.2em] text-muted uppercase'
+  const link = 'lnk t-small w-fit text-foreground-soft hover:text-foreground'
 
-  // Сүлжээний холбоосууд — байгаа нь л гарна
-  const socials = [
-    info.instagram && {
-      label: 'Instagram',
-      href: `https://instagram.com/${info.instagram}`,
+  const columns = [
+    {
+      heading: t.nav.menu,
+      items: [
+        { href: `/${locale}/schedule`, label: t.nav.schedule },
+        { href: `/${locale}/classes`, label: t.nav.classes },
+        { href: `/${locale}/shop`, label: t.nav.shop },
+      ],
     },
+    {
+      heading: t.nav.about,
+      items: [
+        { href: `/${locale}/instructors`, label: t.nav.instructors },
+        { href: `/${locale}/gallery`, label: t.nav.gallery },
+        { href: `/${locale}/faq`, label: t.nav.faq },
+      ],
+    },
+  ]
+
+  const socials = [
+    info.instagram && { label: 'Instagram', href: `https://instagram.com/${info.instagram}` },
     info.facebook && { label: 'Facebook', href: String(info.facebook) },
   ].filter(Boolean) as { label: string; href: string }[]
 
   return (
     // Доод самбар хөвж байдаг тул төгсгөлийн мөрүүд түүний ард дарагдахгүйн
     // тулд гар утсанд нэмэлт зай — самбарын өндөр + амьсгал.
-    <footer className="relative mt-28 overflow-hidden border-t border-line pb-24 lg:pb-0">
-      {/* Хуудсын төгсгөлд сүүлчийн гэрэл */}
-      <div className="glow glow-soft -bottom-40 left-1/2 h-72 w-[36rem] -translate-x-1/2" />
+    <footer className="relative mt-32 overflow-hidden border-t border-line pb-24 lg:pb-0">
+      <div className="glow glow-soft -bottom-48 left-1/2 h-80 w-[40rem] -translate-x-1/2" />
 
-      <div className="mx-auto grid w-full max-w-6xl gap-x-8 gap-y-12 px-4 py-16 sm:px-5 sm:grid-cols-2 lg:grid-cols-[1.6fr_1fr_1fr_1.2fr]">
-        <div className="flex flex-col items-start gap-4">
-          <p className="font-display text-lg font-bold tracking-[-0.045em]">Twerk Mongolia</p>
-          <p className="max-w-[30ch] text-sm text-muted">
-            {hero.subtitle ? `${hero.subtitle} · Улаанбаатар` : `${t.brand} · Улаанбаатар`}
+      <div className="shell g12 gap-y-14 pt-20 pb-16">
+        {/* ── Мэдэгдэл ────────────────────────────────────────────────
+            Хөл нь холбоосын хогийн сав биш. Эхлээд ганц өгүүлбэр, дараа нь
+            ганц үйлдэл — ёроолд хүрсэн хүн дээш эргэж гүйлгэх ёсгүй. */}
+        <div className="col-span-12 flex flex-col items-start gap-7 lg:col-span-5" data-rv>
+          <p className="t-h3 max-w-[24ch] text-balance">
+            {hero.subtitle ?? t.brand}
           </p>
-
-          {/* Гол үйлдэл хөлд ч давтагдана — хуудсын ёроолд хүрсэн хүн
-              дээш эргэж гүйлгэх ёсгүй. */}
-          <Link
-            href={`/${locale}/schedule`}
-            className="group mt-1 inline-flex items-center gap-2 rounded-full border border-line-strong px-4 py-2 text-sm font-semibold transition-colors hover:border-foreground hover:bg-surface-2"
-          >
+          <Link href={`/${locale}/schedule`} className="btn btn-line">
             {t.nav.booking}
-            <span aria-hidden className="transition-transform group-hover:translate-x-0.5">
-              →
-            </span>
+            <svg
+              viewBox="0 0 16 16"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="square"
+              aria-hidden="true"
+              className="ico h-3.5 w-3.5"
+            >
+              <path d="M2 8h11M9 4l4 4-4 4" />
+            </svg>
           </Link>
         </div>
 
-        <nav className="flex flex-col gap-2.5 text-sm">
-          <p className={headingClass}>{t.nav.menu}</p>
-          <Link href={`/${locale}/schedule`} className={linkClass}>
-            {t.nav.schedule}
-          </Link>
-          <Link href={`/${locale}/classes`} className={linkClass}>
-            {t.nav.classes}
-          </Link>
-          <Link href={`/${locale}/shop`} className={linkClass}>
-            {t.nav.shop}
-          </Link>
-        </nav>
+        {columns.map((column) => (
+          <nav
+            key={String(column.heading)}
+            className="col-span-6 flex flex-col gap-4 sm:col-span-4 lg:col-span-2"
+            data-rv
+          >
+            <p className="t-label text-faint">{column.heading}</p>
+            <div className="flex flex-col gap-2.5">
+              {column.items.map((item) => (
+                <Link key={item.href} href={item.href} className={link}>
+                  {item.label}
+                </Link>
+              ))}
+            </div>
+          </nav>
+        ))}
 
-        <nav className="flex flex-col gap-2.5 text-sm">
-          <p className={headingClass}>{t.nav.about}</p>
-          <Link href={`/${locale}/instructors`} className={linkClass}>
-            {t.nav.instructors}
-          </Link>
-          <Link href={`/${locale}/gallery`} className={linkClass}>
-            {t.nav.gallery}
-          </Link>
-          <Link href={`/${locale}/faq`} className={linkClass}>
-            {t.nav.faq}
-          </Link>
-        </nav>
+        <address
+          className="col-span-12 flex flex-col gap-4 not-italic sm:col-span-4 lg:col-span-3"
+          data-rv
+        >
+          <p className="t-label text-faint">{t.nav.contact}</p>
 
-        <address className="flex flex-col gap-2.5 text-sm not-italic">
-          <p className={headingClass}>{t.nav.contact}</p>
-          {info.address && <span className="max-w-[26ch] text-muted">{info.address}</span>}
           {info.phone && (
             <a
               href={`tel:${String(info.phone).replace(/\s/g, '')}`}
-              className={`${linkClass} font-display text-lg font-bold tabular-nums`}
+              className="t-h3 w-fit tabular-nums transition-opacity duration-200 hover:opacity-60"
             >
               {info.phone}
             </a>
           )}
           {info.email && (
-            <a href={`mailto:${info.email}`} className={linkClass}>
+            <a href={`mailto:${info.email}`} className={link}>
               {info.email}
             </a>
           )}
+          {info.address && <span className="t-small max-w-[26ch] text-muted">{info.address}</span>}
 
           {socials.length > 0 && (
-            <div className="mt-1 flex flex-wrap gap-2">
+            <div className="mt-1 flex flex-wrap gap-x-5 gap-y-2">
               {socials.map((social) => (
                 <a
                   key={social.label}
                   href={social.href}
                   rel="noreferrer noopener"
                   target="_blank"
-                  className="rounded-full border border-line px-3 py-1.5 text-xs text-foreground-soft transition-colors hover:border-line-strong hover:text-foreground"
+                  className="lnk t-label text-muted hover:text-foreground"
                 >
-                  {social.label} ↗
+                  {social.label}
                 </a>
               ))}
             </div>
@@ -112,33 +129,39 @@ export async function Footer({ locale }: { locale: Locale }) {
         </address>
       </div>
 
-      {/* Аварга тамга — доод ирмэгээсээ зүсэгдэж, хуудас үргэлжилж буй мэдрэмж
-          үлдээнэ. Гоёл тул уншигчид хэрэггүй: `aria-hidden`. */}
-      <div
-        aria-hidden
-        className="pointer-events-none mx-auto max-w-6xl overflow-hidden px-4 pb-2 sm:px-5"
-      >
-        <p className="wordmark">Twerk Mongolia</p>
+      {/* ── Тамга ──────────────────────────────────────────────────────
+          Дэлгэцийн өргөнийг бүтэн дүүргэнэ. `92%` нь захын зайг үлдээж,
+          нэр ирмэгт тулахаас сэргийлнэ — нэр нь зүсэгдэхгүй, багтана. */}
+      <div aria-hidden className="shell overflow-hidden pb-4">
+        <p
+          className="font-display leading-[0.76] font-medium tracking-[-0.055em] whitespace-nowrap text-transparent select-none"
+          style={{
+            fontSize: 'min(12.6vw, 11rem)',
+            WebkitTextStroke: '1px var(--line-strong)',
+          }}
+        >
+          Twerk Mongolia
+        </p>
       </div>
 
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 border-t border-line/60 px-4 py-6 sm:flex-row sm:items-center sm:justify-between sm:px-5">
-        <p className="text-xs text-muted">© {new Date().getFullYear()} Twerk Mongolia</p>
+      <div className="shell flex flex-col gap-4 border-t border-line py-6 sm:flex-row sm:items-center sm:justify-between">
+        <p className="t-meta text-faint">© {new Date().getFullYear()} Twerk Mongolia</p>
 
         <a
           href="https://tsstark.com"
           target="_blank"
           rel="noreferrer noopener"
-          className="group flex items-center gap-2 text-xs text-muted transition-colors hover:text-foreground"
+          className="group flex items-center gap-2 text-faint transition-colors duration-200 hover:text-foreground"
         >
-          powered by
+          <span className="t-meta">powered by</span>
           <Image
             src="/media/tsstark-logo.png"
             alt=""
             width={264}
             height={264}
-            className="logo-invert h-6 w-6 opacity-80 transition-opacity group-hover:opacity-100"
+            className="logo-invert h-5 w-5 opacity-70 transition-opacity duration-200 group-hover:opacity-100"
           />
-          <span className="font-medium">TS Stark</span>
+          <span className="t-meta font-semibold">TS Stark</span>
         </a>
       </div>
     </footer>
