@@ -547,6 +547,7 @@ export async function setUserRole(formData: FormData): Promise<void> {
   }
 
   revalidatePath('/admin/customers')
-  redirect('/admin/customers?ok=1')
+  // Цонх байсан газраа эргэж нээгдэнэ (§ components/admin/CustomerTable.tsx)
+  redirect(`/admin/customers?ok=1${id.success ? `&open=${id.data}` : ''}`)
 }
 

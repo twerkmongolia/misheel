@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, type ReactNode } from 'react'
-import { AdminIcon } from './AdminIcon'
+import { DialogFrame } from './Dialog'
 
 /**
  * Карт → харилцах цонх.
@@ -48,33 +48,13 @@ export function CardDialog({
         {card}
       </button>
 
-      <dialog
-        ref={ref}
-        className="admin-dialog"
-        // Бүрхүүл дээр дарахад хаана. `<dialog>` өөрөө дэвсгэрээ ч хамруулж
-        // мэдэрдэг тул зорилт нь цонх өөрөө эсэхийг шалгана.
-        onClick={(event) => {
+      <dialog ref={ref} className="admin-dialog" onClick={(event) => {
+          // Бүрхүүл дээр дарахад хаана — `<dialog>` дэвсгэрээ ч өөртөө тооцдог
           if (event.target === ref.current) ref.current?.close()
-        }}
-      >
-        <div className="flex max-h-[inherit] flex-col">
-          <div className="flex shrink-0 items-center gap-3 border-b border-line px-5 py-3.5">
-            <div className="min-w-0">
-              <h2 className="truncate text-sm font-semibold">{title}</h2>
-              {subtitle && <p className="truncate text-xs text-muted">{subtitle}</p>}
-            </div>
-            <button
-              type="button"
-              onClick={() => ref.current?.close()}
-              aria-label="Хаах"
-              className="ml-auto grid h-9 w-9 shrink-0 place-items-center rounded-lg text-muted transition-colors hover:bg-surface-2 hover:text-foreground"
-            >
-              <AdminIcon name="close" className="h-[18px] w-[18px]" />
-            </button>
-          </div>
-
-          <div className="min-h-0 flex-1 overflow-y-auto p-5">{children}</div>
-        </div>
+        }}>
+        <DialogFrame title={title} subtitle={subtitle} onClose={() => ref.current?.close()}>
+          {children}
+        </DialogFrame>
       </dialog>
     </>
   )
