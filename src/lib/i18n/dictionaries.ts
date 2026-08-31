@@ -123,6 +123,13 @@ const mn = {
     students: 'сурагч',
     years: 'жил',
     weekly: 'долоо хоног бүрийн хичээл',
+    // Бүлэг бүрийн дэд гарчиг — гарчгийн хажууд суух нэг өгүүлбэр.
+    scheduleNote: 'Суудал урьдчилан захиалснаар баталгаажна. Долоо хоног бүр шинэчлэгдэнэ.',
+    classesNote: 'Анхан шатнаас ахисан түвшин хүртэл. Аль ч цэгээс эхэлж болно.',
+    instructorsNote: 'Заалыг хөтөлдөг хүмүүс. Хичээл бүр тэдний нэгэнтэй холбоотой.',
+    videosNote: 'Заалны уур амьсгалыг үг хэлж чадахгүй — хөдөлгөөнийг харна уу.',
+    shopNote: 'Дасгалд зориулсан хувцас, хэрэгсэл. Заалнаас эсвэл хүргэлтээр.',
+    scroll: 'Гүйлгэ',
   },
   schedule: {
     title: 'Хичээлийн хуваарь',
@@ -385,6 +392,12 @@ const en: Dictionary = {
     students: 'students',
     years: 'years',
     weekly: 'classes every week',
+    scheduleNote: 'Your seat is confirmed once you book. Updated every week.',
+    classesNote: 'From absolute beginner to advanced. Start wherever you are.',
+    instructorsNote: 'The people who lead the room. Every class belongs to one of them.',
+    videosNote: 'Words cannot carry the feeling of the room — watch the movement.',
+    shopNote: 'Clothing and gear made for practice. In studio or delivered.',
+    scroll: 'Scroll',
   },
   schedule: {
     title: 'Class schedule',
