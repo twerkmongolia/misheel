@@ -9,8 +9,11 @@ import type { SessionView } from '@/lib/data'
  * Хуваарийн нэгж хайрцаг.
  *
  * Харааны гол цэг нь ЦАГ — сурагч эхлээд «хэдэн цагт вэ» гэдгийг хардаг,
- * дараа нь хичээлийн нэрийг. Тиймээс цаг нь том display үсгээр, нэр нь
- * доор нь энгийн жинтэй.
+ * дараа нь хичээлийн нэрийг. Тиймээс цаг нь том serif -ээр, нэр нь доор
+ * нь grotesque -ээр: хоёр өөр дуу хоолой = хоёр өөр төрлийн мэдээлэл.
+ *
+ * Зүүн ирмэгийн зураас нь hover дээр дээрээс доош татагдана — олон хайрцаг
+ * зэрэгцэхэд аль нь гарын доор байгааг өнгөгүйгээр заана.
  */
 export function SessionCard({
   session,
@@ -31,32 +34,30 @@ export function SessionCard({
 
   return (
     <article
-      className={`card card-link group relative flex flex-col gap-5 overflow-hidden p-6 ${
-        dimmed ? 'opacity-55' : ''
+      data-rv
+      className={`card card-link group relative flex flex-col gap-6 overflow-hidden p-6 sm:p-7 ${
+        dimmed ? 'opacity-50' : ''
       }`}
     >
-      {/* Зүүн ирмэгийн зураас — hover дээр дээрээс доош татагдана. Хайрцаг
-          олон байхад аль нь гарын доор байгааг өнгөгүйгээр хэлнэ. */}
       {!dimmed && (
         <span
           aria-hidden
-          className="absolute top-0 bottom-0 left-0 w-[2px] origin-top scale-y-0 bg-foreground transition-transform duration-300 ease-out group-hover:scale-y-100"
+          className="absolute top-0 bottom-0 left-0 w-px origin-top scale-y-0 bg-foreground transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-y-100"
         />
       )}
 
-      <div className="flex items-start justify-between gap-3">
+      <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <p className="text-[11px] font-semibold tracking-[0.18em] text-muted uppercase">
-            {weekdayShort(session.starts_at, locale)} · {formatDate(session.starts_at, locale)}
+          <p className="t-label text-muted">
+            {weekdayShort(session.starts_at, locale)}
+            <span className="text-faint"> · </span>
+            {formatDate(session.starts_at, locale)}
           </p>
-          {/* Цаг ба «хүртэл» -ийг нэг суурь дээр — эхлэл нь том, төгсгөл нь жижиг */}
-          <p className="mt-2 flex items-baseline gap-2">
-            <span className="font-display text-[2.6rem] leading-none font-bold tracking-[-0.045em] tabular-nums">
-              {formatTime(session.starts_at)}
-            </span>
-            <span className="text-xs text-muted tabular-nums">
-              → {formatTime(session.ends_at)}
-            </span>
+          {/* `whitespace-nowrap` — эхлэх ба дуусах цаг хоёр мөр болж хуваагдвал
+              цаг нь нэг тоо биш, хоёр тусдаа зүйл мэт уншигдана. */}
+          <p className="mt-3 flex items-baseline gap-2.5 whitespace-nowrap">
+            <span className="t-num text-[2.5rem]">{formatTime(session.starts_at)}</span>
+            <span className="t-meta text-muted">→ {formatTime(session.ends_at)}</span>
           </p>
         </div>
 
@@ -73,36 +74,31 @@ export function SessionCard({
         )}
       </div>
 
-      <div className="min-w-0 border-t border-line pt-4">
-        {/* Бүтэн хайрцгийг дарж болно — холбоос нь өөрөө дээр нь тархана */}
+      <div className="min-w-0 border-t border-line pt-5">
         <Link
           href={`/${locale}/schedule/${session.id}`}
-          className="text-lg font-semibold transition-colors before:absolute before:inset-0 before:content-[''] hover:text-foreground"
+          className="t-h3 before:absolute before:inset-0 before:content-['']"
         >
           {session.classType ? loc(session.classType, 'name', locale) : '—'}
         </Link>
-        <p className="mt-1.5 text-sm text-muted">
+        <p className="t-small mt-1.5 text-muted">
           {session.instructor?.name ?? '—'}
           {session.location ? ` · ${session.location.name}` : ''}
         </p>
         {session.classType && (
-          <p className="mt-0.5 text-xs text-muted">{t.level[session.classType.level]}</p>
+          <p className="t-meta mt-1 text-faint">{t.level[session.classType.level]}</p>
         )}
       </div>
 
-      <div className="mt-auto flex items-center justify-between gap-3 border-t border-line/60 pt-4">
-        <span className="font-display text-base font-bold tabular-nums">
-          {formatMnt(session.price)}
-        </span>
+      <div className="mt-auto flex items-center justify-between gap-4 border-t border-line pt-5">
+        <span className="t-small font-semibold tabular-nums">{formatMnt(session.price)}</span>
 
         {!dimmed && !booked && !full && (
-          /* Форм нь хайрцгийн холбоосын ДЭЭР байх ёстой — эс тэгвэл товч дарахад
-             дэлгэрэнгүй хуудас руу үсэрнэ. */
           <form action={bookSession} className="relative z-10">
             <input type="hidden" name="session_id" value={session.id} />
             <input type="hidden" name="locale" value={locale} />
             {back && <input type="hidden" name="back" value={back} />}
-            <Button type="submit" className="px-4 py-2">
+            <Button type="submit" variant="secondary" className="btn-sm">
               {t.schedule.book}
             </Button>
           </form>
