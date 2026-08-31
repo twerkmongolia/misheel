@@ -48,35 +48,80 @@ export async function Header({ locale }: { locale: Locale }) {
     { href: `/${locale}/faq`, label: t.nav.faq },
   ]
 
-  const linkClass = 'rounded-full px-4 py-2 text-sm transition-colors'
+  const linkClass = 'rounded-full px-3.5 py-1.5 text-sm transition-colors'
   const sheetButton =
     'flex h-12 items-center justify-center rounded-full px-5 text-[15px] font-semibold transition-colors'
 
   return (
     <>
       <HeaderShell>
-        <div className="mx-auto flex h-16 w-full max-w-6xl items-center gap-3 px-4 sm:px-5">
+        <div className="mx-auto flex h-[4.25rem] w-full max-w-6xl items-center gap-3 px-4 sm:px-5">
           <Link
             href={`/${locale}`}
-            className="font-display text-base font-bold tracking-[-0.045em] whitespace-nowrap transition-opacity hover:opacity-70"
+            aria-label={t.brand}
+            className="group flex items-center gap-2.5 whitespace-nowrap"
           >
-            Twerk Mongolia
+            {/* Тамга — үсэггүй дүрс. Логоны хажууд байрлаж, гар утсанд ганцаараа
+                ч танигдана. Дөрвөлжинд бичсэн «Т» биш, хоёр давхар нуман зураас:
+                хөдөлгөөний давталтыг илэрхийлнэ. */}
+            <span
+              aria-hidden
+              className="grid h-7 w-7 shrink-0 place-items-center rounded-[0.6rem] border border-line-strong text-foreground transition-colors group-hover:border-foreground"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.9"
+                strokeLinecap="round"
+                className="h-[15px] w-[15px]"
+              >
+                <path d="M5 8.5c2.2-3 4.6-3 6.8 0s4.6 3 6.8 0M5 15.5c2.2-3 4.6-3 6.8 0s4.6 3 6.8 0" />
+              </svg>
+            </span>
+            <span className="font-display text-base font-bold tracking-[-0.045em] transition-opacity group-hover:opacity-70">
+              Twerk Mongolia
+            </span>
           </Link>
 
-          <nav className="hidden flex-1 items-center justify-center gap-0.5 lg:flex">
-            {primary.map((item) => (
-              <NavLink key={item.href} href={item.href} className={linkClass}>
-                {item.label}
-              </NavLink>
-            ))}
+          {/* Цэс нэг тавиур дотор — идэвхтэй зүйл нь дэвсгэрээс өргөгдөж,
+              холбоосууд салангид биш НЭГ хяналт мэт уншигдана. */}
+          <nav className="hidden flex-1 justify-center lg:flex">
+            <div className="flex items-center gap-0.5 rounded-full border border-line bg-surface/50 p-1 backdrop-blur-sm">
+              {primary.map((item) => (
+                <NavLink key={item.href} href={item.href} className={linkClass}>
+                  {item.label}
+                </NavLink>
+              ))}
+            </div>
           </nav>
 
           {/* Дэлгэц өргөн үед — бүх зүйл мөрөндөө багтана */}
-          <div className="ml-auto hidden items-center gap-1.5 lg:ml-0 lg:flex">
+          <div className="ml-auto hidden items-center gap-1 lg:ml-0 lg:flex">
             <ThemeToggle label={t.nav.theme} className="h-9 w-9" />
             <LocaleSwitch current={locale} />
 
-            <NavLink href={`/${locale}/cart`} className={`${linkClass} flex items-center gap-1.5`}>
+            {/* Тохиргоо ⇄ хэрэглэгчийн үйлдлийг тусгаарлана */}
+            <span aria-hidden className="mx-1.5 h-5 w-px bg-line" />
+
+            <NavLink
+              href={`/${locale}/cart`}
+              className={`${linkClass} flex items-center gap-1.5 pl-3`}
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.6"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-4 w-4"
+                aria-hidden="true"
+              >
+                <path d="M3 4.5h2.2l2.3 10.6h9.4l2.1-7.6H6.4" />
+                <circle cx="9.5" cy="19" r="1.4" />
+                <circle cx="16.5" cy="19" r="1.4" />
+              </svg>
               {t.nav.cart}
               {count > 0 && (
                 <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-foreground px-1.5 text-[11px] font-bold text-background tabular-nums">
@@ -86,11 +131,11 @@ export async function Header({ locale }: { locale: Locale }) {
             </NavLink>
 
             {profile ? (
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1">
                 {staff && (
                   <Link
                     href="/admin"
-                    className="rounded-full border border-line-strong px-4 py-1.5 text-sm text-foreground-soft transition-colors hover:border-foreground hover:text-foreground"
+                    className="rounded-full border border-line-strong px-3.5 py-1.5 text-sm text-foreground-soft transition-colors hover:border-foreground hover:text-foreground"
                   >
                     {t.nav.admin}
                   </Link>
@@ -111,9 +156,12 @@ export async function Header({ locale }: { locale: Locale }) {
             ) : (
               <Link
                 href={`/${locale}/login`}
-                className="rounded-full bg-button px-5 py-2 text-sm font-semibold text-button-ink transition-all hover:brightness-90"
+                className="group ml-0.5 inline-flex items-center gap-1.5 rounded-full bg-button px-5 py-2 text-sm font-semibold text-button-ink transition-all hover:brightness-90"
               >
                 {t.nav.login}
+                <span aria-hidden className="transition-transform group-hover:translate-x-0.5">
+                  →
+                </span>
               </Link>
             )}
           </div>

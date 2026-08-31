@@ -20,7 +20,11 @@ const variants: Record<Variant, string> = {
 
 const base =
   'inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold ' +
-  'transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-40'
+  'transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-40 ' +
+  // Hover дээр өчүүхэн өргөгдөж, дарахад суух — хуруунд хариу мэдрэгдэнэ.
+  // Идэвхгүй товч хөдлөх ёсгүй: дарагдахгүй гэдгээ хөдөлгөөнөөрөө ч хэлнэ.
+  'hover:-translate-y-px active:translate-y-0 active:scale-[0.97] ' +
+  'disabled:transform-none disabled:hover:translate-y-0'
 
 export function Button({
   variant = 'primary',
@@ -62,12 +66,19 @@ export function Section({
   className?: string
 }) {
   return (
-    <section className={`flex flex-col gap-6 ${className}`}>
+    <section className={`flex flex-col gap-7 ${className}`}>
       {(title || action) && (
-        <div className="flex flex-col gap-3">
-          {eyebrow && <Eyebrow>{eyebrow}</Eyebrow>}
-          <div className="flex flex-wrap items-end justify-between gap-3">
-            {title && <h2 className="text-2xl font-bold sm:text-3xl">{title}</h2>}
+        <div className="flex flex-col gap-3.5">
+          {/* Эйброуг богино зураас дагалдана — гарчгийн блок хаанаас
+              эхэлж байгааг нүд шууд олно. */}
+          {eyebrow && (
+            <div className="flex items-center gap-3">
+              <span aria-hidden className="h-px w-7 shrink-0 bg-line-strong" />
+              <Eyebrow>{eyebrow}</Eyebrow>
+            </div>
+          )}
+          <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
+            {title && <h2 className="text-3xl font-bold sm:text-4xl">{title}</h2>}
             {action}
           </div>
           <div className="rule" />
@@ -169,8 +180,15 @@ export function Alert({
 
 export function Empty({ children }: { children: ReactNode }) {
   return (
-    <div className="rounded-3xl border border-dashed border-line px-6 py-16 text-center text-sm text-muted">
-      {children}
+    <div className="flex flex-col items-center gap-3 rounded-3xl border border-dashed border-line px-6 py-20 text-center">
+      {/* Хоосон байдлыг ХЭЛБЭРЭЭР заана — тасархай тойрог, дотор нь зураас */}
+      <span
+        aria-hidden
+        className="grid h-10 w-10 place-items-center rounded-full border border-dashed border-line-strong text-muted"
+      >
+        <span className="h-px w-3.5 bg-current" />
+      </span>
+      <span className="max-w-[40ch] text-sm text-muted">{children}</span>
     </div>
   )
 }
