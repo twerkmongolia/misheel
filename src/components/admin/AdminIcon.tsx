@@ -16,6 +16,17 @@ export type NavIcon =
   | 'percent'
   | 'wallet'
   | 'clock'
+  | 'plus'
+  | 'search'
+  | 'trash'
+  | 'image'
+  | 'info'
+  | 'alert'
+  | 'success'
+  | 'inbox'
+  | 'menu'
+  | 'globe'
+  | 'close'
 
 const paths: Record<NavIcon, React.ReactNode> = {
   dashboard: (
@@ -114,6 +125,62 @@ const paths: Record<NavIcon, React.ReactNode> = {
     <>
       <circle cx="12" cy="12" r="8.5" />
       <path d="M12 7.2V12l3.2 1.9" />
+    </>
+  ),
+  plus: <path d="M12 5v14M5 12h14" />,
+  search: (
+    <>
+      <circle cx="10.8" cy="10.8" r="6.3" />
+      <path d="m15.4 15.4 4.1 4.1" />
+    </>
+  ),
+  trash: (
+    <>
+      <path d="M4.5 6.5h15M9.5 6.5V4.8a1.3 1.3 0 0 1 1.3-1.3h2.4a1.3 1.3 0 0 1 1.3 1.3v1.7" />
+      <path d="M6.5 6.5 7.4 19a1.6 1.6 0 0 0 1.6 1.5h6a1.6 1.6 0 0 0 1.6-1.5l.9-12.5" />
+      <path d="M10.3 10v6.5M13.7 10v6.5" />
+    </>
+  ),
+  image: (
+    <>
+      <rect x="3.5" y="4.5" width="17" height="15" rx="2.5" />
+      <circle cx="9" cy="9.6" r="1.6" />
+      <path d="m4.4 17.2 4.4-4.3a2 2 0 0 1 2.7-.1l5.2 4.4M14.6 14l1.6-1.5a2 2 0 0 1 2.7 0l1.6 1.4" />
+    </>
+  ),
+  info: (
+    <>
+      <circle cx="12" cy="12" r="8.6" />
+      <path d="M12 11.2v5" />
+      <path d="M12 7.9h.01" />
+    </>
+  ),
+  alert: (
+    <>
+      <path d="M10.6 4.2 2.9 17.5a1.6 1.6 0 0 0 1.4 2.4h15.4a1.6 1.6 0 0 0 1.4-2.4L13.4 4.2a1.6 1.6 0 0 0-2.8 0Z" />
+      <path d="M12 9.4v4.2" />
+      <path d="M12 16.8h.01" />
+    </>
+  ),
+  success: (
+    <>
+      <circle cx="12" cy="12" r="8.6" />
+      <path d="m8.4 12.2 2.4 2.4 4.8-4.9" />
+    </>
+  ),
+  inbox: (
+    <>
+      <path d="M3.5 13.5h4l1.4 2.4h6.2l1.4-2.4h4" />
+      <path d="M6.1 4.5h11.8a2 2 0 0 1 1.9 1.4l1.7 6.2v5.4a2.5 2.5 0 0 1-2.5 2.5H5a2.5 2.5 0 0 1-2.5-2.5v-5.4l1.7-6.2a2 2 0 0 1 1.9-1.4Z" />
+    </>
+  ),
+  menu: <path d="M4 7h16M4 12h16M4 17h16" />,
+  close: <path d="m6 6 12 12M18 6 6 18" />,
+  globe: (
+    <>
+      <circle cx="12" cy="12" r="8.6" />
+      <path d="M3.6 9.5h16.8M3.6 14.5h16.8" />
+      <path d="M12 3.4c-4.2 4.6-4.2 12.6 0 17.2 4.2-4.6 4.2-12.6 0-17.2Z" />
     </>
   ),
 }

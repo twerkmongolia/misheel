@@ -2,19 +2,6 @@ import 'server-only'
 
 import { createClient } from '@/lib/supabase/server'
 import { isSupabaseConfigured } from '@/lib/supabase/env'
-import {
-  demoClassTypes,
-  demoEnabled,
-  demoFaq,
-  demoGallery,
-  demoInstructors,
-  demoLocations,
-  getDemoProductImages,
-  demoProducts,
-  demoSessionsBetween,
-  demoSiteContent,
-  demoVariants,
-} from '@/lib/demo-data'
 import type {
   ClassSession,
   ClassType,
@@ -68,7 +55,6 @@ function attach(
 }
 
 export async function getSiteContent(keys: string[]): Promise<Map<string, SiteContent>> {
-  if (demoEnabled()) return demoSiteContent(keys)
   if (!isSupabaseConfigured()) return new Map()
 
   const supabase = await createClient()
@@ -77,7 +63,6 @@ export async function getSiteContent(keys: string[]): Promise<Map<string, SiteCo
 }
 
 export async function getClassTypes(includeInactive = false): Promise<ClassType[]> {
-  if (demoEnabled()) return demoClassTypes
   if (!isSupabaseConfigured()) return []
 
   const supabase = await createClient()
@@ -89,7 +74,6 @@ export async function getClassTypes(includeInactive = false): Promise<ClassType[
 }
 
 export async function getInstructors(includeInactive = false): Promise<Instructor[]> {
-  if (demoEnabled()) return demoInstructors
   if (!isSupabaseConfigured()) return []
 
   const supabase = await createClient()
@@ -101,7 +85,6 @@ export async function getInstructors(includeInactive = false): Promise<Instructo
 }
 
 export async function getLocations(): Promise<Location[]> {
-  if (demoEnabled()) return demoLocations
   if (!isSupabaseConfigured()) return []
 
   const supabase = await createClient()
@@ -111,9 +94,6 @@ export async function getLocations(): Promise<Location[]> {
 
 /** Хуваарийн хуудсанд: тухайн хугацаанд багтах бүх хичээл. */
 export async function getSessionsBetween(from: Date, to: Date): Promise<SessionView[]> {
-  if (demoEnabled()) {
-    return attach(demoSessionsBetween(from, to), demoClassTypes, demoInstructors, demoLocations)
-  }
   if (!isSupabaseConfigured()) return []
 
   const supabase = await createClient()
@@ -134,16 +114,6 @@ export async function getSessionsBetween(from: Date, to: Date): Promise<SessionV
 
 /** Нүүр хуудсанд: ойрын хичээлүүд. */
 export async function getUpcomingSessions(limit = 6): Promise<SessionView[]> {
-  if (demoEnabled()) {
-    const from = new Date()
-    const to = new Date(from.getTime() + 28 * 24 * 60 * 60 * 1000)
-    return attach(
-      demoSessionsBetween(from, to),
-      demoClassTypes,
-      demoInstructors,
-      demoLocations,
-    ).slice(0, limit)
-  }
   if (!isSupabaseConfigured()) return []
 
   const supabase = await createClient()
@@ -164,14 +134,6 @@ export async function getUpcomingSessions(limit = 6): Promise<SessionView[]> {
 }
 
 export async function getSession(id: string): Promise<SessionView | null> {
-  if (demoEnabled()) {
-    // Өнгөрсөн/ирээдүйн аль ч хичээлийг олохын тулд өргөн хугацаа шүүнэ
-    const from = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000)
-    const to = new Date(Date.now() + 90 * 24 * 60 * 60 * 1000)
-    const found = demoSessionsBetween(from, to).find((session) => session.id === id)
-    if (!found) return null
-    return attach([found], demoClassTypes, demoInstructors, demoLocations)[0] ?? null
-  }
   if (!isSupabaseConfigured()) return null
 
   const supabase = await createClient()
@@ -233,7 +195,6 @@ function buildProducts(
 }
 
 export async function getProducts(includeInactive = false): Promise<ProductView[]> {
-  if (demoEnabled()) return buildProducts(demoProducts, getDemoProductImages(), demoVariants)
   if (!isSupabaseConfigured()) return []
 
   const supabase = await createClient()
@@ -253,11 +214,6 @@ export async function getProducts(includeInactive = false): Promise<ProductView[
 }
 
 export async function getProductBySlug(slug: string): Promise<ProductView | null> {
-  if (demoEnabled()) {
-    const product = demoProducts.find((item) => item.slug === slug)
-    if (!product) return null
-    return buildProducts([product], getDemoProductImages(), demoVariants)[0] ?? null
-  }
   if (!isSupabaseConfigured()) return null
 
   const supabase = await createClient()
@@ -277,17 +233,6 @@ export async function getVariantsWithProduct(
   variantIds: string[],
 ): Promise<{ variant: ProductVariant; product: Product; image: ProductImage | null }[]> {
   if (variantIds.length === 0) return []
-
-  if (demoEnabled()) {
-    return variantIds.flatMap((id) => {
-      const variant = demoVariants.find((item) => item.id === id)
-      if (!variant) return []
-      const product = demoProducts.find((item) => item.id === variant.product_id)
-      if (!product) return []
-      const image = getDemoProductImages().find((item) => item.product_id === product.id) ?? null
-      return [{ variant, product, image }]
-    })
-  }
 
   if (!isSupabaseConfigured()) return []
 
@@ -312,7 +257,6 @@ export async function getVariantsWithProduct(
 }
 
 export async function getGallery(): Promise<GalleryItem[]> {
-  if (demoEnabled()) return demoGallery
   if (!isSupabaseConfigured()) return []
 
   const supabase = await createClient()
@@ -321,7 +265,6 @@ export async function getGallery(): Promise<GalleryItem[]> {
 }
 
 export async function getFaq(): Promise<FaqItem[]> {
-  if (demoEnabled()) return demoFaq
   if (!isSupabaseConfigured()) return []
 
   const supabase = await createClient()

@@ -32,7 +32,13 @@ async function audit(action: string, entity: string, entityId: string | null, di
 /* ── Хуваарь ───────────────────────────────────────────────────────────── */
 
 const sessionSchema = z.object({
-  class_type_id: uuid,
+  // `new` = хуваариа үүсгэхийн зэрэгцээ шинэ хичээлийн төрөл бий болгоно
+  class_type_id: uuid.or(z.literal('new')),
+  new_name_mn: z.string().trim().max(120).optional().default(''),
+  new_name_en: z.string().trim().max(120).optional().default(''),
+  new_desc_mn: z.string().trim().max(2000).optional().default(''),
+  new_desc_en: z.string().trim().max(2000).optional().default(''),
+  new_level: z.enum(['beginner', 'intermediate', 'advanced']).optional().default('beginner'),
   instructor_id: uuid.or(z.literal('')).transform((value) => value || null),
   location_id: uuid.or(z.literal('')).transform((value) => value || null),
   // datetime-local нь бүсийн мэдээлэлгүй ирдэг — УБ-ын цагаар гэж үзнэ.
@@ -49,6 +55,74 @@ function ulaanbaatarToIso(local: string): string {
   return new Date(`${local}:00+08:00`).toISOString()
 }
 
+/* ── Хаягийн мөр (slug) ────────────────────────────────────────────────────
+   `slug` бол нийтийн хуудасны хаяг: `/mn/shop/crop-top`. Ажилтанд утгагүй
+   техникийн талбар бөгөөд буруу бичвэл (кирилл, зай, том үсэг) хаяг эвдэрдэг
+   тул ХЭЗЭЭ Ч гараар бөглүүлэхгүй — нэрнээс нь өөрөө үүснэ. */
+
+const CYRILLIC: Record<string, string> = {
+  а: 'a', б: 'b', в: 'v', г: 'g', д: 'd', е: 'ye', ё: 'yo', ж: 'j', з: 'z', и: 'i',
+  й: 'i', к: 'k', л: 'l', м: 'm', н: 'n', о: 'o', ө: 'o', п: 'p', р: 'r', с: 's',
+  т: 't', у: 'u', ү: 'u', ф: 'f', х: 'h', ц: 'ts', ч: 'ch', ш: 'sh', щ: 'sh',
+  ъ: '', ы: 'y', ь: '', э: 'e', ю: 'yu', я: 'ya',
+}
+
+function slugify(name: string): string {
+  return (
+    name
+      .toLowerCase()
+      .split('')
+      .map((char) => CYRILLIC[char] ?? char)
+      .join('')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '') || 'zuil'
+  )
+}
+
+/** Нэрнээс slug гаргаад, давхцвал ард нь дугаар залгана (`saraa`, `saraa-2`). */
+async function uniqueSlug(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  table: 'class_types' | 'products' | 'instructors',
+  name: string,
+): Promise<string> {
+  const base = slugify(name)
+  const { data } = await supabase.from(table).select('slug').like('slug', `${base}%`)
+  const used = new Set((data ?? []).map((row) => row.slug))
+
+  let slug = base
+  for (let n = 2; used.has(slug); n += 1) slug = `${base}-${n}`
+  return slug
+}
+
+/** Шинэ хичээлийн төрлийг үүсгээд id-г нь буцаана. */
+async function createClassTypeFrom(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  input: {
+    name_mn: string
+    name_en: string
+    desc_mn: string
+    desc_en: string
+    level: 'beginner' | 'intermediate' | 'advanced'
+    duration_min: number
+    base_price: number
+  },
+): Promise<string | null> {
+  const slug = await uniqueSlug(supabase, 'class_types', input.name_mn)
+
+  const { data, error } = await supabase
+    .from('class_types')
+    .insert({ ...input, slug })
+    .select('id')
+    .single()
+
+  if (error || !data) {
+    redirect(`/admin/schedule?error=${encodeURIComponent(error?.message ?? 'Хичээл үүсгэж чадсангүй')}`)
+  }
+
+  await audit('class_type.create', 'class_types', data.id, { slug })
+  return data.id
+}
+
 export async function createSessions(formData: FormData): Promise<void> {
   await requireStaff()
 
@@ -61,10 +135,29 @@ export async function createSessions(formData: FormData): Promise<void> {
   const startsAt = ulaanbaatarToIso(input.starts_at)
   const supabase = await createClient()
 
+  // Шинэ хичээл сонгосон бол ЭХЛЭЭД төрлийг үүсгэнэ — хуваарь түүнээс хамаарна.
+  let classTypeId = input.class_type_id
+  if (classTypeId === 'new') {
+    if (!input.new_name_mn) {
+      redirect(`/admin/schedule?error=${encodeURIComponent('Шинэ хичээлийн нэрийг бөглөнө үү')}`)
+    }
+    const created = await createClassTypeFrom(supabase, {
+      name_mn: input.new_name_mn,
+      name_en: input.new_name_en,
+      desc_mn: input.new_desc_mn,
+      desc_en: input.new_desc_en,
+      level: input.new_level,
+      duration_min: input.duration_min,
+      base_price: input.price,
+    })
+    classTypeId = created as string
+    revalidatePath('/', 'layout')
+  }
+
   if (input.weeks > 1) {
     // Давтагдах цувралыг DB функц үүсгэнэ — цагийн тооцоо нэг газарт.
     const { error } = await supabase.rpc('create_session_series', {
-      p_class_type_id: input.class_type_id,
+      p_class_type_id: classTypeId,
       p_instructor_id: input.instructor_id,
       p_location_id: input.location_id,
       p_first_start: startsAt,
@@ -79,7 +172,7 @@ export async function createSessions(formData: FormData): Promise<void> {
   } else {
     const endsAt = new Date(new Date(startsAt).getTime() + input.duration_min * 60_000).toISOString()
     const { error } = await supabase.from('class_sessions').insert({
-      class_type_id: input.class_type_id,
+      class_type_id: classTypeId,
       instructor_id: input.instructor_id,
       location_id: input.location_id,
       starts_at: startsAt,
@@ -122,55 +215,6 @@ export async function cancelSession(formData: FormData): Promise<void> {
   redirect('/admin/schedule?ok=1')
 }
 
-/* ── Ирц ───────────────────────────────────────────────────────────────── */
-
-export async function markAttendance(formData: FormData): Promise<void> {
-  await requireStaff()
-
-  const id = uuid.safeParse(formData.get('booking_id'))
-  const status = z.enum(['attended', 'no_show', 'confirmed']).safeParse(formData.get('status'))
-  const sessionId = String(formData.get('session_id') ?? '')
-
-  if (id.success && status.success) {
-    const supabase = await createClient()
-    await supabase.from('bookings').update({ status: status.data }).eq('id', id.data)
-    await audit('booking.attendance', 'bookings', id.data, { status: status.data })
-  }
-
-  revalidatePath('/admin/bookings')
-  redirect(`/admin/bookings${sessionId ? `?session=${sessionId}` : ''}`)
-}
-
-/* ── Хичээлийн төрөл ───────────────────────────────────────────────────── */
-
-const classTypeSchema = z.object({
-  slug: z.string().trim().regex(/^[a-z0-9-]+$/, 'slug нь зөвхөн a-z, 0-9, - байна'),
-  name_mn: z.string().trim().min(2),
-  name_en: z.string().trim().default(''),
-  desc_mn: z.string().trim().default(''),
-  desc_en: z.string().trim().default(''),
-  level: z.enum(['beginner', 'intermediate', 'advanced']),
-  duration_min: z.coerce.number().int().min(15).max(300),
-  base_price: z.coerce.number().int().min(0),
-})
-
-export async function createClassType(formData: FormData): Promise<void> {
-  await requireStaff()
-
-  const parsed = classTypeSchema.safeParse(Object.fromEntries(formData))
-  if (!parsed.success) {
-    redirect(`/admin/classes?error=${encodeURIComponent(parsed.error.issues[0]?.message ?? 'invalid')}`)
-  }
-
-  const supabase = await createClient()
-  const { error } = await supabase.from('class_types').insert(parsed.data)
-  if (error) redirect(`/admin/classes?error=${encodeURIComponent(error.message)}`)
-
-  await audit('class_type.create', 'class_types', null, { slug: parsed.data.slug })
-  revalidatePath('/admin/classes')
-  redirect('/admin/classes?ok=1')
-}
-
 export async function toggleActive(formData: FormData): Promise<void> {
   await requireStaff()
 
@@ -185,14 +229,14 @@ export async function toggleActive(formData: FormData): Promise<void> {
     await audit(`${table.data}.toggle`, table.data, id.data, { is_active: next })
   }
 
-  revalidatePath(back)
+  // `back` нь `?open=…` агуулж болно — revalidate зөвхөн ЗАМ хүлээж авна
+  revalidatePath(back.split('?')[0])
   redirect(back.startsWith('/admin') ? back : '/admin')
 }
 
 /* ── Багш ──────────────────────────────────────────────────────────────── */
 
 const instructorSchema = z.object({
-  slug: z.string().trim().regex(/^[a-z0-9-]+$/),
   name: z.string().trim().min(2),
   bio_mn: z.string().trim().default(''),
   bio_en: z.string().trim().default(''),
@@ -209,20 +253,29 @@ export async function createInstructor(formData: FormData): Promise<void> {
   }
 
   const supabase = await createClient()
+  const slug = await uniqueSlug(supabase, 'instructors', parsed.data.name)
+
   const { error } = await supabase.from('instructors').insert({
     ...parsed.data,
+    slug,
     instagram: parsed.data.instagram || null,
     photo_url: parsed.data.photo_url || null,
   })
 
   if (error) redirect(`/admin/instructors?error=${encodeURIComponent(error.message)}`)
 
-  await audit('instructor.create', 'instructors', null, { slug: parsed.data.slug })
+  await audit('instructor.create', 'instructors', null, { slug })
   revalidatePath('/admin/instructors')
   redirect('/admin/instructors?ok=1')
 }
 
 /* ── Дэлгүүр ───────────────────────────────────────────────────────────── */
+
+/** Барааны цонх дахин нээгдэхийн тулд id-г хаяг руу залгана (§ CardDialog). */
+function backToProduct(formData: FormData, extra = 'ok=1'): string {
+  const productId = String(formData.get('product_id') ?? '')
+  return `/admin/products?${extra}${productId ? `&open=${productId}` : ''}`
+}
 
 export async function updateStock(formData: FormData): Promise<void> {
   await requireStaff()
@@ -244,11 +297,10 @@ export async function updateStock(formData: FormData): Promise<void> {
   }
 
   revalidatePath('/admin/products')
-  redirect('/admin/products?ok=1')
+  redirect(backToProduct(formData))
 }
 
 const productSchema = z.object({
-  slug: z.string().trim().regex(/^[a-z0-9-]+$/),
   name_mn: z.string().trim().min(2),
   name_en: z.string().trim().default(''),
   desc_mn: z.string().trim().default(''),
@@ -265,12 +317,36 @@ export async function createProduct(formData: FormData): Promise<void> {
   }
 
   const supabase = await createClient()
-  const { error } = await supabase.from('products').insert(parsed.data)
-  if (error) redirect(`/admin/products?error=${encodeURIComponent(error.message)}`)
+  const slug = await uniqueSlug(supabase, 'products', parsed.data.name_mn)
 
-  await audit('product.create', 'products', null, { slug: parsed.data.slug })
+  const { data: product, error } = await supabase
+    .from('products')
+    .insert({ ...parsed.data, slug })
+    .select('id')
+    .single()
+
+  if (error || !product) {
+    redirect(`/admin/products?error=${encodeURIComponent(error?.message ?? 'Бараа үүсгэж чадсангүй')}`)
+  }
+
+  await audit('product.create', 'products', product.id, { slug })
+
+  // Зураг нь заавал биш. Бараа аль хэдийн үүссэн тул зураг дээр алдаа
+  // гарвал бүхэлд нь бүтэлгүйтсэн мэт мессеж өгвөл ажилтан төөрнө.
+  const files = pickFiles(formData)
+  if (files.length > 0) {
+    const failure = await saveProductImages(supabase, product.id, files, parsed.data.name_mn)
+    if (failure) {
+      redirect(
+        `/admin/products?error=${encodeURIComponent(`Бараа үүслээ, гэвч зураг ороогүй — ${failure}`)}`,
+      )
+    }
+  }
+
   revalidatePath('/admin/products')
-  redirect('/admin/products?ok=1')
+  revalidatePath('/', 'layout')
+  // Шинэ барааны цонхыг шууд нээнэ — дараагийн алхам нь ямагт хувилбар нэмэх.
+  redirect(`/admin/products?ok=1&open=${product.id}`)
 }
 
 export async function addVariant(formData: FormData): Promise<void> {
@@ -302,7 +378,7 @@ export async function addVariant(formData: FormData): Promise<void> {
 
   await audit('variant.create', 'product_variants', null, { sku: parsed.data.sku })
   revalidatePath('/admin/products')
-  redirect('/admin/products?ok=1')
+  redirect(backToProduct(formData))
 }
 
 /* ── Барааны зураг ─────────────────────────────────────────────────────── */
@@ -311,68 +387,93 @@ const MAX_IMAGE_BYTES = 5 * 1024 * 1024
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/avif']
 
 /**
- * Барааны зургийг Supabase Storage-д байршуулна.
+ * Барааны зургуудыг Supabase Storage-д байршуулна.
  *
  * Файлыг `media` bucket дотор `products/<барааны id>/` замд хадгална.
  * Bucket нийтэд уншигдах тул зураг шууд харагдана; бичих эрх нь
  * `media_staff_write` бодлогоор зөвхөн ажилтанд нээлттэй.
+ *
+ * Алдааны текстийг БУЦААНА (redirect хийхгүй) — дуудагч тал нь «бараа
+ * үүссэн ч зураг ороогүй» гэх зэрэг өөр өөр мессеж угсрах хэрэгтэй.
  */
-export async function uploadProductImage(formData: FormData): Promise<void> {
-  await requireStaff()
-
-  const productId = uuid.safeParse(formData.get('product_id'))
-  const file = formData.get('file')
-  const alt = String(formData.get('alt') ?? '').trim()
-
-  if (!productId.success || !(file instanceof File) || file.size === 0) {
-    redirect('/admin/products?error=' + encodeURIComponent('Зураг сонгоно уу'))
-  }
-
-  if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
-    redirect('/admin/products?error=' + encodeURIComponent('JPG, PNG, WEBP эсвэл AVIF байх ёстой'))
-  }
-
-  if (file.size > MAX_IMAGE_BYTES) {
-    redirect('/admin/products?error=' + encodeURIComponent('Зураг 5MB-аас хэтэрсэн байна'))
-  }
-
-  const extension = file.name.split('.').pop()?.toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg'
-  const path = `products/${productId.data}/${crypto.randomUUID()}.${extension}`
-
-  const supabase = await createClient()
-  const { error: uploadError } = await supabase.storage
-    .from('media')
-    .upload(path, file, { contentType: file.type, upsert: false })
-
-  if (uploadError) {
-    redirect('/admin/products?error=' + encodeURIComponent(uploadError.message))
-  }
-
-  const {
-    data: { publicUrl },
-  } = supabase.storage.from('media').getPublicUrl(path)
-
+async function saveProductImages(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  productId: string,
+  files: File[],
+  alt: string,
+): Promise<string | null> {
   // Одоо байгаа зургуудын араас нэмнэ
   const { count } = await supabase
     .from('product_images')
     .select('id', { count: 'exact', head: true })
-    .eq('product_id', productId.data)
+    .eq('product_id', productId)
 
-  const { error } = await supabase.from('product_images').insert({
-    product_id: productId.data,
-    url: publicUrl,
-    alt,
-    sort_order: (count ?? 0) + 1,
-  })
+  let order = count ?? 0
 
-  if (error) {
-    redirect('/admin/products?error=' + encodeURIComponent(error.message))
+  for (const file of files) {
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+      return `${file.name}: JPG, PNG, WEBP эсвэл AVIF байх ёстой`
+    }
+    if (file.size > MAX_IMAGE_BYTES) {
+      return `${file.name}: 5MB-аас хэтэрсэн байна`
+    }
+
+    const extension = file.name.split('.').pop()?.toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg'
+    const path = `products/${productId}/${crypto.randomUUID()}.${extension}`
+
+    const { error: uploadError } = await supabase.storage
+      .from('media')
+      .upload(path, file, { contentType: file.type, upsert: false })
+
+    if (uploadError) return uploadError.message
+
+    const {
+      data: { publicUrl },
+    } = supabase.storage.from('media').getPublicUrl(path)
+
+    order += 1
+    const { error } = await supabase.from('product_images').insert({
+      product_id: productId,
+      url: publicUrl,
+      alt,
+      sort_order: order,
+    })
+
+    if (error) return error.message
+
+    await audit('product_image.upload', 'product_images', productId, { path })
   }
 
-  await audit('product_image.upload', 'product_images', productId.data, { path })
+  return null
+}
+
+/** `<input type="file" multiple>` -ээс бодит файлуудыг л шүүнэ. */
+function pickFiles(formData: FormData): File[] {
+  return formData
+    .getAll('file')
+    .filter((entry): entry is File => entry instanceof File && entry.size > 0)
+}
+
+export async function uploadProductImage(formData: FormData): Promise<void> {
+  await requireStaff()
+
+  const productId = uuid.safeParse(formData.get('product_id'))
+  const files = pickFiles(formData)
+  const alt = String(formData.get('alt') ?? '').trim()
+
+  if (!productId.success || files.length === 0) {
+    redirect('/admin/products?error=' + encodeURIComponent('Зураг сонгоно уу'))
+  }
+
+  const supabase = await createClient()
+  const failure = await saveProductImages(supabase, productId.data, files, alt)
+  if (failure) {
+    redirect(backToProduct(formData, `error=${encodeURIComponent(failure)}`))
+  }
+
   revalidatePath('/admin/products')
   revalidatePath('/', 'layout')
-  redirect('/admin/products?ok=1')
+  redirect(backToProduct(formData))
 }
 
 export async function deleteProductImage(formData: FormData): Promise<void> {
@@ -402,7 +503,7 @@ export async function deleteProductImage(formData: FormData): Promise<void> {
 
   revalidatePath('/admin/products')
   revalidatePath('/', 'layout')
-  redirect('/admin/products?ok=1')
+  redirect(backToProduct(formData))
 }
 
 /* ── Захиалга ──────────────────────────────────────────────────────────── */
@@ -449,46 +550,3 @@ export async function setUserRole(formData: FormData): Promise<void> {
   redirect('/admin/customers?ok=1')
 }
 
-/* ── Контент ───────────────────────────────────────────────────────────── */
-
-export async function updateSiteContent(formData: FormData): Promise<void> {
-  await requireStaff()
-
-  const key = z.string().trim().min(1).safeParse(formData.get('key'))
-  if (!key.success) redirect('/admin/content?error=invalid')
-
-  // Талбарууд `mn.title`, `en.title` хэлбэрээр ирнэ.
-  const valueMn: Record<string, string> = {}
-  const valueEn: Record<string, string> = {}
-
-  for (const [name, value] of formData.entries()) {
-    if (typeof value !== 'string') continue
-    if (name.startsWith('mn.')) valueMn[name.slice(3)] = value
-    if (name.startsWith('en.')) valueEn[name.slice(3)] = value
-  }
-
-  const supabase = await createClient()
-  const { error } = await supabase
-    .from('site_content')
-    .update({ value_mn: valueMn, value_en: valueEn, updated_at: new Date().toISOString() })
-    .eq('key', key.data)
-
-  if (error) redirect(`/admin/content?error=${encodeURIComponent(error.message)}`)
-
-  await audit('content.update', 'site_content', null, { key: key.data })
-  revalidatePath('/', 'layout')
-  redirect('/admin/content?ok=1')
-}
-
-export async function markMessageRead(formData: FormData): Promise<void> {
-  await requireStaff()
-
-  const id = uuid.safeParse(formData.get('message_id'))
-  if (id.success) {
-    const supabase = await createClient()
-    await supabase.from('contact_messages').update({ is_read: true }).eq('id', id.data)
-  }
-
-  revalidatePath('/admin/messages')
-  redirect('/admin/messages')
-}

@@ -53,6 +53,64 @@ const mn = {
     intermediate: 'Дунд шат',
     advanced: 'Ахисан шат',
   },
+  /**
+   * «Бидний тухай» хуудасны текст.
+   *
+   * ТООНУУД энд БАЙХГҮЙ — тэдгээр нь хуудсан дээр нэг эх сурвалжтай
+   * (§ about/page.tsx `SHOWS`, `STATS`). Хэл тус бүрд тоо давхардвал нэгийг
+   * нь засаад нөгөөг мартах эрсдэлтэй.
+   */
+  about: {
+    eyebrow: 'Улаанбаатар',
+    lead: 'Гадаадад олон улсын тэмцээн болтлоо хөгжсөн чөлөөт бүжгийн урсгал.',
+    whatTitle: 'Twerk гэж юу вэ',
+    what: {
+      free: {
+        title: 'Чөлөөт урсгал',
+        body: 'Twerk гэдэг нь гадаадад олон улсын тэмцээн болтлоо хөгжсөн чөлөөт бүжгийн урсгал юм.',
+      },
+      health: {
+        title: 'Эрүүл мэндэд',
+        body: 'Зөвхөн гоо зүйн талаасаа сайхан харагдах бус, эмэгтэйчүүдийн эрүүл мэндэд хамгийн хэрэгтэй бүжгийн төрлөөр шалгарчээ.',
+      },
+      why: {
+        title: 'Тиймээс л',
+        body: 'Олон олон охид бүсгүйчүүд уг бүжгээр хичээллэх болсон байна.',
+      },
+    },
+    storyTitle: 'Twerk Mongolia',
+    story:
+      'Twerk Mongolia үүсгэн байгуулагдаад дөрөв дэх жилдээ явж байна. Энэ хугацаанд арван мянга орчим охид бүсгүйчүүд сонирхон Twerk сургалтад сууcан — зөвхөн энэ тооноос ч Twerk Монголд хэрхэн хөгжиж байгааг харж болно.',
+    statYears: 'жил',
+    statYearsHint: 'үүсгэн байгуулагдсанаас хойш',
+    statStudents: 'сурагч',
+    statStudentsHint: 'сургалтад суусан',
+    statShows: 'Battle Show',
+    statShowsHint: 'том тайзны шоу',
+    showsTitle: 'Twerk Battle Show',
+    showsLead:
+      'Суралцагчиддаа зориулж эхэлсэн шоу маань удаа дараалан томорсоор ирлээ. Хэвтээ мөр бүр тухайн шоуны үзэгчдийн тоог харуулна.',
+    showsAudience: 'үзэгч',
+    showsWomen: 'эмэгтэй',
+    showsMen: 'эрэгтэй',
+    showsNoData: 'Тоо бүртгэгдээгүй',
+    shows: {
+      v1: 'Суралцагчиддаа зориулсан анхны шоу.',
+      v2: '',
+      v3: 'Том тайз засалттай зохион байгуулагдсан.',
+      v4: 'MICAS-тай хамтран.',
+    },
+    photos: {
+      lineup: 'Twerk Mongolia-гийн бүжигчид студид',
+      circle: 'Бүжигчид тойрог үүсгэн зогсож байгаа нь',
+      row: 'Бүжигчид нэг эгнээнд',
+      trio: 'Гурван бүжигчин тайзны хувцастай',
+      stage: 'Том тайз дээрх тоглолт',
+    },
+    photosTitle: 'Заалнаас',
+    ctaTitle: 'Эхлэхэд хэзээ ч оройтоогүй',
+    ctaBody: 'Анхан шатны хичээлд урьдчилан бүртгүүлээд, эхний хичээлээсээ л хөдөлж эхэлнэ.',
+  },
   home: {
     upcoming: 'Ойрын хичээлүүд',
     upcomingAll: 'Бүх хуваарь',
@@ -263,6 +321,57 @@ const en: Dictionary = {
     beginner: 'Beginner',
     intermediate: 'Intermediate',
     advanced: 'Advanced',
+  },
+  about: {
+    eyebrow: 'Ulaanbaatar',
+    lead: 'A free dance movement that grew abroad into international competition.',
+    whatTitle: 'What is twerk',
+    what: {
+      free: {
+        title: 'A free movement',
+        body: 'Twerk is a free dance movement that grew abroad all the way into international competition.',
+      },
+      health: {
+        title: 'For your health',
+        body: 'Beyond how it looks, it is regarded as one of the most useful dance forms for women’s health.',
+      },
+      why: {
+        title: 'That is why',
+        body: 'More and more women have taken up the dance.',
+      },
+    },
+    storyTitle: 'Twerk Mongolia',
+    story:
+      'Twerk Mongolia is in its fourth year. In that time close to ten thousand women have taken a Twerk class with us — that number alone shows how far twerk has come in Mongolia.',
+    statYears: 'years',
+    statYearsHint: 'since we started',
+    statStudents: 'students',
+    statStudentsHint: 'have taken a class',
+    statShows: 'Battle Shows',
+    statShowsHint: 'staged productions',
+    showsTitle: 'Twerk Battle Show',
+    showsLead:
+      'What began as a show for our own students has grown with every edition. Each bar below is that show’s audience.',
+    showsAudience: 'guests',
+    showsWomen: 'women',
+    showsMen: 'men',
+    showsNoData: 'Not recorded',
+    shows: {
+      v1: 'Our first show, made for our students.',
+      v2: '',
+      v3: 'Staged with a full production set.',
+      v4: 'Together with MICAS.',
+    },
+    photos: {
+      lineup: 'Twerk Mongolia dancers in the studio',
+      circle: 'Dancers standing in a circle',
+      row: 'Dancers in a single line',
+      trio: 'Three dancers in stage outfits',
+      stage: 'Performing on a full stage',
+    },
+    photosTitle: 'From the studio',
+    ctaTitle: 'It is never too late to start',
+    ctaBody: 'Book a beginner class and you will be moving from the very first hour.',
   },
   home: {
     upcoming: 'Upcoming classes',
