@@ -1,29 +1,39 @@
 @import "tailwindcss";
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   Twerk Mongolia — монохром
+   TWERK MONGOLIA — «ATELIER» ЗАГВАРЫН СИСТЕМ
 
-   Өнгө огт байхгүй. Харанхуй горимд хар суурь + цагаан текст, гэрэлтэй
-   горимд яг эсрэгээр. Хоёулаа ижил ШАТЛАЛТАЙ — зөвхөн тэнхлэг нь эргэнэ.
+   ── Өнгө ───────────────────────────────────────────────────────────────
+   Өнгө огт байхгүй. Харанхуйд хар суурь + цагаан текст, гэрэлтэйд эсрэгээр.
+   Палитр НЭГ л удаа бичигдэж, `light-dark()` нь `color-scheme` -ээс уншина.
+   Энэ палитр өмнөх хувилбараас ХӨНДӨГДӨӨГҮЙ — систем бүхэлдээ дахин
+   зохиогдсон ч өнгөний биет нь хэвээр.
 
-   Өнгөгүй систем дээр эрэмбийг ЮУ үүсгэх вэ:
-     · гэрэлтүүлэлт  — тод → саарал → бүдэг саарал (4 шат)
-     · дүүргэлт      — дүүрсэн = үндсэн үйлдэл, хүрээтэй = хоёрдогч
-     · хүрээний хэв  — тасархай = идэвхгүй, тод = анхаарал шаардсан
-     · үсгийн жин    — 800 → 600 → 400
-     · зай           — ойрхон = холбоотой, хол = тусдаа
+   ── Тэгвэл эрэмбийг юу үүсгэх вэ ───────────────────────────────────────
+   Өнгө байхгүй тул бусад бүх материал ажлаа хийх ёстой:
 
-   Тиймээс өнгө нэмэх нь энэ системийг эвдэнэ. Төлөв заахдаа ХЭЛБЭР
-   ашиглана — өнгө биш.
+     1. ҮСГИЙН ЭСРЭГ ТЭСРЭГ — өндөр ялгаралтай Didone (Playfair Display)
+        нь editorial мэдэгдэл хэлнэ; нарийвчилсан grotesque (Inter) нь
+        мэдээлэл дамжуулна. Хоёр өөр дуу хоолой = хоёр өөр үүрэг.
+     2. ХЭМЖЭЭ — 8.5rem -ээс 0.6875rem хүртэлх 9 шатлалт хэмжүүр.
+     3. ЗАЙ — ойрхон = холбоотой, хол = тусдаа. Хэсгийн зай ганц токеноос.
+     4. ШУГАМ — хайрцаг биш ШУГАМ бүтэц үүсгэнэ. Дугуйрсан хайрцаг олон
+        байх нь хямд загварын хамгийн түгээмэл шинж.
+     5. ГЭРЭЛТҮҮЛЭЛТ — текстийн 4 шат (тод → зөөлөн → бүдэг → сүүмгэр).
+     6. ХӨДӨЛГӨӨН — тайван төлөв тайван, hover нь хариу өгнө.
 
-   ── Горим хэрхэн сонгогдох вэ ───────────────────────────────────────────
-   `light-dark()` нь `color-scheme` -ээс уншина. Тиймээс палитрыг НЭГ л
-   удаа бичээд, доор зөвхөн `color-scheme` -ийг сольдог. Хос тодорхойлолт,
-   media query-ийн давхардал байхгүй.
+   ── Радиус ─────────────────────────────────────────────────────────────
+   3px. Бүхэлдээ. Pill товч, `rounded-2xl` хайрцаг БАЙХГҮЙ. Дугуй хэлбэр
+   зөвхөн утгатай газраа: цэг, аватар, дүрст товч.
 
-     · `<html>` дээр data-theme байхгүй → `light dark` → систем шийднэ
-       (CSS дангаараа — анивчилтгүй, JS шаардахгүй)
-     · data-theme="light" / "dark"      → хэрэглэгчийн сонголт давна
+   ── Хөдөлгөөн ──────────────────────────────────────────────────────────
+   Зөвхөн `opacity`, `transform`, `clip-path` — бүгд нийлмэл давхаргад
+   ажиллах тул layout дахин тооцоологдохгүй, 60fps барина.
+   `prefers-reduced-motion` -д бүгд таслагдана.
+
+   ── Удирдлага ──────────────────────────────────────────────────────────
+   `/admin` нь ТУСДАА орчин, өөрийн палитр, өөрийн үсэгтэй. Энэ шинэчлэлт
+   түүнд хүрээгүй — өдөржин хүснэгт уншдаг орчинд editorial serif хэрэггүй.
    ═══════════════════════════════════════════════════════════════════════ */
 
 :root {
@@ -83,6 +93,50 @@
   --brand-soft: var(--surface-2);
 
   --radius-card: 1.25rem;
+
+  /* ═══ БҮТЭЦ — ӨНГӨ БИШ ═════════════════════════════════════════════════
+     Дээрх өнгөнүүд хөндөгдөөгүй. Доорх бүх зүйл нь ХЭМЖЭЭ, ХЭМНЭЛ, ХУГАЦАА
+     — өөрөөр хэлбэл өнгөгүй системд эрэмбэ үүсгэдэг цорын ганц материал. */
+
+  /* ── Хуудасны багана ────────────────────────────────────────────────
+     88rem нь 1408px. Өмнөх 72rem -ээс өргөн: захын зай нь агуулгыг
+     шахахгүй, харин ЗОРИУДААР хоосон үлдээж буй мэт уншигдана. */
+  --shell: 88rem;
+  --shell-pad: clamp(1.25rem, 5vw, 5rem);
+  --gutter: clamp(1rem, 2.2vw, 2rem);
+
+  /* ── Босоо хэмнэл ───────────────────────────────────────────────────
+     Хэсгүүдийн хоорондын зай нэг л эх сурвалжтай. Хэсэг бүр өөрийн
+     гэсэн зайтай бол хуудас амьсгалахаа болино. */
+  --bay: clamp(5.5rem, 11vw, 10rem);
+  --bay-sm: clamp(3rem, 6vw, 5rem);
+
+  /* ── Радиус ─────────────────────────────────────────────────────────
+     Дугуй бөмбөлөг (pill) БАЙХГҮЙ. Өндөр ялгаралтай Didone үсэг, нимгэн
+     шугам хоёрын хажууд дугуйрсан булан зөөлөрч, хэвлэмэл ирмэгийн
+     эрч алдагдана. 3px нь «зүсээгүй ч дугуй биш» гэсэн цорын ганц цэг.
+     Дугуй хэлбэр зөвхөн УТГАТАЙ газраа үлдэнэ: цэг, аватар, дүрст товч. */
+  --r: 3px;
+  --r-lg: 4px;
+  --r-full: 999px;
+
+  /* ── Хөдөлгөөний хэл ────────────────────────────────────────────────
+     Хоёрхон муруй. `--ease` нь маш хурдан эхэлж, удаан суудаг — үнэтэй
+     механизм зогсох мэт. `--ease-io` нь төлөв солиход, хоёр тал нь тэнцүү. */
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-io: cubic-bezier(0.65, 0, 0.35, 1);
+  --t-1: 180ms;
+  --t-2: 320ms;
+  --t-3: 620ms;
+  --t-4: 1000ms;
+
+  /* ── Гүн ────────────────────────────────────────────────────────────
+     Сүүдэр бол ГАНЦ л зорилготой: hover дээр «энэ зүйл өргөгдлөө» гэж
+     хэлэх. Тайван төлөвт сүүдэр огт байхгүй — гүнийг шугам барина. */
+  --lift: light-dark(
+    0 22px 48px -28px rgba(0, 0, 0, 0.4),
+    0 24px 56px -26px rgba(0, 0, 0, 0.95)
+  );
 }
 
 /* Хэрэглэгчийн шууд сонголт — системийнхийг давна */
@@ -321,7 +375,6 @@ form:has(select[name='class_type_id'] option[value='new']:checked) .new-class-fi
   .admin-shell :is(input:not([type='file']), select) { min-height: 2.5rem; }
   .admin-shell .admin-btn { min-height: 2.5rem; }
 }
-
 @theme inline {
   --color-background: var(--background);
   --color-surface: var(--surface);
@@ -352,28 +405,46 @@ form:has(select[name='class_type_id'] option[value='new']:checked) .new-class-fi
   --color-brand-soft: var(--brand-soft);
 
   --font-sans: var(--font-body), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-display), ui-serif, Georgia, serif;
+
+  --radius-DEFAULT: var(--r);
+  --radius-sm: var(--r);
+  --radius-md: var(--r);
+  --radius-lg: var(--r-lg);
+  --radius-xl: var(--r-lg);
+  --radius-2xl: var(--r-lg);
+  --radius-3xl: var(--r-lg);
+
+  --ease-out-expo: var(--ease);
 }
 
-/* ── Суурь ────────────────────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════════════════
+   1 · СУУРЬ
+   ═══════════════════════════════════════════════════════════════════════════ */
 
 html {
   /* Наалдмал навбар, хөвдөг доод самбар — хаяг доторх # холбоос эдгээрийн
      ард дарагдахгүй */
-  scroll-padding-top: 5rem;
+  scroll-padding-top: 6rem;
   scroll-padding-bottom: 6rem;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
+  font-size: 1rem;
+  line-height: 1.62;
+  letter-spacing: -0.011em;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* Inter -ийн эргэлдсэн `a`, нэг давхар `l` — жижиг хэмжээнд уншилт сайжирна */
+  font-feature-settings: 'cv05', 'cv11', 'ss03';
   position: relative;
   /* Гар утсанд хэвтээ гүйлт = эвдэрсэн зохиомж. `hidden` биш `clip` —
      `hidden` нь body-г гүйлтийн сав болгож, наалдмал навбарыг эвддэг. */
   overflow-x: clip;
-  /* iOS дээрх саарал анивчилт — апп шиг мэдрэмжийг алдагдуулдаг */
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -384,13 +455,13 @@ body::before {
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  opacity: 0.022;
+  opacity: 0.02;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
 /* `@layer base` дотор байх ЁСТОЙ. Давхаргагүй дүрэм нь Tailwind-ийн
    `@layer utilities` -ийг үл харгалзан дардаг тул энэ нь `sticky`, `fixed`,
-   `z-*` зэрэг utility-г чимээгүйхэн устгаж байсан. */
+   `z-*` зэрэг utility-г чимээгүйгээр устгаж байсан. */
 @layer base {
   body > * {
     position: relative;
@@ -398,349 +469,840 @@ body::before {
   }
 }
 
-h1, h2, h3, h4 {
-  font-family: var(--font-display);
-  letter-spacing: -0.035em;
-  text-wrap: balance;
-}
-
 ::selection {
   background: var(--foreground);
   color: var(--background);
 }
 
+/* Фокусын хүрээ дугуй БИШ — систем бүхэлдээ 3px радиустай */
 :focus-visible {
   outline: 2px solid var(--foreground);
   outline-offset: 3px;
-  border-radius: 4px;
+  border-radius: var(--r);
 }
 
-::-webkit-scrollbar { width: 11px; height: 11px; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-track { background: var(--background); }
 ::-webkit-scrollbar-thumb {
   background: var(--surface-3);
   border: 3px solid var(--background);
-  border-radius: 99px;
+  border-radius: var(--r-full);
 }
 ::-webkit-scrollbar-thumb:hover { background: var(--line-strong); }
 
-/* ── Гэрэл ────────────────────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════════════════
+   2 · ҮСГИЙН СИСТЕМ
 
-/* Прожектор. Өнгөгүй тул зөвхөн орон зайн мэдрэмж өгнө. Харанхуйд гэрэл
-   цацна, гэрэлтэй горимд сүүдэр тусгана — хоёуланд нь гүн үүсгэнэ. */
-.glow {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(100px);
-  pointer-events: none;
-  z-index: -1;
-  background: light-dark(rgba(0, 0, 0, 0.06), rgba(255, 255, 255, 0.07));
+   Хоёр дуу хоолой:
+     · Playfair Display — өндөр ялгаралтай Didone. Зөвхөн МЭДЭГДЭЛ хэлнэ:
+       баатар, хэсгийн гарчиг, том тоо. 24px -ээс доош ХЭЗЭЭ Ч биш —
+       нарийн зурлагууд нь тэр хэмжээнд сарнина.
+     · Inter — нарийвчилсан grotesque. Бусад БҮГД: их бие, шошго, тоо,
+       удирдлага, мета. Тоонууд баганадаа эгнэнэ.
+
+   Есөн шатлал. Шат бүр өмнөхөөсөө ХЭМЖЭЭ, ЖИН, ЗАЙ гурвуулаараа ялгарна —
+   ганцхан хэмжээгээр ялгарсан шат нь эрэмбэ биш, санамсаргүй байдал.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.t-display,
+.t-h1,
+.t-h2,
+.t-num {
+  font-family: var(--font-display), ui-serif, Georgia, serif;
+  font-weight: 500;
+  text-wrap: balance;
 }
 
-.glow-soft { background: light-dark(rgba(0, 0, 0, 0.035), rgba(255, 255, 255, 0.04)); }
-
-/* ── Хөдөлгөөн ────────────────────────────────────────────────────────────
-   Зөвхөн CSS — хуудас сервер дээр л зурагдана. Нэвтрэх үеийн «мандалт» нь
-   уншигчийн нүдийг дээрээс доош чиглүүлнэ: эхлээд эйброу, дараа нь гарчгийн
-   үг бүр, эцэст нь товч. Саатал `--d` -ээр өгөгдөнө.
-   ─────────────────────────────────────────────────────────────────────── */
-
-@keyframes rise {
-  from { opacity: 0; translate: 0 20px; }
-  to { opacity: 1; translate: 0 0; }
+.t-display {
+  font-size: clamp(3.25rem, 8.6vw, 8rem);
+  line-height: 0.9;
+  letter-spacing: -0.03em;
 }
 
-.rise {
-  animation: rise 760ms cubic-bezier(0.16, 1, 0.3, 1) both;
-  animation-delay: var(--d, 0ms);
+.t-h1 {
+  font-size: clamp(2.25rem, 5vw, 4.25rem);
+  line-height: 0.98;
+  letter-spacing: -0.024em;
 }
 
-/* ── Гүйлтэд уясан хөдөлгөөн ──────────────────────────────────────────────
-   Элемент харагдах хэсэгт ОРЖ ИРЭХ явцад нь хөдөлгөөн явагдана. Гол нь —
-   энэ бүхэн JS-гүй: `animation-timeline: view()` нь хөдөлгөөний явцыг
-   цаг хугацаанд биш, элементийн гүйлтийн байрлалд уяна. Тиймээс нүүр
-   хуудас серверийн бүрэлдэхүүн хэсэг хэвээр үлдэнэ — IntersectionObserver
-   ч, hydration ч, нэмэлт багц ч байхгүй.
-
-   ⚠️ Бүгд `transform` -ийг БИШ, бие даасан `translate` / `scale` шинжийг
-   хөдөлгөнө. Учир нь `both` дүүргэлттэй хөдөлгөөн дууссан хойноо ч эцсийн
-   утгаа барьдаг: `transform` -ийг хөдөлгөвөл дээр нь тавих `:hover`
-   `transform` чимээгүй үхнэ. Бие даасан шинжүүд `transform` -тэй
-   ЗЭРЭГЦЭЖ нийлдэг тул гүйлт ба hover хоёр зөрчилдөхгүй.
-
-   Дэмждэггүй хөтөч дээр (`@supports`) хөдөлгөөн огт үүсэхгүй — агуулга
-   шууд бүтнээрээ харагдана, хагас тунгалаг зүйл үлдэхгүй. */
-
-@keyframes reveal {
-  from { opacity: 0; translate: 0 30px; }
-  to { opacity: 1; translate: 0 0; }
+.t-h2 {
+  font-size: clamp(1.75rem, 3.2vw, 2.75rem);
+  line-height: 1.04;
+  letter-spacing: -0.02em;
 }
 
-/* Зураг харагдах хэсэгт орж ирэхдээ өчүүхэн ухарна — гүн үүсгэнэ */
-@keyframes scroll-zoom {
-  from { scale: 1.12; }
-  to { scale: 1; }
+/* H3 -ээс доош grotesque руу шилжинэ — энэ хилээс цааш serif нь
+   чимэглэл болж, уншилтад саад болно. */
+.t-h3 {
+  font-family: var(--font-sans);
+  font-size: clamp(1.0625rem, 1.5vw, 1.3125rem);
+  font-weight: 600;
+  line-height: 1.26;
+  letter-spacing: -0.016em;
+  text-wrap: balance;
 }
 
-/* Гарчгийн доорх зураас зүүнээс баруун тийш татагдана */
-@keyframes grow-x {
-  from { scale: 0 1; }
-  to { scale: 1 1; }
+.t-lead {
+  font-size: clamp(1.0625rem, 1.4vw, 1.3125rem);
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: -0.014em;
+  text-wrap: pretty;
 }
 
-/* Гарчгийн доорх татагдах зураас. Дэмжигдээгүй үед `scale: 0` тул огт
-   харагдахгүй — доод талын `border` нь хэвээр байх тул алдаа мэт харагдахгүй. */
-.underline-grow { position: relative; }
+.t-body { font-size: 1rem; line-height: 1.62; }
 
-.underline-grow::after {
-  content: '';
-  position: absolute;
-  right: 0;
-  bottom: -1px;
-  left: 0;
-  height: 1px;
-  background: var(--foreground);
-  transform-origin: left;
-  scale: 0 1;
+.t-small { font-size: 0.875rem; line-height: 1.56; letter-spacing: -0.006em; }
+
+/* Шошго — том үсэг, өргөн зай. Уншихад биш, ЗААХАД зориулагдсан:
+   энэ бол гарчиг биш, «энэ хэсэг ямар төрлийн зүйл бэ» гэсэн шошго. */
+.t-label {
+  font-family: var(--font-sans);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  /* 1 биш 1.35 — урт монгол шошго хоёр мөр болоход мөрүүд наалдахгүй */
+  line-height: 1.35;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
 }
 
-@supports (animation-timeline: view()) {
-  @media (prefers-reduced-motion: no-preference) {
-    .reveal,
-    .stagger > * {
-      animation: reveal linear both;
-      animation-timeline: view();
-      animation-range: entry 4% cover 24%;
-    }
-
-    /* Тор доторх хайрцгууд зэрэг биш ДАРААЛАН гарна. Саатлыг `animation-delay`
-       -ээр өгч болохгүй — гүйлтийн цагийн хуваарьт хугацаа гэж байхгүй.
-       Оронд нь хайрцаг бүрийн явцын МУЖИЙГ сунгана. */
-    .stagger > *:nth-child(2) { animation-range: entry 4% cover 31%; }
-    .stagger > *:nth-child(3) { animation-range: entry 4% cover 38%; }
-    .stagger > *:nth-child(4) { animation-range: entry 4% cover 45%; }
-    .stagger > *:nth-child(n + 5) { animation-range: entry 4% cover 52%; }
-
-    .zoom-in .card-media {
-      animation: scroll-zoom linear both;
-      animation-timeline: view();
-      animation-range: entry 0% cover 48%;
-    }
-
-    .underline-grow::after {
-      animation: grow-x linear both;
-      animation-timeline: view();
-      animation-range: entry 18% cover 20%;
-    }
-  }
+/* Өргөн дэлгэцэд зай нээгдэнэ — тэнд шошго нэг мөрөнд багтдаг */
+@media (min-width: 640px) {
+  .t-label { letter-spacing: 0.2em; }
 }
 
-/* ── Гэрлийн шүүрэлт ──────────────────────────────────────────────────────
-   Хайрцаг дээгүүр өнгөрөх нарийн туяа. Өнгө нэмэхгүй — цагаан гэрэл л
-   гулсана. Hover -ийн хариу нь «өнгө сольсон» биш «гэрэл тусав» болно. */
-.sheen::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-  translate: -130% 0;
-  background: linear-gradient(
-    105deg,
-    transparent 38%,
-    light-dark(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.13)) 50%,
-    transparent 62%
-  );
-  transition: translate 760ms cubic-bezier(0.2, 0.8, 0.2, 1);
+.t-meta {
+  font-size: 0.75rem;
+  line-height: 1.45;
+  letter-spacing: 0.004em;
+  font-variant-numeric: tabular-nums;
 }
 
-.sheen:hover::after { translate: 130% 0; }
-
-/* Хичээлийн нэрсийн гүйдэг тууз. Хоёр ижил хагасыг зэрэгцүүлээд -50%
-   зөөвөрлөх нь заадасгүй давталт өгнө — хагасууд ЯГ ижил өргөнтэй байх
-   ёстой тул зайг тууз дээр биш, хагас бүрийн дотор нь тавина. */
-@keyframes marquee {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
+/* Тоон мэдэгдэл — үзүүлэлт, цаг, үнэ. Баганадаа эгнэхгүй тоо бол
+   харьцуулж болохгүй тоо. */
+.t-num {
+  font-variant-numeric: tabular-nums lining-nums;
+  letter-spacing: -0.03em;
+  line-height: 0.86;
 }
 
-.marquee-track {
-  display: flex;
-  width: max-content;
-  animation: marquee var(--speed, 42s) linear infinite;
+/* Налуу нь ЗӨВХӨН нэг үг онцлоход. Didone -ийн налуу бол өөр зурлага,
+   өөр хэмнэл — тиймээс өгүүлбэр дунд нэг л удаа утга үүсгэнэ. */
+.t-it { font-style: italic; letter-spacing: -0.018em; }
+
+/* Гарчгийн анхдагч — засаагүй хуудсууд ч системд харьяалагдана */
+h1, h2 {
+  font-family: var(--font-display), ui-serif, Georgia, serif;
+  font-weight: 500;
+  letter-spacing: -0.022em;
+  line-height: 1.02;
+  text-wrap: balance;
 }
 
-.marquee:hover .marquee-track { animation-play-state: paused; }
-
-/* Хоёр ирмэг рүү уусна — тууз таслагдсан биш, үргэлжилж буй мэт */
-.edge-fade {
-  -webkit-mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
-  mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+h3, h4 {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  letter-spacing: -0.014em;
+  text-wrap: balance;
 }
 
-/* Амьд цэг — «энд, одоо» гэдгийг өнгөгүйгээр хэлнэ */
-@keyframes ping-ring {
-  0% { transform: scale(1); opacity: 0.55; }
-  70%, 100% { transform: scale(2.6); opacity: 0; }
+/* ═══════════════════════════════════════════════════════════════════════════
+   3 · ЗОХИОМЖ
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Хуудасны багана. Захын зай нь дэлгэцтэй хамт ургана — 1408px дээр 80px,
+   утсан дээр 20px. Агуулга хэзээ ч ирмэг тулж очихгүй. */
+.shell {
+  width: 100%;
+  max-width: var(--shell);
+  margin-inline: auto;
+  padding-inline: var(--shell-pad);
 }
 
-.ping-ring { animation: ping-ring 2.4s cubic-bezier(0, 0, 0.2, 1) infinite; }
-
-/* ── Гарчгийн хэлбэр ──────────────────────────────────────────────────────
-   Монохром систем дээр гарчгийн хоёр дахь мөрийг ЗУРЛАГААР гаргах нь
-   өнгө нэмэлгүйгээр эрэмбэ үүсгэнэ: дүүрсэн үг эхэлж, хүрээтэй үг
-   араас нь уншигдана. Зурлагын зузаан үсгийн хэмжээг дагана. */
-.text-outline {
-  color: transparent;
-  -webkit-text-stroke: clamp(1px, 0.16em, 3px) var(--foreground);
-}
-
-/* Зурлага дэмждэггүй хөтөч дээр гарчиг алга болохоос сэргийлнэ */
-@supports not (-webkit-text-stroke: 1px #000) {
-  .text-outline { color: var(--foreground); opacity: 0.4; -webkit-text-stroke: 0; }
-}
-
-/* ── Торон дэвсгэр ────────────────────────────────────────────────────────
-   Маш нимгэн хайрцагласан шугам. Дээрээсээ доошоо уусах тул зөвхөн
-   гарчгийн ард мэдэгдэнэ — заалны шалны шугам шиг. */
-.hairlines {
-  background-image:
-    linear-gradient(var(--line) 1px, transparent 1px),
-    linear-gradient(90deg, var(--line) 1px, transparent 1px);
-  background-size: 92px 92px;
-  -webkit-mask-image: radial-gradient(130% 78% at 50% 0%, #000, transparent 68%);
-  mask-image: radial-gradient(130% 78% at 50% 0%, #000, transparent 68%);
-}
-
-/* ── Зураг дээрх текст ────────────────────────────────────────────────────
-   `Media` нь зурагтай үедээ уналт нэмдэг ч, зураггүй орлуулагч дээр нэмдэггүй.
-   Мөн гэрэлтэй горимд `--foreground` хар болох тул бараан зураг дээр
-   уншигдахаа болино. Тиймээс хучаас нь ҮРГЭЛЖ бараан, текст нь ҮРГЭЛЖ
-   цагаан — энэ хоёр хамт л зөв ажиллана. */
-.tile-scrim {
-  background: linear-gradient(
-    to top,
-    rgb(0 0 0 / 0.88) 0%,
-    rgb(0 0 0 / 0.55) 32%,
-    rgb(0 0 0 / 0.12) 62%,
-    transparent 100%
-  );
-}
-
-/* ── Бүтэн өргөн ──────────────────────────────────────────────────────────
-   `main` нь 72rem -ээр хязгаарлагдсан. Зарим тууз — баатрын зураг, гүйдэг
-   бичиг, төгсгөлийн уриалга — тэр хүрээнээс ГАРЧ дэлгэцийн хоёр ирмэг хүртэл
-   үргэлжлэх ёстой. `50% - 50vw` нь төвлөрсөн эцгээс гадагш татна.
-
-   `body { overflow-x: clip }` (дээр) нь 100vw + гүйлтийн зурвасаас үүсэх
-   хэвтээ гүйлтийг залгих тул энэ нь аюулгүй. */
+/* Баганаас ГАРЧ дэлгэцийн хоёр ирмэг хүртэл. `body { overflow-x: clip }`
+   нь 100vw + гүйлтийн зурвасаас үүсэх хэвтээ гүйлтийг залгина. */
 .bleed {
   width: 100vw;
   margin-left: calc(50% - 50vw);
   margin-right: calc(50% - 50vw);
 }
 
-/* Бүтэн өргөн туузны дотор агуулгыг эргүүлж хуудасны баганад эгнүүлнэ */
-.bleed-inner {
-  margin-inline: auto;
-  width: 100%;
-  max-width: 72rem;
-  padding-inline: 1rem;
+/* Багананы захын зайг ХАСНА — элемент дэлгэцийн ирмэг хүртэл үргэлжилнэ.
+   Зөвхөн өргөн дэлгэцэд: нарийн дэлгэцэд бүх зүйл багана дотроо байна. */
+@media (min-width: 1024px) {
+  /* Багананы ирмэгээс ДЭЛГЭЦИЙН ирмэг хүртэлх зай = савны гадуурх зай +
+     савны дотоод зай. Зөвхөн `--shell-pad` -ийг хасвал 88rem -ээс өргөн
+     дэлгэц дээр багана голлон суух тул хажуу талд цоорхой үлдэнэ. */
+  :root { --edge: calc((100vw - min(100vw, var(--shell))) / 2 + var(--shell-pad)); }
+
+  .bleed-r { margin-right: calc(var(--edge) * -1); }
+  .bleed-l { margin-left: calc(var(--edge) * -1); }
 }
 
-@media (min-width: 640px) {
-  .bleed-inner { padding-inline: 1.25rem; }
+/* 12 багана. Хэсэг бүр өөр өөр мужийг эзэлснээр хуудас нэг хэвийн
+   болохоос ангижирна — гол нь бүгд НЭГ л тортой байх. */
+.g12 {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: var(--gutter);
 }
 
-/* ── Хэвтээ зам ───────────────────────────────────────────────────────────
-   Хайрцгуудыг тор болгож өрөхийн оронд НЭГ мөрөнд хэвтээгээр гүйлгэнэ.
-   Гүйлтийн зурвас нь зохиомжийг эвддэг тул нуугдана — хөдөлгөөн нь хуруу,
-   trackpad, эсвэл сумаар үргэлжилнэ. */
-.rail {
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+/* Хэсгийн босоо хэмнэл */
+.bay { padding-block: var(--bay); }
+.bay-t { padding-top: var(--bay); }
+.bay-b { padding-bottom: var(--bay); }
+
+/* ── Шугам ────────────────────────────────────────────────────────────────
+   Энэ систем дэх ГОЛ бүтцийн материал. Хайрцаг нь агуулгыг тусгаарладаг
+   бол шугам нь ХОЛБОНО: нэг шугам дээр сууж буй хоёр зүйл хоорондоо
+   харьцаатай гэдгийг хэлнэ. */
+.hr { height: 1px; background: var(--line); border: 0; }
+.hr-strong { background: var(--line-strong); }
+
+/* Гүйлтэд татагдах шугам */
+.hr-draw { transform-origin: left; }
+
+/* Торон дэвсгэр — заалны шалны шугам. Дээрээсээ уусах тул зөвхөн
+   гарчгийн ард мэдэгдэнэ. */
+.mesh {
+  background-image:
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: 88px 88px;
+  -webkit-mask-image: radial-gradient(120% 76% at 50% 0%, #000, transparent 66%);
+  mask-image: radial-gradient(120% 76% at 50% 0%, #000, transparent 66%);
 }
 
-.rail::-webkit-scrollbar { display: none; }
+/* Прожектор. Өнгөгүй тул зөвхөн орон зайн мэдрэмж өгнө: харанхуйд гэрэл
+   цацна, гэрэлтэйд сүүдэр тусгана. */
+.glow {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(110px);
+  pointer-events: none;
+  z-index: -1;
+  background: light-dark(rgba(0, 0, 0, 0.05), rgba(255, 255, 255, 0.06));
+}
 
-/* ── Хайрцаг ──────────────────────────────────────────────────────────── */
+.glow-soft { background: light-dark(rgba(0, 0, 0, 0.03), rgba(255, 255, 255, 0.035)); }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ⚠️ ЭНЭ БҮХЭН `@layer components` ДОТОР
+
+   Давхаргагүй дүрэм нь Tailwind-ийн `@layer utilities` -ийг ҮЛ ХАРГАЛЗАН
+   дардаг. Өөрөөр хэлбэл `.media { position: relative }` нь дуудлагын
+   газарт бичсэн `absolute` -ийг чимээгүй устгана — дуудагч нь ямар ч
+   алдаа хараагүй атлаа зохиомж эвдэрнэ.
+
+   `components` давхарга нь `utilities` -ээс ӨМНӨ тавигдсан тул эдгээр
+   бүрдлийн анхдагч утгыг дуудлагын газраас дарж бичих боломжтой болно:
+   `.media` дээр `absolute`, `rounded-none`, `border-0` гэх мэт. Яг ийм
+   байх ёстой — бүрдэл нь ЭХЛЭЛ цэг өгдөг, эцсийн шийдвэр биш.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+@layer components {
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   4 · ГАДАРГА
+   ═══════════════════════════════════════════════════════════════════════════ */
 
 .card {
   background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: var(--radius-card);
+  border-radius: var(--r);
 }
 
+/* Дарж болох гадарга. Тайван төлөвт сүүдэргүй — гүнийг зөвхөн шугам
+   барина. Сүүдэр нь hover -ийн ЦОРЫН ГАНЦ хэрэгсэл: «энэ өргөгдлөө». */
 .card-link {
   transition:
-    transform 260ms cubic-bezier(0.2, 0.8, 0.2, 1),
-    box-shadow 260ms ease,
-    border-color 220ms ease,
-    background-color 220ms ease;
+    transform var(--t-2) var(--ease),
+    box-shadow var(--t-2) var(--ease),
+    border-color var(--t-1) linear,
+    background-color var(--t-1) linear;
 }
 
 .card-link:hover {
-  transform: translateY(-4px);
+  transform: translate3d(0, -3px, 0);
   border-color: var(--line-strong);
-  background: var(--surface-2);
-  /* Өнгөгүй системд сүүдэр бол цорын ганц «өргөгдлөө» гэсэн дохио.
-     Харанхуйд сүүдэр харагдахгүй тул тэнд илүү гүн, өргөн тараана. */
-  box-shadow: light-dark(
-    0 18px 40px -22px rgba(0, 0, 0, 0.32),
-    0 20px 46px -20px rgba(0, 0, 0, 0.9)
-  );
+  box-shadow: var(--lift);
 }
 
-/* Дарах агшинд буцаж суух — хуруунд хариу мэдрэгдэнэ */
 .card-link:active {
-  transform: translateY(-1px);
+  transform: translate3d(0, -1px, 0) scale(0.995);
   transition-duration: 90ms;
 }
 
-.card-link:hover .card-media { transform: scale(1.06); }
-.card-media { transition: transform 620ms cubic-bezier(0.2, 0.8, 0.2, 1); }
-
-/* Гарчгийн доорх нарийн зураас */
-.rule {
-  height: 1px;
-  background: linear-gradient(90deg, var(--line-strong), transparent);
-}
-
-/* Идэвхтэй цэсний зүйл. Тавиурын дотор сууж байгаа тул дүүргэлт дангаараа
-   сул — нэг пикселийн дотоод хүрээ нэмбэл гадарга дээрээс өргөгдөж харагдана. */
-.nav-active {
-  color: var(--foreground);
+/* ── Зураг ────────────────────────────────────────────────────────────────
+   Зураг хайрцагт хийгддэггүй — зураг ӨӨРӨӨ хайрцаг. Тиймээс `.media` нь
+   зөвхөн зүсэлт, `.card-media` нь дотоод хөдөлгөөн. */
+.media {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--r);
   background: var(--surface-2);
-  box-shadow: inset 0 0 0 1px var(--line);
 }
 
-/* ── Хөлийн үсэг ──────────────────────────────────────────────────────────
-   Хуудсын хамгийн ёроолд брэндийн нэр аварга том, зурлагаар. Уншихад биш —
-   хуудас дуусахдаа чимээгүй тамга дарж байгаа юм. Дэлгэцийн өргөнийг бүтэн
-   дүүргэж, доод ирмэгээсээ зүсэгдэнэ. */
-.wordmark {
-  font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
-  font-weight: 800;
-  /* 13 тэмдэгт × ~0.55em ≈ 7.2em — доорх хязгаарууд нь нэрийг ХОЁУЛАНД нь
-     (утас ба өргөн дэлгэц) бүтнээр багтаана, зүсэгдэхгүй. */
-  font-size: clamp(2.25rem, 10.5vw, 8rem);
-  line-height: 0.74;
-  letter-spacing: -0.055em;
+.card-media { transition: transform var(--t-4) var(--ease); }
+.card-link:hover .card-media,
+.group:hover .card-media { transform: scale(1.045); }
+
+/* Зураг дээрх текстийн уншигдац. Гэрэлтэй горимд `--foreground` хар болох
+   тул бараан зураг дээр уншигдахаа болино — хучаас нь ҮРГЭЛЖ бараан,
+   текст нь ҮРГЭЛЖ цагаан байж л хос болж ажиллана. */
+.scrim {
+  background: linear-gradient(
+    to top,
+    rgb(0 0 0 / 0.9) 0%,
+    rgb(0 0 0 / 0.58) 30%,
+    rgb(0 0 0 / 0.14) 60%,
+    transparent 100%
+  );
+}
+
+/* Хайрцаг дээгүүр өнгөрөх нарийн туяа. Өнгө нэмэхгүй — цагаан гэрэл гулсана. */
+.sheen::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  translate: -130% 0;
+  background: linear-gradient(
+    104deg,
+    transparent 40%,
+    light-dark(rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0.1)) 50%,
+    transparent 60%
+  );
+  transition: translate 900ms var(--ease);
+}
+
+.sheen:hover::after { translate: 130% 0; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   5 · УДИРДЛАГУУД
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Товч ─────────────────────────────────────────────────────────────────
+   Дугуй бөмбөлөг биш ТЭГШ ӨНЦӨГТ. Hover нь өнгө «бүдгэрүүлэх» биш —
+   доороос дээш дүүргэлт ЭРГЭНЭ: цагаан товч хар болж, хар товч цагаан
+   болно. Энэ нь монохром системд боломжтой цорын ганц жинхэнэ өөрчлөлт
+   бөгөөд ямар ч өнгө нэмэхгүйгээр хамгийн хүчтэй хариу өгнө. */
+.btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.625rem;
+  min-height: 2.875rem;
+  padding-inline: 1.5rem;
+  border: 1px solid transparent;
+  border-radius: var(--r);
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
   white-space: nowrap;
-  user-select: none;
-  color: transparent;
-  -webkit-text-stroke: 1px var(--line-strong);
+  isolation: isolate;
+  overflow: hidden;
+  transition:
+    color var(--t-2) var(--ease-io),
+    border-color var(--t-2) var(--ease-io),
+    transform var(--t-1) var(--ease);
 }
 
-@supports not (-webkit-text-stroke: 1px #000) {
-  .wordmark { color: var(--line); -webkit-text-stroke: 0; }
+.btn::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  z-index: -1;
+  transform: scaleY(0);
+  transform-origin: bottom;
+  transition: transform var(--t-2) var(--ease-io);
 }
 
-/* ── Горимын товчны дүрс ──────────────────────────────────────────────── */
+.btn:hover::before { transform: scaleY(1); }
 
-/* `light-dark()` нь зөвхөн өнгөнд ажилладаг тул `display` -ийг сонгогчоор
+/* Дарах агшин — 90ms дотор суугаад буцна. Хуруунд ХАРИУ мэдрэгдэнэ. */
+.btn:active { transform: scale(0.975); transition-duration: 90ms; }
+
+.btn:disabled,
+.btn[aria-disabled='true'] {
+  cursor: not-allowed;
+  opacity: 0.4;
+  transform: none;
+}
+
+.btn:disabled::before,
+.btn[aria-disabled='true']::before { transform: scaleY(0); }
+
+/* Үндсэн — дүүрсэн. Хуудсанд ГАНЦ л байх ёстой. */
+.btn-solid {
+  background: var(--button);
+  border-color: var(--button);
+  color: var(--button-ink);
+}
+
+.btn-solid::before { background: var(--background); }
+.btn-solid:hover { color: var(--foreground); border-color: var(--foreground); }
+
+/* Хоёрдогч — хүрээтэй. Hover дээр дүүрч, үндсэн товч болж хувирна. */
+.btn-line {
+  border-color: var(--line-strong);
+  color: var(--foreground);
+}
+
+.btn-line::before { background: var(--foreground); }
+.btn-line:hover { color: var(--background); border-color: var(--foreground); }
+
+/* Гуравдагч — хүрээгүй. Зөвхөн дэвсгэр өөрчлөгдөнө. */
+.btn-bare { color: var(--muted); }
+.btn-bare::before { background: var(--surface-2); }
+.btn-bare:hover { color: var(--foreground); }
+
+/* Устгах/цуцлах — тасархай хүрээгээр эхэлж, hover дээр л тодорно.
+   Санамсаргүй дарахаас хэлбэрээрээ сэргийлнэ. */
+.btn-risk {
+  border-style: dashed;
+  border-color: var(--line-strong);
+  color: var(--muted);
+}
+
+.btn-risk::before { background: var(--foreground); }
+.btn-risk:hover { color: var(--background); border-color: var(--foreground); border-style: solid; }
+
+/* Хэмжээ. Навбар, хайрцаг доторх товч нь хуудасны үндсэн товчтой ижил
+   өндөртэй байх ёсгүй — эрэмбэ нь хэмжээгээр ч илэрнэ. */
+.btn-sm {
+  min-height: 2.25rem;
+  padding-inline: 1rem;
+  font-size: 0.6875rem;
+  letter-spacing: 0.1em;
+}
+
+.btn-lg {
+  min-height: 3.25rem;
+  padding-inline: 1.5rem;
+  font-size: 0.75rem;
+}
+
+/* Утсан дээр л том болно — 390px өргөнд 2rem захын зай хоёр товчийг
+   зэрэгцүүлэхээ болиулна. */
+@media (min-width: 640px) {
+  .btn-lg {
+    min-height: 3.375rem;
+    padding-inline: 2rem;
+    font-size: 0.8125rem;
+  }
+}
+
+/* Урт шошготой товч нарийн дэлгэцэд хоёр мөр болж эвхэгдэнэ. `nowrap`
+   нь ГАНЦ мөрөнд багтахыг шаарддаг тул халилтын гол эх үүсвэр байсан. */
+@media (max-width: 400px) {
+  .btn { white-space: normal; text-align: center; }
+}
+
+/* ── Дүрст товч ───────────────────────────────────────────────────────────
+   Дөрвөлжин, хүрээгүй. Hover дээр л хүрээ ГАРЧ ирнэ: тайван үед навбар
+   товчны эгнээ биш, тэмдэгтүүдийн эгнээ мэт уншигдана. */
+.icon-btn {
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 1px solid transparent;
+  border-radius: var(--r);
+  color: var(--muted);
+  transition:
+    color var(--t-1) linear,
+    border-color var(--t-1) linear,
+    background-color var(--t-1) linear;
+}
+
+.icon-btn:hover {
+  border-color: var(--line);
+  background: var(--surface-2);
+  color: var(--foreground);
+}
+
+.icon-btn:active { transform: scale(0.94); transition-duration: 90ms; }
+
+/* Товчны дүрс — сум. Hover дээр чиглэлээ заана. */
+.btn .ico { transition: transform var(--t-2) var(--ease); }
+.btn:hover .ico { transform: translateX(4px); }
+
+/* ── Холбоос ──────────────────────────────────────────────────────────────
+   Доогуур зураас нь ГАРЧ ирнэ, зүүнээс баруун тийш. Байнга зурсан зураас
+   нь текстийн урсгалыг тасалдаг; огт зураасгүй бол дарж болохыг мэдэхгүй. */
+.lnk {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 0% 1px;
+  padding-bottom: 1px;
+  transition:
+    background-size var(--t-2) var(--ease),
+    color var(--t-1) linear;
+}
+
+.lnk:hover { background-size: 100% 1px; }
+
+/* Гарч ирэхийн оронд АЛГА болох хувилбар — цэсэнд, зураас нь анхнаасаа
+   байгаа газар. */
+.lnk-out { background-size: 100% 1px; }
+.lnk-out:hover { background-size: 0% 1px; }
+
+/* ── Оролт ────────────────────────────────────────────────────────────────
+   Хайрцаг биш ШУГАМ. Фокуслахад шугам зүүнээс баруун тийш татагдана —
+   хүрээ «өнгө солих» -оос хамаагүй тодорхой дохио. */
+.ctl {
+  width: 100%;
+  padding: 0.75rem 0;
+  border: 0;
+  border-bottom: 1px solid var(--line-strong);
+  border-radius: 0;
+  background-color: transparent;
+  background-image: linear-gradient(var(--foreground), var(--foreground));
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 0% 1px;
+  color: var(--foreground);
+  font: inherit;
+  font-size: 1rem;
+  transition: background-size var(--t-2) var(--ease), border-color var(--t-1) linear;
+}
+
+.ctl::placeholder { color: var(--faint); }
+.ctl:hover { border-bottom-color: var(--foreground-soft); }
+.ctl:focus { background-size: 100% 1px; outline: 0; }
+.ctl:focus-visible { outline: 0; }
+
+/* `select` -ийн сумыг өөрсдөө зурна — хөтөч бүр өөр өөр зурдаг */
+select.ctl {
+  appearance: none;
+  padding-right: 1.5rem;
+  background-image:
+    linear-gradient(var(--foreground), var(--foreground)),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6' fill='none' stroke='%23888' stroke-width='1.4'%3E%3Cpath d='M1 1l4 4 4-4'/%3E%3C/svg%3E");
+  background-position: 0 100%, right 2px center;
+  background-size: 0% 1px, 10px 6px;
+}
+
+select.ctl:focus { background-size: 100% 1px, 10px 6px; }
+
+textarea.ctl { resize: vertical; min-height: 7rem; }
+
+/* iOS дээр 16px -ээс жижиг оролт фокуслахад хуудас томордог — Safari-ийн
+   дүрэм, тойрч гарах арга байхгүй. */
+@media (max-width: 767px) {
+  .ctl { font-size: 16px; }
+}
+
+/* ── Цэсний холбоос ───────────────────────────────────────────────────────
+   Идэвхтэй зүйлийг дүүргэлтээр биш ЗУРААСААР заана. Дүүргэлт нь навбарыг
+   товчны эгнээ мэт харагдуулдаг; зураас нь «та энд байна» гэж заана. */
+.nav-item {
+  position: relative;
+  padding: 0.5rem 0;
+  color: var(--muted);
+  transition: color var(--t-1) linear;
+}
+
+.nav-item::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 1px;
+  background: var(--foreground);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform var(--t-2) var(--ease);
+}
+
+.nav-item:hover { color: var(--foreground-soft); }
+.nav-item:hover::after { transform: scaleX(1); transform-origin: left; }
+
+.nav-item[aria-current='page'] { color: var(--foreground); }
+.nav-item[aria-current='page']::after { transform: scaleX(1); transform-origin: left; }
+
+/* ── Хураангуй самбар ─────────────────────────────────────────────────────
+   `<details>` -ийн нээлт нь анхдагчаараа огцом. `::details-content` нь
+   агуулгын хайрцгийг зорих боломж олгодог: `interpolate-size` нь `auto`
+   өндрийг шилжүүлж болохуйц болгож, `allow-discrete` нь `content-visibility`
+   -ийг шилжилтийн туршид барина.
+
+   Дэмждэггүй хөтөч дээр самбар шууд нээгдэнэ — өнөөдрийнхтэй яг адил.
+   Тиймээс энэ бол сайжруулалт, шаардлага биш. */
+@supports selector(::details-content) {
+  .faq::details-content {
+    block-size: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition:
+      block-size var(--t-2) var(--ease),
+      opacity var(--t-2) var(--ease),
+      content-visibility var(--t-2) allow-discrete;
+    interpolate-size: allow-keywords;
+  }
+
+  .faq[open]::details-content {
+    block-size: auto;
+    opacity: 1;
+  }
+}
+
+.faq summary { transition: opacity var(--t-1) linear; }
+.faq summary:hover { opacity: 0.62; }
+
+/* ── Шошго ────────────────────────────────────────────────────────────────
+   Өнгө байхгүй тул төлөвийг ХЭЛБЭР заана:
+     дүүрсэн   → баталгаажсан      тод хүрээ → анхаарал шаардсан
+     тасархай  → боломжгүй         бүдэг     → энгийн мэдээлэл */
+.tag {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.3125rem 0.625rem;
+  border: 1px solid transparent;
+  border-radius: var(--r);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.tag-fill { background: var(--foreground); color: var(--background); }
+.tag-line { border-color: var(--line-strong); color: var(--foreground); }
+.tag-dash { border-color: var(--line-strong); border-style: dashed; color: var(--muted); }
+.tag-mute { background: var(--surface-2); color: var(--foreground-soft); }
+
+/* ── Гүйлтийн явц ─────────────────────────────────────────────────────────
+   Навбарын доод ирмэг дээрх нэг пикселийн шугам. JS -гүй: `scroll()` нь
+   хөдөлгөөний явцыг баримтын гүйлтэд шууд уяна. Дэмжигдээгүй үед
+   `scaleX(0)` тул огт харагдахгүй — дутуу зүйл үлдэхгүй. */
+.progress {
+  transform: scaleX(0);
+  transform-origin: left;
+}
+
+@supports (animation-timeline: scroll()) {
+  .progress {
+    animation: draw-x linear;
+    animation-timeline: scroll(root block);
+  }
+}
+
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   6 · ХӨДӨЛГӨӨН
+
+   Хоёр эх сурвалж:
+     · ГҮЙЛТ  — `[data-rv]`. Жижиг ажиглагч (§ site/Reveal.tsx) элемент
+       харагдах хэсэгт орохад `.is-in` нэмнэ. IntersectionObserver нь бүх
+       хөтөч дээр ажилладаг тул scroll-timeline -аас найдвартай.
+     · HOVER  — зөвхөн CSS шилжилт.
+
+   ⚠️ Анхдагч төлөв нь ХАРАГДАХ. `<html>` дээр `rv-on` анги нэмэгдсэн үед л
+   элементүүд нуугдана — тэр ангийг зурагдахаас өмнө ажилладаг мөрийн
+   скрипт тавина. JS унтарсан эсвэл унасан бол агуулга бүтнээрээ харагдана:
+   хөдөлгөөн нь чимэглэл, агуулгын урьдчилсан нөхцөл БИШ.
+
+   Зөвхөн `opacity`, `transform`, `clip-path` хөдөлнө — гурвуулаа нийлмэл
+   давхаргад ажиллах тул layout дахин тооцоологдохгүй, 60fps барина. */
+
+@keyframes draw-x {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+@keyframes drift {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(0, -7%, 0); }
+}
+
+html.rv-on [data-rv] {
+  transition:
+    opacity var(--t-3) var(--ease) var(--rv-d, 0ms),
+    transform var(--t-3) var(--ease) var(--rv-d, 0ms),
+    clip-path var(--t-4) var(--ease) var(--rv-d, 0ms);
+}
+
+/* Анхдагч — доороос мандаж, тодрох */
+html.rv-on [data-rv]:not(.is-in) {
+  opacity: 0;
+  transform: translate3d(0, 1.75rem, 0);
+}
+
+/* Зүсэлтээр нээгдэх — зураг, том гарчигт. Тунгалаг биш, БҮТЭН зүйл
+   доороос дээш нээгдэнэ: гэрэл зураг мэт «илчлэгдэх» мэдрэмж.
+
+   ⚠️ Эцсийн төлөвийг ЗААВАЛ `inset(0 0 0 0)` гэж бичнэ — `none` руу шилжих
+   нь тасархай (interpolable биш) тул хөтөч завсрын утга тооцож чадахгүй.
+   Хоёр төлөв хоёулаа `inset()` байж л шилжилт жигд явна. */
+html.rv-on [data-rv='clip'] {
+  clip-path: inset(0 0 0 0);
+}
+
+html.rv-on [data-rv='clip']:not(.is-in) {
+  opacity: 1;
+  transform: none;
+  clip-path: inset(0 0 101% 0);
+}
+
+html.rv-on [data-rv='scale']:not(.is-in) {
+  opacity: 0;
+  transform: scale(0.965);
+}
+
+html.rv-on [data-rv='left']:not(.is-in) {
+  opacity: 0;
+  transform: translate3d(-1.75rem, 0, 0);
+}
+
+/* Шугам — зүүнээс баруун тийш татагдана */
+html.rv-on [data-rv='line'] { transform-origin: left; }
+html.rv-on [data-rv='line']:not(.is-in) { opacity: 1; transform: scaleX(0); }
+
+/* ── Ачаалалтын нэвтрэлт ─────────────────────────────────────────────────
+   Баатрын хэсэг дэлгэц нээгдмэгц ХАРАГДДАГ — тиймээс түүнийг гүйлтэд уях нь
+   утгагүй. Гүйлтийн ажиглагч нь «доош гүйхэд юу тохиолдох» -ыг л мэднэ:
+   дээд хэсгийг түүнд даатгавал нэг зүйл л дутуу болоход (ажиглагч ачаалж
+   амжаагүй, элемент алдагдсан) хуудасны хамгийн чухал зураг ҮҮРД хоосон
+   үлдэнэ. Яг тийм зүйл болсон.
+
+   Тиймээс дээд хэсэг нь ЦАГААР ажилладаг цэвэр CSS хөдөлгөөнтэй: JS огт
+   оролцохгүй, ажиглагч байхгүй ч ажиллана. Хөдөлгөөн багасгах горимд
+   доорх ерөнхий дүрэм хугацааг тэглэх тул эцсийн төлөвтөө шууд суух ба
+   `both` дүүргэлт агуулгыг харагдуулна.
+
+   Саатал `--d` -ээр: эйброу → гарчгийн үг бүр → тайлбар → товч → зураг. */
+
+@keyframes enter-rise {
+  from { opacity: 0; translate: 0 1.5rem; }
+  to { opacity: 1; translate: 0 0; }
+}
+
+@keyframes enter-clip {
+  from { clip-path: inset(0 0 101% 0); }
+  to { clip-path: inset(0 0 0 0); }
+}
+
+@keyframes enter-mask {
+  from { transform: translate3d(0, 108%, 0); }
+  to { transform: none; }
+}
+
+.enter {
+  animation: enter-rise var(--t-3) var(--ease) both;
+  animation-delay: var(--d, 0ms);
+}
+
+.enter-clip {
+  animation: enter-clip var(--t-4) var(--ease) both;
+  animation-delay: var(--d, 0ms);
+}
+
+.enter-mask .mask-line > span {
+  animation: enter-mask var(--t-4) var(--ease) both;
+  animation-delay: var(--d, 0ms);
+}
+
+.enter-mask .mask-line:nth-child(2) > span { animation-delay: calc(var(--d, 0ms) + 90ms); }
+.enter-mask .mask-line:nth-child(3) > span { animation-delay: calc(var(--d, 0ms) + 180ms); }
+.enter-mask .mask-line:nth-child(4) > span { animation-delay: calc(var(--d, 0ms) + 270ms); }
+
+/* ── Багана бүрийн саатал ────────────────────────────────────────────────
+   Торны хайрцгууд ЗЭРЭГ гарах нь машин мэт. Дараалан гарах нь гар мэт.
+   Саатал 70ms — үүнээс урт бол хүлээлгэнэ, богино бол мэдэгдэхгүй. */
+[data-stagger] > *:nth-child(1) { --rv-d: 0ms; }
+[data-stagger] > *:nth-child(2) { --rv-d: 70ms; }
+[data-stagger] > *:nth-child(3) { --rv-d: 140ms; }
+[data-stagger] > *:nth-child(4) { --rv-d: 210ms; }
+[data-stagger] > *:nth-child(5) { --rv-d: 280ms; }
+[data-stagger] > *:nth-child(6) { --rv-d: 350ms; }
+[data-stagger] > *:nth-child(n + 7) { --rv-d: 420ms; }
+
+/* ── Мөрөөр далдалсан гарчиг ─────────────────────────────────────────────
+   Мөр бүр өөрийн цонхтой; текст доороосоо өргөгдөж орж ирнэ. Зүсэгдсэн
+   ирмэг нь хэвлэлийн зурагт хуудас нээгдэж буй мэт мэдрэмж өгнө. */
+.mask-line { display: block; overflow: hidden; }
+.mask-line > span { display: block; will-change: transform; }
+
+html.rv-on [data-rv='mask'] .mask-line > span {
+  transform: translate3d(0, 108%, 0);
+  transition: transform var(--t-4) var(--ease) var(--rv-d, 0ms);
+}
+
+html.rv-on [data-rv='mask'].is-in .mask-line > span { transform: none; }
+
+html.rv-on [data-rv='mask'] .mask-line:nth-child(2) > span { transition-delay: calc(var(--rv-d, 0ms) + 90ms); }
+html.rv-on [data-rv='mask'] .mask-line:nth-child(3) > span { transition-delay: calc(var(--rv-d, 0ms) + 180ms); }
+html.rv-on [data-rv='mask'] .mask-line:nth-child(4) > span { transition-delay: calc(var(--rv-d, 0ms) + 270ms); }
+
+/* ── Параллакс ───────────────────────────────────────────────────────────
+   Зөвхөн НЭГ-ХОЁР зурагт. Бүх зүйл өөр өөр хурдтай хөдөлбөл хуудас
+   сэлгэцэлж, уншихад хэцүү болно. Гүйлтэд шууд уясан тул JS хэрэггүй. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .drift {
+      animation: drift linear both;
+      animation-timeline: view();
+      animation-range: cover 0% cover 100%;
+    }
+  }
+}
+
+/* ── Гүйдэг тууз ─────────────────────────────────────────────────────────
+   Хоёр ижил хагасыг зэрэгцүүлээд -50% зөөвөрлөх нь заадасгүй давталт өгнө
+   — хагасууд ЯГ ижил өргөнтэй байх ёстой тул зайг тууз дээр биш, хагас
+   бүрийн дотор нь тавина. */
+@keyframes marquee {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-50%, 0, 0); }
+}
+
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee var(--speed, 46s) linear infinite;
+}
+
+.marquee:hover .marquee-track { animation-play-state: paused; }
+
+/* Хоёр ирмэг рүү уусна — тууз таслагдсан биш, үргэлжилж буй мэт */
+.edge-fade {
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+}
+
+/* Амьд цэг — «энд, одоо» гэдгийг өнгөгүйгээр хэлнэ */
+@keyframes ping-ring {
+  0% { transform: scale(1); opacity: 0.5; }
+  70%, 100% { transform: scale(2.8); opacity: 0; }
+}
+
+.ping-ring { animation: ping-ring 2.6s cubic-bezier(0, 0, 0.2, 1) infinite; }
+
+/* Хэвтээ зам — гүйлтийн зурвас нь зохиомжийг эвддэг тул нуугдана */
+.rail { scrollbar-width: none; -ms-overflow-style: none; }
+.rail::-webkit-scrollbar { display: none; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   7 · ГОРИМЫН ТОВЧ, ЛОГО
+
+   `light-dark()` нь зөвхөн ӨНГӨНД ажилладаг тул `display` -ийг сонгогчоор
    удирдана. Ингэснээр товч серверээс ямар ч төлөвийг таамаглах шаардлагагүй
-   — hydration зөрөх, эсвэл буруу дүрс анивчих асуудал гарахгүй. */
+   — hydration зөрөх, эсвэл буруу дүрс анивчих асуудал гарахгүй.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
 .when-light { display: none; }
 .when-dark { display: block; }
 
@@ -752,8 +1314,7 @@ h1, h2, h3, h4 {
 :root[data-theme='light'] .when-light { display: block; }
 :root[data-theme='light'] .when-dark { display: none; }
 
-/* Хар зурлагатай, дэвсгэргүй лого — харанхуй дээр харагдахгүй тул эргүүлнэ.
-   Дүрсний өнгө нь цэвэр хар/цагаан тул `invert` гажуудал үүсгэхгүй. */
+/* Хар зурлагатай, дэвсгэргүй лого — харанхуй дээр харагдахгүй тул эргүүлнэ */
 .logo-invert { filter: invert(1); }
 
 @media (prefers-color-scheme: light) {
@@ -762,14 +1323,33 @@ h1, h2, h3, h4 {
 
 :root[data-theme='light'] .logo-invert { filter: none; }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   8 · ХӨДӨЛГӨӨН БАГАСГАХ
+
+   Хагас арга байхгүй: хугацааг богиносгох нь давталттай хөдөлгөөнийг
+   зогсоодоггүй. Тиймээс бүгдийг ТАСАЛНА, агуулгыг эцсийн төлөвт нь
+   шууд үлдээнэ.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
-  .card-link:hover { transform: none; }
-  .card-link:hover .card-media { transform: none; }
+
+  .marquee-track, .ping-ring, .progress { animation: none !important; }
   .sheen::after { display: none; }
-  /* Давталттай хөдөлгөөнийг богиносгох нь биш, БҮРМӨСӨН зогсоох хэрэгтэй */
-  .marquee-track, .ping-ring { animation: none !important; }
+  .card-link:hover { transform: none; }
+  .card-link:hover .card-media, .group:hover .card-media { transform: none; }
+
+  html.rv-on [data-rv],
+  html.rv-on [data-rv]:not(.is-in) {
+    opacity: 1 !important;
+    transform: none !important;
+    clip-path: none !important;
+  }
+
+  html.rv-on [data-rv='mask'] .mask-line > span { transform: none !important; }
 }
