@@ -13,7 +13,7 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
   const info = content(site.get('contact'), locale)
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="shell flex flex-col gap-14 pt-12 sm:pt-16">
       <PageHeader title={t.contact.title} />
 
       <div className="grid gap-10 md:grid-cols-2">
