@@ -153,6 +153,10 @@ const mn = {
     weekPrev: 'Өмнөх долоо хоног',
     weekNext: 'Дараа долоо хоног',
     thisWeek: 'Энэ долоо хоног',
+    sessionCount: 'хичээл',
+    clear: 'Цэвэрлэх',
+    filterTitle: 'Шүүх',
+    noneThisDay: 'Хичээлгүй',
   },
   booking: {
     success: 'Бүртгэл амжилттай боллоо.',
@@ -424,6 +428,10 @@ const en: Dictionary = {
     weekPrev: 'Previous week',
     weekNext: 'Next week',
     thisWeek: 'This week',
+    sessionCount: 'classes',
+    clear: 'Clear',
+    filterTitle: 'Filter',
+    noneThisDay: 'No classes',
   },
   booking: {
     success: 'You are booked in.',
