@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 import { Badge, ButtonLink, Empty, PageHeader, Section } from '@/components/ui'
 import { Media } from '@/components/site/media'
-import { SessionCard } from '@/components/site/SessionCard'
+import { SessionList } from '@/components/site/SessionList'
 import { getDictionary, loc, isLocale } from '@/lib/i18n'
 import { formatMnt } from '@/lib/format'
 import { getClassTypes, getUpcomingSessions } from '@/lib/data'
@@ -61,17 +61,11 @@ export default async function ClassDetailPage({
         {mine.length === 0 ? (
           <Empty>{t.schedule.noSessions}</Empty>
         ) : (
-          <div className="grid gap-3 sm:grid-cols-2">
-            {mine.map((session) => (
-              <SessionCard
-                key={session.id}
-                session={session}
-                locale={locale}
-                booked={booked.has(session.id)}
-                back={`/${locale}/classes/${slug}`}
-              />
-            ))}
-          </div>
+          /* `hide="classType"` — энэ хуудас БҮХЭЛДЭЭ нэг хичээлийн тухай тул
+             мөр бүр дээр нэрийг нь давтвал жагсаалт нэг үг хуулсан багана
+             болно. Оронд нь БАГШИЙН нэр гарчиг болно: мөрүүд хоорондоо
+             яг үүгээрээ ялгаатай. */
+          <SessionList sessions={mine} locale={locale} booked={booked} hide="classType" />
         )}
       </Section>
     </div>
