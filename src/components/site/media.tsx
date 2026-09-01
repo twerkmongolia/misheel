@@ -1,5 +1,5 @@
 import Image from 'next/image'
-import { existsSync } from 'node:fs'
+import { existsSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 
 /**
@@ -88,7 +88,7 @@ export function Media({
     return (
       <div className={`media ${ratio} ${className}`}>
         <Image
-          src={src}
+          src={versioned(src)}
           alt={alt}
           fill
           priority={priority}
