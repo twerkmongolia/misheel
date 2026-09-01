@@ -60,6 +60,11 @@ export function formatDayShort(iso: string, locale: AppLocale): string {
   const day = formatInTimeZone(date, TIMEZONE, 'd')
   return `${month}-р сарын ${day}`
 }
+
+/** Сарын хэдэн нь вэ — зөвхөн тоо. Долоо хоногийн тоймд хэрэглэнэ. */
+export function dayOfMonth(iso: string): string {
+  return formatInTimeZone(new Date(iso), TIMEZONE, 'd')
+}
 /** `2026-08-29` хэлбэрээр — өдрөөр бүлэглэхэд ашиглана (УБ-ын цагаар). */
 export function dayKey(iso: string): string {
   return formatInTimeZone(new Date(iso), TIMEZONE, 'yyyy-MM-dd')
