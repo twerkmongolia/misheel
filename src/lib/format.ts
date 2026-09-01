@@ -45,6 +45,21 @@ export function weekdayLong(iso: string, locale: AppLocale): string {
   return MN_WEEKDAYS_LONG[Number(formatInTimeZone(date, TIMEZONE, 'i')) % 7] ?? ''
 }
 
+/**
+ * Хуваарийн огноо — УНШИХАД зориулсан.
+ *
+ * `formatDate` нь `2026.09.07` гэж бичдэг: баримт бичиг, хүснэгтэд зөв ч
+ * хуваарийн жагсаалтад уншигч «энэ хэдэн сарын хэд вэ» гэдгийг тоолж
+ * олох ёстой болдог. Энд сар, өдрийг ҮГЭЭР хэлнэ — жил нь ойрын хичээлд
+ * хэзээ ч эргэлзээ төрүүлдэггүй тул хасагдав.
+ */
+export function formatDayShort(iso: string, locale: AppLocale): string {
+  const date = new Date(iso)
+  if (locale === 'en') return formatInTimeZone(date, TIMEZONE, 'd MMM', { locale: enUS })
+  const month = formatInTimeZone(date, TIMEZONE, 'M')
+  const day = formatInTimeZone(date, TIMEZONE, 'd')
+  return `${month}-р сарын ${day}`
+}
 /** `2026-08-29` хэлбэрээр — өдрөөр бүлэглэхэд ашиглана (УБ-ын цагаар). */
 export function dayKey(iso: string): string {
   return formatInTimeZone(new Date(iso), TIMEZONE, 'yyyy-MM-dd')
