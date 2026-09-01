@@ -1,10 +1,11 @@
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 import { notFound } from 'next/navigation'
-import { ButtonLink, Card, Eyebrow, PageHeader, Section } from '@/components/ui'
+import { ButtonLink, Card, Eyebrow, Section } from '@/components/ui'
 import { Media } from '@/components/site/media'
 import { getDictionary, loc, isLocale, type Locale } from '@/lib/i18n'
 import { getInstructors } from '@/lib/data'
+import { PageBanner } from '@/components/site/PageBanner'
 
 /**
  * Хуудасны гэрэл зургууд.
@@ -81,22 +82,20 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
   const points = [t.about.what.free, t.about.what.health, t.about.what.why]
 
   return (
-    <div className="shell flex flex-col gap-24 pt-12 sm:pt-16">
-      {/* ── Танилцуулга ──────────────────────────────────────────────────
-          Гарчиг нь ганц үг — өнгөгүй систем дээр хэмжээ өөрөө мэдэгдэл. */}
-      <section className="relative">
-        <div className="glow -top-24 -left-20 h-72 w-72" />
-        <PageHeader eyebrow={t.about.eyebrow} title="Twerk" lead={t.about.lead} />
+    <>
+      {/* Нээлтийн зураг ба гарчиг НЭГ блок боллоо. Урьд нь гарчиг дээр,
+          зураг доор нь тусдаа зогсдог байсан — тууз хоёрыг нэгтгэнэ.
+          `banners/about.jpg` олдоогүй бол хуудасны хуучин зургаа хэвээр
+          хэрэглэнэ, юу ч алдагдахгүй. */}
+      <PageBanner
+        page="about"
+        eyebrow={t.about.eyebrow}
+        title="Twerk"
+        lead={t.about.lead}
+        fallbackSrc={photo(PHOTOS.lineup) ?? undefined}
+      />
 
-        <div className="mt-10">
-          <Media
-            src={photo(PHOTOS.lineup)}
-            alt={t.about.photos.lineup}
-            ratio="aspect-[16/10] sm:aspect-[21/9]"
-            priority
-          />
-        </div>
-      </section>
+      <div className="shell flex flex-col gap-24 pt-12 sm:pt-16">
 
       {/* ── Twerk гэж юу вэ ──────────────────────────────────────────── */}
       <Section title={t.about.whatTitle}>
@@ -285,5 +284,6 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
         </div>
       </section>
     </div>
+    </>
   )
 }

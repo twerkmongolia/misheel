@@ -1,10 +1,11 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { PageHeader, Badge, Empty } from '@/components/ui'
+import { Badge, Empty } from '@/components/ui'
 import { Media } from '@/components/site/media'
 import { getDictionary, loc, isLocale } from '@/lib/i18n'
 import { formatMnt } from '@/lib/format'
 import { getClassTypes } from '@/lib/data'
+import { PageBanner } from '@/components/site/PageBanner'
 
 export default async function ClassesPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
@@ -14,9 +15,14 @@ export default async function ClassesPage({ params }: { params: Promise<{ locale
   const classTypes = await getClassTypes()
 
   return (
-    <div className="shell flex flex-col gap-14 pt-12 sm:pt-16">
-      <PageHeader title={t.nav.classes} lead={t.schedule.subtitle} />
+    <>
+      <PageBanner
+        page="classes"
+        title={t.nav.classes}
+        lead={t.schedule.subtitle}
+      />
 
+      <div className="shell flex flex-col gap-12 pt-10 sm:pt-12">
       {classTypes.length === 0 ? (
         <Empty>{t.common.empty}</Empty>
       ) : (
@@ -65,5 +71,6 @@ export default async function ClassesPage({ params }: { params: Promise<{ locale
         </div>
       )}
     </div>
+    </>
   )
 }

@@ -1,5 +1,5 @@
 import Image from 'next/image'
-import { existsSync } from 'node:fs'
+import { existsSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 
 /**
@@ -16,12 +16,43 @@ import { join } from 'node:path'
  * `Media` -г зөвхөн серверийн бүрэлдэхүүн хэсгүүд дууддаг тул `node:fs`
  * энд аюулгүй.
  */
-function localMissing(src: string): boolean {
-  if (!src.startsWith('/media/')) return false
+export function mediaExists(src?: string | null): boolean {
+  if (!src) return false
+  // Гадаад URL -ийг шалгах боломжгүй тул «байгаа» гэж үзнэ
+  if (!src.startsWith('/media/')) return true
 
   // Демо горимд `?v=<mtime>` залгадаг — шалгахын өмнө тайрна
-  const path = src.split('?')[0]
-  return !existsSync(join(process.cwd(), 'public', path))
+  const path = src.split('?')[0]!
+  return existsSync(join(process.cwd(), 'public', path))
+}
+
+function localMissing(src: string): boolean {
+  return !mediaExists(src)
+}
+
+/**
+ * Локал зурагт `?v=<файлын өөрчлөгдсөн хугацаа>` залгана.
+ *
+ * ── Яагаад ─────────────────────────────────────────────────────────────
+ * `next/image` нь `/_next/image?url=…&w=…` гэсэн хаягаар зураг гаргадаг ба
+ * түүндээ урт хугацааны кэшийн толгой тавьдаг. Файлыг нь ИЖИЛ НЭРЭЭР дарж
+ * хуулахад хаяг өөрчлөгддөггүй тул хөтөч хуучин зургаа л үзүүлсээр байна —
+ * гаднаас нь харахад «зураг солигдохгүй байна» гэж мэдрэгдэнэ. Диск дээрх
+ * файл шинэ, дэлгэц дээрх зураг хуучин.
+ *
+ * Файлын `mtime` -ийг хаягт залгаснаар файл өөрчлөгдөх бүрд хаяг өөрчлөгдөж,
+ * хөтөч шинээр татна. Өөрчлөгдөөгүй үед хаяг хэвээр тул кэш ажилласаар байна.
+ */
+function versioned(src: string): string {
+  if (!src.startsWith('/media/')) return src
+
+  try {
+    const path = src.split('?')[0]!
+    const { mtimeMs } = statSync(join(process.cwd(), 'public', path))
+    return `${path}?v=${Math.round(mtimeMs)}`
+  } catch {
+    return src
+  }
 }
 
 /**
@@ -57,7 +88,7 @@ export function Media({
     return (
       <div className={`media ${ratio} ${className}`}>
         <Image
-          src={src}
+          src={versioned(src)}
           alt={alt}
           fill
           priority={priority}

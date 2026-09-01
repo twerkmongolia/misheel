@@ -1,9 +1,10 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { Empty, PageHeader } from '@/components/ui'
+import { Empty } from '@/components/ui'
 import { Media } from '@/components/site/media'
 import { getDictionary, loc, isLocale } from '@/lib/i18n'
 import { getInstructors } from '@/lib/data'
+import { PageBanner } from '@/components/site/PageBanner'
 
 export default async function InstructorsPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
@@ -13,9 +14,13 @@ export default async function InstructorsPage({ params }: { params: Promise<{ lo
   const instructors = await getInstructors()
 
   return (
-    <div className="shell flex flex-col gap-14 pt-12 sm:pt-16">
-      <PageHeader title={t.nav.instructors} />
+    <>
+      <PageBanner
+        page="instructors"
+        title={t.nav.instructors}
+      />
 
+      <div className="shell flex flex-col gap-12 pt-10 sm:pt-12">
       {instructors.length === 0 ? (
         <Empty>{t.common.empty}</Empty>
       ) : (
@@ -57,5 +62,6 @@ export default async function InstructorsPage({ params }: { params: Promise<{ lo
         </div>
       )}
     </div>
+    </>
   )
 }

@@ -45,6 +45,42 @@ export function weekdayLong(iso: string, locale: AppLocale): string {
   return MN_WEEKDAYS_LONG[Number(formatInTimeZone(date, TIMEZONE, 'i')) % 7] ?? ''
 }
 
+/**
+ * Хуваарийн огноо — УНШИХАД зориулсан.
+ *
+ * `formatDate` нь `2026.09.07` гэж бичдэг: баримт бичиг, хүснэгтэд зөв ч
+ * хуваарийн жагсаалтад уншигч «энэ хэдэн сарын хэд вэ» гэдгийг тоолж
+ * олох ёстой болдог. Энд сар, өдрийг ҮГЭЭР хэлнэ — жил нь ойрын хичээлд
+ * хэзээ ч эргэлзээ төрүүлдэггүй тул хасагдав.
+ */
+export function formatDayShort(iso: string, locale: AppLocale): string {
+  const date = new Date(iso)
+  if (locale === 'en') return formatInTimeZone(date, TIMEZONE, 'd MMM', { locale: enUS })
+  const month = formatInTimeZone(date, TIMEZONE, 'M')
+  const day = formatInTimeZone(date, TIMEZONE, 'd')
+  return `${month}-р сарын ${day}`
+}
+
+/** Сарын хэдэн нь вэ — зөвхөн тоо. Долоо хоногийн тоймд хэрэглэнэ. */
+export function dayOfMonth(iso: string): string {
+  return formatInTimeZone(new Date(iso), TIMEZONE, 'd')
+}
+
+/**
+ * «Өнөөдөр» / «Маргааш» — эсвэл юу ч биш.
+ *
+ * Огноо уншсан хүн толгойдоо ҮРГЭЛЖ нэг тооцоо хийдэг: «энэ чинь хэддэх
+ * өдөр билээ». Хамгийн ойрын хоёр өдрийг нэрлэснээр тэр тооцоо арилна.
+ * Гуравдахь өдрөөс цааш нэр өгөх нь эсрэгээрээ — «нөгөөдөр» гэдэг нь
+ * огнооноос удаан ойлгогддог.
+ */
+export function relativeDay(iso: string, from: Date = new Date()): 'today' | 'tomorrow' | null {
+  const target = dayKey(iso)
+  if (target === dayKey(from.toISOString())) return 'today'
+  if (target === dayKey(addDays(from, 1).toISOString())) return 'tomorrow'
+  return null
+}
+
 /** `2026-08-29` хэлбэрээр — өдрөөр бүлэглэхэд ашиглана (УБ-ын цагаар). */
 export function dayKey(iso: string): string {
   return formatInTimeZone(new Date(iso), TIMEZONE, 'yyyy-MM-dd')

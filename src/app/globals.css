@@ -474,6 +474,33 @@ body::before {
   color: var(--background);
 }
 
+/* ── Заагч ────────────────────────────────────────────────────────────────
+   Tailwind v4 -ийн preflight нь `button` -оос `cursor: pointer` -ийг АВЧ
+   ХАЯСАН (v3 -д байсан). Үүний үр дүнд дарж болох бүх зүйл дээр заагч нь
+   сум хэвээр үлдэж, «энэ товч уу, эсвэл зүгээр текст үү» гэдэг эргэлзээ
+   төрдөг. Тиймээс дүрмийг гараар буцаана — дарагдах чадвартай БҮХ элемент
+   дээр нэг мөрөөр. */
+button,
+summary,
+label[for],
+[role='button'],
+[role='tab'],
+[type='button'],
+[type='submit'],
+[type='reset'],
+[type='checkbox'],
+[type='radio'],
+select {
+  cursor: pointer;
+}
+
+/* Идэвхгүй товч нь «дарж болно» гэж худал амлахгүй */
+button:disabled,
+[aria-disabled='true'],
+select:disabled {
+  cursor: not-allowed;
+}
+
 /* Фокусын хүрээ дугуй БИШ — систем бүхэлдээ 3px радиустай */
 :focus-visible {
   outline: 2px solid var(--foreground);
@@ -838,6 +865,38 @@ h3, h4 {
 .btn:disabled::before,
 .btn[aria-disabled='true']::before { transform: scaleY(0); }
 
+/* ── Товчны байранд суух ТӨЛӨВ ───────────────────────────────────────────
+   Товч биш: дарагдахгүй, `<span>` -ээр гарна. Гэвч товчны ХЭЛБЭРТЭЙ бөгөөд
+   товч байх ёстой байрандаа сууна — «энд үйлдэл байх ёстой байсан, яагаад
+   байхгүйг би хэлж байна» гэдгийг байрлал өөрөө асууж, текст хариулна.
+
+   Хоосон зай асуулт үлдээдэг; жинхэнэ товчны хажууд хүрээгүй жижиг үг
+   бүр ч мууг — уншигч түүнийг олж хардаггүй. Тиймээс хэлбэрийг нь барьж,
+   зөвхөн ЗУРЛАГЫГ нь тасалдаг: тасархай хүрээ = боломжгүй.
+
+   `:disabled` -ийн 0.4 тунгалагшилтыг ашиглаагүй — «Дүүрсэн» гэдэг нь
+   уншигдах ёстой мэдээлэл, бүдгэрсэн чимээ биш. */
+.btn-state {
+  border-color: var(--line-strong);
+  border-style: dashed;
+  color: var(--muted);
+  cursor: default;
+}
+
+.btn-state::before { content: none; }
+.btn-state:active { transform: none; }
+
+/* Баталгаажсан төлөв — дүүрсэн, тасраагүй. Хориг биш ХАРИУ. */
+.btn-done {
+  background: var(--surface-2);
+  border-color: var(--line-strong);
+  color: var(--foreground);
+  cursor: default;
+}
+
+.btn-done::before { content: none; }
+.btn-done:active { transform: none; }
+
 /* Үндсэн — дүүрсэн. Хуудсанд ГАНЦ л байх ёстой. */
 .btn-solid {
   background: var(--button);
@@ -1057,6 +1116,53 @@ textarea.ctl { resize: vertical; min-height: 7rem; }
 
 .faq summary { transition: opacity var(--t-1) linear; }
 .faq summary:hover { opacity: 0.62; }
+
+/* ── Чип — СОНГОЛТ ────────────────────────────────────────────────────────
+   Уугуул `<select>` нь үйлдлийн системийн ЖАГСААЛТЫГ дуудна: macOS дээр
+   цайвар, дугуйрсан, өөрийн үсэгтэй цонх гарч ирээд, монохром системийн
+   дундуур огт өөр ертөнцийн хэсэг наасан мэт харагддаг. Түүнийг загварчлах
+   боломжгүй — сольж л таарна.
+
+   Чип нь холбоос. Тиймээс:
+     · JavaScript шаардахгүй — дарвал шинэ хаяг руу очно;
+     · «Хайх» товч хэрэггүй болно — нэг алхам хасагдана;
+     · БҮХ сонголт нэг дор харагдана. Уншигч жагсаалт нээх шаардлагагүй,
+       ямар хичээл байдгийг шүүхээсээ ӨМНӨ мэднэ.
+
+   Том үсэг БИШ: дотор нь хүний нэр, хичээлийн нэр сууна («Twerk үндэс»),
+   тэдгээрийг том үсгээр бичих нь нэрийг нь гуйвуулна. */
+.chip {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  min-height: 2.125rem;
+  padding-inline: 0.875rem;
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+  color: var(--foreground-soft);
+  transition:
+    color var(--t-1) linear,
+    border-color var(--t-1) linear,
+    background-color var(--t-1) linear;
+}
+
+.chip:hover {
+  border-color: var(--line-strong);
+  color: var(--foreground);
+}
+
+/* Сонгогдсон нь ЭРГЭНЭ — монохром системд боломжтой хамгийн хүчтэй ялгаа */
+.chip-on {
+  background: var(--foreground);
+  border-color: var(--foreground);
+  color: var(--background);
+}
+
+.chip-on:hover { color: var(--background); }
 
 /* ── Шошго ────────────────────────────────────────────────────────────────
    Өнгө байхгүй тул төлөвийг ХЭЛБЭР заана:

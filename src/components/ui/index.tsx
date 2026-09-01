@@ -231,7 +231,7 @@ export function Alert({
  */
 export function Empty({ children }: { children: ReactNode }) {
   return (
-    <div className="flex flex-col items-center gap-4 border border-dashed border-line px-6 py-24 text-center">
+    <div className="flex flex-col items-center gap-4 border border-dashed border-line px-5 py-14 text-center sm:px-6 sm:py-24">
       <span
         aria-hidden
         className="grid h-11 w-11 place-items-center rounded-full border border-dashed border-line-strong text-muted"

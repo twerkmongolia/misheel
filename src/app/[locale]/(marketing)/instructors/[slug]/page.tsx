@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 import { Empty, PageHeader, Section } from '@/components/ui'
 import { Media } from '@/components/site/media'
-import { SessionCard } from '@/components/site/SessionCard'
+import { SessionList } from '@/components/site/SessionList'
 import { getDictionary, loc, isLocale } from '@/lib/i18n'
 import { getInstructors, getMyBookedSessionIds, getUpcomingSessions } from '@/lib/data'
 import { getUser } from '@/lib/auth/dal'
@@ -48,17 +48,9 @@ export default async function InstructorPage({
         {mine.length === 0 ? (
           <Empty>{t.schedule.noSessions}</Empty>
         ) : (
-          <div className="grid gap-3 sm:grid-cols-2">
-            {mine.map((session) => (
-              <SessionCard
-                key={session.id}
-                session={session}
-                locale={locale}
-                booked={booked.has(session.id)}
-                back={`/${locale}/instructors/${slug}`}
-              />
-            ))}
-          </div>
+          /* `hide="instructor"` — багшийн нэр хуудасны гарчиг дээр аль хэдийн
+             байгаа тул мөр бүр дээр давтахгүй. */
+          <SessionList sessions={mine} locale={locale} booked={booked} hide="instructor" />
         )}
       </Section>
     </div>

@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation'
 import type { CSSProperties, ReactNode } from 'react'
 import { Arrow, ButtonLink, Empty, Eyebrow } from '@/components/ui'
 import { Media } from '@/components/site/media'
-import { SessionRow } from '@/components/site/SessionRow'
+import { SessionList } from '@/components/site/SessionList'
 import { VideoEmbed } from '@/components/site/VideoEmbed'
 import { Stat } from '@/components/site/Stat'
 import { content, getDictionary, loc, isLocale } from '@/lib/i18n'
@@ -12,10 +12,12 @@ import { youtubeId } from '@/lib/youtube'
 import {
   getClassTypes,
   getInstructors,
+  getMyBookedSessionIds,
   getProducts,
   getSiteContent,
   getUpcomingSessions,
 } from '@/lib/data'
+import { getUser } from '@/lib/auth/dal'
 
 /**
  * Админ `site_content` дээрх `videos` мөрийг засаагүй үед харагдах бичлэгүүд.
@@ -101,13 +103,17 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   if (!isLocale(locale)) notFound()
 
   const t = getDictionary(locale)
-  const [site, sessions, classTypes, instructors, products] = await Promise.all([
+  const [site, sessions, classTypes, instructors, products, user] = await Promise.all([
     getSiteContent(['hero', 'about', 'videos']),
-    getUpcomingSessions(5),
+    getUpcomingSessions(6),
     getClassTypes(),
     getInstructors(),
     getProducts(),
+    getUser(),
   ])
+  /* Аль хичээлд нь аль хэдийн бүртгүүлснийг мэдэхгүй бол «Бүртгүүлэх» товч
+     худал амлалт болно — дарахад л алдаа буцаана. */
+  const booked = await getMyBookedSessionIds(user?.id ?? null)
 
   const hero = content(site.get('hero'), locale)
   const about = content(site.get('about'), locale)
@@ -299,8 +305,9 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       )}
 
       {/* ══ 01 · Ойрын хичээлүүд ══════════════════════════════════════════
-          Тор биш ЖАГСААЛТ. Цаг бүр нэг баганад буудаг тул нүд доошоо шууд
-          гүйж, хичээлүүдийг харьцуулна. */}
+          Тор биш ЖАГСААЛТ, түүнчлэн ӨДРӨӨР БҮЛЭГЛЭСЭН. Огноо бүлгийн
+          гарчигт нэг л удаа бичигдэж, мөрүүд нь зөвхөн цаг ба хичээлээ
+          хэлнэ — нүд доошоо гүйж, хичээлүүдийг шууд харьцуулна. */}
       <Chapter
         id="schedule"
         index={no('schedule')}
@@ -311,11 +318,10 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         {sessions.length === 0 ? (
           <Empty>{t.schedule.noSessions}</Empty>
         ) : (
-          <ul className="border-t border-line">
-            {sessions.map((session) => (
-              <SessionRow key={session.id} session={session} locale={locale} />
-            ))}
-          </ul>
+          /* `back` дамжуулаагүй — бүртгэл хийгдсэний дараа хуваарийн хуудас
+             руу буцна. Баталгаажуулах мэдэгдэл зөвхөн тэнд харагддаг тул
+             энд буцаавал хэрэглэгч «болов уу, үгүй юу» гэдгээ мэдэхгүй. */
+          <SessionList sessions={sessions} locale={locale} booked={booked} />
         )}
       </Chapter>
 
