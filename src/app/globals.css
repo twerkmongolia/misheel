@@ -885,6 +885,18 @@ h3, h4 {
 
 .btn-state::before { content: none; }
 .btn-state:active { transform: none; }
+
+/* Баталгаажсан төлөв — дүүрсэн, тасраагүй. Хориг биш ХАРИУ. */
+.btn-done {
+  background: var(--surface-2);
+  border-color: var(--line-strong);
+  color: var(--foreground);
+  cursor: default;
+}
+
+.btn-done::before { content: none; }
+.btn-done:active { transform: none; }
+
 /* Үндсэн — дүүрсэн. Хуудсанд ГАНЦ л байх ёстой. */
 .btn-solid {
   background: var(--button);
