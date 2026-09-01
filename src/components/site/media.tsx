@@ -16,8 +16,10 @@ import { join } from 'node:path'
  * `Media` -г зөвхөн серверийн бүрэлдэхүүн хэсгүүд дууддаг тул `node:fs`
  * энд аюулгүй.
  */
-function localMissing(src: string): boolean {
-  if (!src.startsWith('/media/')) return false
+export function mediaExists(src?: string | null): boolean {
+  if (!src) return false
+  // Гадаад URL -ийг шалгах боломжгүй тул «байгаа» гэж үзнэ
+  if (!src.startsWith('/media/')) return true
 
   // Демо горимд `?v=<mtime>` залгадаг — шалгахын өмнө тайрна
   const path = src.split('?')[0]
