@@ -145,28 +145,33 @@ export default async function SchedulePage({
     },
   ].filter((row) => row.options.length > 0)
 
+  /* Эвхэгдсэн үед шүүлт нь юугаар шүүгдсэнээ ӨӨРӨӨ хэлэх ёстой — эс тэгвэл
+     «яагаад ганцхан хичээл байна вэ» гэдэг нь тайлбаргүй үлдэнэ. */
+  const activeLabels = filters
+    .filter((row) => row.active)
+    .map((row) => row.options.find((option) => option.value === row.active)?.label)
+    .filter(Boolean) as string[]
+
   return (
     <>
-      <PageBanner
-        page="schedule"
-        title={t.schedule.title}
-        lead={t.schedule.subtitle}
-      />
+      <PageBanner page="schedule" title={t.schedule.title} lead={t.schedule.subtitle} />
 
-      <div className="shell flex flex-col gap-10 pt-10 sm:pt-12">
-      {search.booked && <Alert tone="good">{t.booking.success}</Alert>}
-      {search.cancelled && <Alert tone="neutral">{t.booking.cancelled}</Alert>}
-      {search.error && <Alert tone="danger">{bookingErrorMessage(t, search.error)}</Alert>}
+      <div className="shell flex flex-col gap-8 pt-10 pb-[var(--bay-sm)] sm:pt-12">
+        {search.booked && <Alert tone="good">{t.booking.success}</Alert>}
+        {search.cancelled && <Alert tone="neutral">{t.booking.cancelled}</Alert>}
+        {search.error && <Alert tone="danger">{bookingErrorMessage(t, search.error)}</Alert>}
 
-      {/* ══ 1 · БИ ХААНА БАЙНА ═══════════════════════════════════════════
-          Долоо хоног нь хуудасны ГАРЧИГ — нимгэн навигацийн мөр биш.
-          Хажууд нь тухайн долоо хоногийн нийт тоо: «энэ долоо хоног дүүрэн
-          үү, хоосон уу» гэдгийг ганц харцаар хэлнэ. */}
-      <section className="flex flex-col gap-5">
-        <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-4">
-          <div className="min-w-0">
+        {/* ══ 1 · БИ ХААНА БАЙНА ═════════════════════════════════════════
+            Долоо хоногийн шилжилт БА долоо хоногийн тойм нь урьд нь хоёр
+            тусдаа блок байв: гарчиг, сум нэг мөрөнд, доор нь өдрүүдийн
+            зурвас. Хоёулаа нэг л асуултад («аль долоо хоног, аль өдөр»)
+            хариулдаг тул НЭГ хяналт болгож нийлүүлэв — сум нь зурвасын
+            хоёр үзүүрт суусан есөн нүдтэй эгнээ. Нэг зүйлийг хоёр газар
+            хайх шаардлагагүй болно. */}
+        <section className="flex flex-col gap-4">
+          <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
             <h2 className="t-h3">{offset === 0 ? t.schedule.thisWeek : range}</h2>
-            <p className="t-meta mt-1.5 text-muted tabular-nums">
+            <p className="t-meta text-muted tabular-nums">
               {offset === 0 && (
                 <>
                   {range}
@@ -174,131 +179,161 @@ export default async function SchedulePage({
                 </>
               )}
               {filtered.length} {t.schedule.sessionCount}
+              {offset !== 0 && (
+                <>
+                  <span className="text-faint"> · </span>
+                  <Link href={weekLink(0)} className="lnk hover:text-foreground">
+                    {t.schedule.thisWeek}
+                  </Link>
+                </>
+              )}
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
-            {offset !== 0 && (
-              <Link href={weekLink(0)} className="btn btn-bare btn-sm">
-                {t.schedule.thisWeek}
-              </Link>
-            )}
-            <Link href={weekLink(offset - 1)} aria-label={t.schedule.weekPrev} className="icon-btn">
+          <nav className="grid grid-cols-[2rem_repeat(7,minmax(0,1fr))_2rem] divide-x divide-line overflow-hidden border-y border-line sm:grid-cols-[2.75rem_repeat(7,minmax(0,1fr))_2.75rem]">
+            <Link
+              href={weekLink(offset - 1)}
+              aria-label={t.schedule.weekPrev}
+              className="grid place-items-center text-muted transition-colors duration-200 hover:bg-surface hover:text-foreground"
+            >
               <span aria-hidden>←</span>
             </Link>
-            <Link href={weekLink(offset + 1)} aria-label={t.schedule.weekNext} className="icon-btn">
+
+            {week.map((day) => {
+              const isToday = day.key === todayKey
+              const open = day.count > 0
+
+              /* Өнөөдөр нь ЭРГЭНЭ — хар дэвсгэр, цагаан тоо. Монохром
+                 системд «энэ бол өнөөдөр» гэдгийг хэлэх хамгийн хүчтэй
+                 арга нь өнгө нэмэх биш, байгаа хоёр өнгөө сольж тавих. */
+              const cell = [
+                'group flex flex-col items-center py-3.5 transition-colors duration-200',
+                isToday ? 'bg-foreground text-background' : open ? 'hover:bg-surface' : 'opacity-40',
+              ].join(' ')
+
+              const body = (
+                <>
+                  <span className={`t-label ${isToday ? 'opacity-70' : 'text-muted'}`}>
+                    {weekdayShort(day.date, locale)}
+                  </span>
+                  <span className="t-num mt-1.5 text-[1.375rem] transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-110 sm:text-[1.75rem]">
+                    {dayOfMonth(day.date)}
+                  </span>
+                  <span
+                    className={`t-meta mt-1 tabular-nums ${
+                      isToday ? 'opacity-70' : open ? 'text-foreground' : 'text-faint'
+                    }`}
+                  >
+                    {day.count || '—'}
+                  </span>
+                </>
+              )
+
+              return open ? (
+                <Link key={day.key} href={`#day-${day.key}`} className={cell}>
+                  {body}
+                </Link>
+              ) : (
+                <span key={day.key} className={cell} aria-label={t.schedule.noneThisDay}>
+                  {body}
+                </span>
+              )
+            })}
+
+            <Link
+              href={weekLink(offset + 1)}
+              aria-label={t.schedule.weekNext}
+              className="grid place-items-center text-muted transition-colors duration-200 hover:bg-surface hover:text-foreground"
+            >
               <span aria-hidden>→</span>
             </Link>
-          </div>
-        </div>
+          </nav>
+        </section>
 
-        {/* ══ 2 · АЛЬ ӨДӨР ХИЧЭЭЛ БАЙНА ══════════════════════════════════
-            Долоо хоногийн тойм. Хичээлтэй өдөр нь ДАРАГДАЖ жагсаалтын
-            тухайн бүлэг рүү үсэрнэ; хоосон өдөр нь дарагдахгүй, тоо нь
-            зураас болно. Ингэснээр «Бямбад юу байна?» гэсэн асуултад
-            гүйлгэлгүйгээр хариулна. */}
-        <nav className="grid grid-cols-7 divide-x divide-line overflow-hidden border-y border-line">
-          {week.map((day) => {
-            const isToday = day.key === todayKey
-            const label = (
-              <>
-                <span className="t-label text-muted">{weekdayShort(day.date, locale)}</span>
-                <span className="t-num mt-1.5 text-[1.375rem] sm:text-[1.75rem]">
-                  {dayOfMonth(day.date)}
-                </span>
-                <span
-                  className={`t-meta mt-1 tabular-nums ${day.count ? 'text-foreground' : 'text-faint'}`}
-                >
-                  {day.count || '—'}
-                </span>
-              </>
-            )
+        {/* ══ 2 · ШҮҮЛТ — ЭВХЭГДСЭН ══════════════════════════════════════
+            Гурван эгнээ чип нь хуудасны эхэнд 200px эзэлж, хичээлүүдийг
+            доош түлхдэг байв. Хэрэглэгчийн дийлэнх нь юу ч шүүхгүй —
+            тэдэнд энэ нь зөвхөн саад. Тиймээс эвхэгдэнэ: ганц мөр үлдэж,
+            шүүсэн үед л сонголтоо ТЕКСТЭЭР хэлж, өөрөө нээлттэй гарна.
 
-            const shell = `flex flex-col items-center py-3 transition-colors duration-200 ${
-              isToday ? 'bg-surface-2' : ''
-            }`
+            `<details>` нь JavaScript шаарддаггүй бөгөөд хаяганд шүүлт
+            байвал `open` тул хуудас сэргээхэд төлөв нь хадгалагдана. */}
+        <details open={hasFilter} className="faq group border-y border-line">
+          <summary className="flex cursor-pointer list-none items-center gap-4 py-4 marker:content-none">
+            <span className="t-label shrink-0 text-muted">{t.schedule.filterTitle}</span>
 
-            return day.count > 0 ? (
-              <Link key={day.key} href={`#day-${day.key}`} className={`${shell} hover:bg-surface-3`}>
-                {label}
-              </Link>
-            ) : (
-              <span key={day.key} className={`${shell} opacity-45`} aria-label={t.schedule.noneThisDay}>
-                {label}
-              </span>
-            )
-          })}
-        </nav>
-      </section>
+            <span className="t-meta min-w-0 flex-1 truncate">
+              {activeLabels.length > 0 ? (
+                <span className="text-foreground">{activeLabels.join(' · ')}</span>
+              ) : (
+                <span className="text-faint">{t.common.all}</span>
+              )}
+            </span>
 
-      {/* ══ 3 · ШҮҮЛТ ════════════════════════════════════════════════════
-          Уугуул `<select>` -ийг ХАСАВ. Тэр нь дарахад үйлдлийн системийн
-          өөрийн цонхыг дуудаж, монохром системийн дундуур цайвар дугуйрсан
-          хайрцаг гаргаж ирдэг — загварт огт захирагддаггүй.
-
-          Оронд нь холбоос-чип. Гурван давуу тал:
-            · Бүх сонголт НЭЭЛГҮЙГЭЭР харагдана — ямар хичээл, ямар багш
-              байдгийг шүүхээсээ өмнө мэднэ;
-            · «Хайх» товч хэрэггүй — дарсан даруйдаа шүүгдэнэ;
-            · JavaScript шаардахгүй, зүгээр нэг холбоос. */}
-      <section className="flex flex-col gap-4 border-y border-line py-6">
-        <div className="flex items-center justify-between gap-4">
-          <span className="t-label text-muted">{t.schedule.filterTitle}</span>
-          {hasFilter && (
-            <Link
-              href={href({})}
-              className="t-meta text-muted underline decoration-line-strong underline-offset-4 transition-colors hover:text-foreground"
+            <span
+              aria-hidden
+              className="relative grid h-5 w-5 shrink-0 place-items-center text-muted transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-open:rotate-90"
             >
-              {t.schedule.clear}
-            </Link>
-          )}
-        </div>
+              <span className="absolute h-px w-4 bg-current" />
+              <span className="absolute h-4 w-px bg-current transition-opacity duration-300 group-open:opacity-0" />
+            </span>
+          </summary>
 
-        {filters.map((row) => (
-          <div
-            key={row.key}
-            className="flex flex-col gap-2 sm:grid sm:grid-cols-[5.5rem_minmax(0,1fr)] sm:items-center sm:gap-4"
-          >
-            <span className="t-label text-faint">{row.label}</span>
-            {/* Нарийн дэлгэцэд эгнээ нь хэвтээ гүйнэ — эвхэгдвэл гурван
-                шүүлт хоорондоо холилдож, аль чип аль эгнээнийх нь мэдэгдэхээ
-                болино. */}
-            <div className="rail flex gap-2 overflow-x-auto">
-              <Link
-                href={href({ ...current, [row.key]: undefined })}
-                className={`chip ${row.active ? '' : 'chip-on'}`}
+          <div className="flex flex-col gap-4 pb-6">
+            {filters.map((row) => (
+              <div
+                key={row.key}
+                className="flex flex-col gap-2 sm:grid sm:grid-cols-[5.5rem_minmax(0,1fr)] sm:items-center sm:gap-4"
               >
-                {t.common.all}
-              </Link>
-              {row.options.map((option) => (
-                <Link
-                  key={option.value}
-                  href={href({ ...current, [row.key]: option.value })}
-                  className={`chip ${row.active === option.value ? 'chip-on' : ''}`}
-                >
-                  {option.label}
-                </Link>
-              ))}
-            </div>
-          </div>
-        ))}
-      </section>
+                <span className="t-label text-faint">{row.label}</span>
+                {/* Нарийн дэлгэцэд эгнээ нь хэвтээ гүйнэ — эвхэгдвэл гурван
+                    шүүлт хоорондоо холилдож, аль чип аль эгнээнийх нь
+                    мэдэгдэхээ болино. */}
+                <div className="rail flex gap-2 overflow-x-auto">
+                  <Link
+                    href={href({ ...current, [row.key]: undefined })}
+                    className={`chip ${row.active ? '' : 'chip-on'}`}
+                  >
+                    {t.common.all}
+                  </Link>
+                  {row.options.map((option) => (
+                    <Link
+                      key={option.value}
+                      href={href({ ...current, [row.key]: option.value })}
+                      className={`chip ${row.active === option.value ? 'chip-on' : ''}`}
+                    >
+                      {option.label}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            ))}
 
-      {/* ══ 4 · ХИЧЭЭЛҮҮД ════════════════════════════════════════════════
-          Нүүр хуудасны «Ойрын хичээлүүд» -тэй ЯГ ижил бүрдэл: зүүн талд
-          наалдмал өдрийн зангуу, баруун талд нарийссан мөрүүд. Хоёр хуудас
-          хоорондоо шилжихэд уншигч дахин сурах юмгүй. */}
-      {filtered.length === 0 ? (
-        <Empty>{t.schedule.noSessions}</Empty>
-      ) : (
-        <SessionList
-          sessions={filtered}
-          locale={locale}
-          booked={booked}
-          back={`/${locale}/schedule${offset !== 0 ? `?w=${offset}` : ''}`}
-        />
-      )}
-    </div>
+            {hasFilter && (
+              <Link
+                href={href({})}
+                className="t-meta self-start text-muted underline decoration-line-strong underline-offset-4 transition-colors hover:text-foreground"
+              >
+                {t.schedule.clear}
+              </Link>
+            )}
+          </div>
+        </details>
+
+        {/* ══ 3 · ХИЧЭЭЛҮҮД ══════════════════════════════════════════════
+            Нүүр хуудасны «Ойрын хичээлүүд» -тэй ЯГ ижил бүрдэл: зүүн талд
+            наалдмал өдрийн зангуу, баруун талд нарийссан мөрүүд. */}
+        {filtered.length === 0 ? (
+          <Empty>{t.schedule.noSessions}</Empty>
+        ) : (
+          <SessionList
+            sessions={filtered}
+            locale={locale}
+            booked={booked}
+            back={`/${locale}/schedule${offset !== 0 ? `?w=${offset}` : ''}`}
+          />
+        )}
+      </div>
     </>
   )
 }
