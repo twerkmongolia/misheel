@@ -80,7 +80,7 @@ export function SessionRow({
   ].filter(Boolean)
 
   return (
-    <li className="group relative border-b border-line last:border-b-0">
+    <li data-rv className="group relative border-b border-line last:border-b-0">
       {/* Hover нь ДЭВСГЭР БИШ ЗУРААС. Дэвсгэр нь мөрийг өнгөт хавтан болгож,
           хуудасны бусад хэсгээс тасалж авдаг; зураас нь зөвхөн «гар энд
           байна» гэж заагаад орхино. Систем бүхэлдээ шугамаар баригдсан. */}
