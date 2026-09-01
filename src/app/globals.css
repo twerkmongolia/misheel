@@ -1155,6 +1155,15 @@ textarea.ctl { resize: vertical; min-height: 7rem; }
   color: var(--foreground);
 }
 
+/* Сонгогдсон нь ЭРГЭНЭ — монохром системд боломжтой хамгийн хүчтэй ялгаа */
+.chip-on {
+  background: var(--foreground);
+  border-color: var(--foreground);
+  color: var(--background);
+}
+
+.chip-on:hover { color: var(--background); }
+
 /* ── Шошго ────────────────────────────────────────────────────────────────
    Өнгө байхгүй тул төлөвийг ХЭЛБЭР заана:
      дүүрсэн   → баталгаажсан      тод хүрээ → анхаарал шаардсан
