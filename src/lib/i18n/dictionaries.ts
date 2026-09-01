@@ -47,6 +47,8 @@ const mn = {
     date: 'Огноо',
     actions: 'Үйлдэл',
     search: 'Хайх',
+    today: 'Өнөөдөр',
+    tomorrow: 'Маргааш',
   },
   level: {
     beginner: 'Анхан шат',
@@ -323,6 +325,8 @@ const en: Dictionary = {
     date: 'Date',
     actions: 'Actions',
     search: 'Search',
+    today: 'Today',
+    tomorrow: 'Tomorrow',
   },
   level: {
     beginner: 'Beginner',
