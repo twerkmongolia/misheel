@@ -1180,13 +1180,19 @@ textarea.ctl { resize: vertical; min-height: 7rem; }
   transition:
     color var(--t-1) linear,
     border-color var(--t-1) linear,
-    background-color var(--t-1) linear;
+    background-color var(--t-1) linear,
+    transform var(--t-1) var(--ease);
 }
 
+/* Нэг пикселийн өргөлт. Чип бол ЖИЖИГ бай — өнгө солих нь хангалттай
+   тодорхой ч, хуруу хаана байгааг хөдөлгөөн хамгийн хурдан хэлдэг. */
 .chip:hover {
   border-color: var(--line-strong);
   color: var(--foreground);
+  transform: translateY(-1px);
 }
+
+.chip:active { transform: translateY(0); transition-duration: 90ms; }
 
 /* Сонгогдсон нь ЭРГЭНЭ — монохром системд боломжтой хамгийн хүчтэй ялгаа */
 .chip-on {
