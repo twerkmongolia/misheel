@@ -30,6 +30,53 @@ export function Arrow({ className = '' }: { className?: string }) {
   )
 }
 
+/* ── Сүлжээний дүрс ───────────────────────────────────────────────────────
+   Брэндүүдийн албан ёсны дүрс нь ДҮҮРСЭН биет байдаг ч энэ систем бүхэлдээ
+   шугамаар баригдсан — дүүрсэн дүрс нь `Arrow` -ийн хажууд өөр гаралтай мэт
+   харагдана. Тиймээс хоёуланг нь ижил зузаантай (1.5) зурлагаар, ижил
+   дугуйрсан дөрвөлжин хүрээнд оруулж дахин зурав: танигдац хэвээр,
+   гэр бүл нь нэг.
+
+   `aria-hidden` — нэрийг нь дэргэд нь текстээр эсвэл `aria-label` -аар
+   өгнө. Дүрс өөрөө хэзээ ч ганцаараа утга дамжуулахгүй. */
+
+const socialSvg = 'ico h-[18px] w-[18px] shrink-0'
+
+export function InstagramIcon({ className = '' }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      aria-hidden="true"
+      className={`${socialSvg} ${className}`}
+    >
+      <rect x="3" y="3" width="18" height="18" rx="5.2" />
+      <circle cx="12" cy="12" r="4" />
+      <circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" stroke="none" />
+    </svg>
+  )
+}
+
+export function FacebookIcon({ className = '' }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      aria-hidden="true"
+      className={`${socialSvg} ${className}`}
+    >
+      <rect x="3" y="3" width="18" height="18" rx="5.2" />
+      <path d="M15.1 8.4h-1.6a1.9 1.9 0 0 0-1.9 1.9V21" />
+      <path d="M9.6 13.1h4.6" />
+    </svg>
+  )
+}
+
 /* ── Товч ─────────────────────────────────────────────────────────────────
    Дөрвөн үүрэг. Нэрс нь ХУУЧНААР үлдэв — 20 гаруй дуудлагын газрыг
    дэмий хөдөлгөхгүйн тулд. Харагдах байдал нь бүхэлдээ шинэ. */

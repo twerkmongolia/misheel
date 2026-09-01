@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation'
-import { Arrow, ButtonLink, Eyebrow, Section } from '@/components/ui'
+import { Arrow, ButtonLink, Eyebrow, FacebookIcon, InstagramIcon, Section } from '@/components/ui'
 import { content, getDictionary, isLocale } from '@/lib/i18n'
 import { getSiteContent } from '@/lib/data'
 import { ContactForm } from './ContactForm'
@@ -23,7 +23,14 @@ import { PageBanner } from '@/components/site/PageBanner'
    нь уншигдана.
    ─────────────────────────────────────────────────────────────────────── */
 
-type Channel = { label: string; value: string; href: string; external?: boolean }
+type Channel = {
+  label: string
+  value: string
+  href: string
+  external?: boolean
+  /** Брэндийн дүрс — зөвхөн сүлжээний сувагт. Утас, и-мэйлд шошго нь өөрөө хангалттай. */
+  Icon?: typeof InstagramIcon
+}
 
 export default async function ContactPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
@@ -48,12 +55,14 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
       value: `@${instagram}`,
       href: `https://instagram.com/${instagram}`,
       external: true,
+      Icon: InstagramIcon,
     },
     facebook && {
       label: 'Facebook',
       value: 'Twerk Mongolia',
       href: facebook,
       external: true,
+      Icon: FacebookIcon,
     },
     email && { label: t.auth.email, value: email, href: `mailto:${email}` },
     address && {
@@ -97,7 +106,13 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
                 data-rv
               >
                 <span className="min-w-0">
-                  <span className="t-label block text-muted">{channel.label}</span>
+                  {/* Дүрс нь шошгыг СОЛИХГҮЙ, дэргэд нь зогсоно: Instagram
+                      гэдгийг дүрсээр нь агшин зуур таних боловч дэлгэц
+                      уншигчид, дүрс ачаалагдаагүй үед нэр нь хэвээр байна. */}
+                  <span className="flex items-center gap-2 text-muted">
+                    {channel.Icon && <channel.Icon />}
+                    <span className="t-label">{channel.label}</span>
+                  </span>
                   <span className="t-h3 mt-1.5 block underline-offset-4 group-hover:underline">
                     {channel.value}
                   </span>
