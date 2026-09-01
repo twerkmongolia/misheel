@@ -144,6 +144,9 @@ const mn = {
     booked: 'Бүртгүүлсэн',
     cancelled: 'Цуцлагдсан',
     seatsLeft: 'суудал үлдсэн',
+    // Цөөхөн суудал үлдсэн үед: «Сүүлийн 2 суудал». Яаралтай гэдгийг
+    // хэлбэрээр биш ҮГЭЭР хэлнэ — тэр нь хамгийн шууд.
+    seatsLast: 'Сүүлийн',
     with: 'багш',
     at: 'байршил',
     loginToBook: 'Бүртгүүлэхийн тулд нэвтэрнэ үү',
@@ -414,6 +417,7 @@ const en: Dictionary = {
     booked: 'Booked',
     cancelled: 'Cancelled',
     seatsLeft: 'seats left',
+    seatsLast: 'Only',
     with: 'with',
     at: 'at',
     loginToBook: 'Log in to book',
