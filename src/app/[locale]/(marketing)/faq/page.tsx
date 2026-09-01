@@ -1,7 +1,8 @@
 import { notFound } from 'next/navigation'
-import { Empty, PageHeader } from '@/components/ui'
+import { Empty } from '@/components/ui'
 import { getDictionary, loc, isLocale } from '@/lib/i18n'
 import { getFaq } from '@/lib/data'
+import { PageBanner } from '@/components/site/PageBanner'
 
 export default async function FaqPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
@@ -11,9 +12,13 @@ export default async function FaqPage({ params }: { params: Promise<{ locale: st
   const items = await getFaq()
 
   return (
-    <div className="shell flex flex-col gap-14 pt-12 sm:pt-16">
-      <PageHeader title={t.nav.faq} />
+    <>
+      <PageBanner
+        page="faq"
+        title={t.nav.faq}
+      />
 
+      <div className="shell flex flex-col gap-12 pt-10 sm:pt-12">
       {items.length === 0 ? (
         <Empty>{t.common.empty}</Empty>
       ) : (
@@ -39,5 +44,6 @@ export default async function FaqPage({ params }: { params: Promise<{ locale: st
         </div>
       )}
     </div>
+    </>
   )
 }
