@@ -62,15 +62,26 @@ export function PageBanner({
       {/* Өндөр нь ХАРЬЦААГААР биш ХЭМЖЭЭГЭЭР тогтоно. 21:9 харьцаа нь өргөн
           дэлгэцэд зөв ч утсан дээр 3см өндөр зурвас болж хувирдаг —
           зураг биш зураас. `clamp` нь хоёр туйлыг хоёуланг нь барина. */}
-      <Media
-        src={src!}
-        alt=""
-        ratio=""
-        className="h-[clamp(15rem,34vw,26rem)] rounded-none"
-        sizes="100vw"
-        priority
-        overlay
-      />
+      {/* Параллакс: зураг нь цонхноосоо 12% ӨНДӨР бөгөөд гүйлтийн туршид
+          дээшээ 7% зөөгдөнө (§ globals.css `.drift`). Хөдөлгөөн нь гүйлтэд
+          ШУУД уягдсан тул JavaScript хэрэггүй, `prefers-reduced-motion`
+          дээр өөрөө таслагдана.
+
+          Тууз нь зөвхөн ЭНД хөдөлнө — хуудсан дээрх бүх зураг өөр өөр
+          хурдтай хөдөлбөл гүйлт нь сэлгэцэж, унших боломжгүй болно. */}
+      <div className="relative h-[clamp(15rem,34vw,26rem)] overflow-hidden">
+        <div className="drift absolute inset-0 -top-[6%] h-[112%]">
+          <Media
+            src={src!}
+            alt=""
+            ratio=""
+            className="h-full rounded-none"
+            sizes="100vw"
+            priority
+            overlay
+          />
+        </div>
+      </div>
 
       <div className="shell absolute inset-x-0 bottom-0 flex flex-col gap-4 pb-8 sm:pb-11">
         {eyebrow && (
