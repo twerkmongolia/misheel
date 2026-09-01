@@ -493,6 +493,14 @@ label[for],
 select {
   cursor: pointer;
 }
+
+/* Идэвхгүй товч нь «дарж болно» гэж худал амлахгүй */
+button:disabled,
+[aria-disabled='true'],
+select:disabled {
+  cursor: not-allowed;
+}
+
 /* Фокусын хүрээ дугуй БИШ — систем бүхэлдээ 3px радиустай */
 :focus-visible {
   outline: 2px solid var(--foreground);
