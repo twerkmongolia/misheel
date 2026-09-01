@@ -65,6 +65,22 @@ export function formatDayShort(iso: string, locale: AppLocale): string {
 export function dayOfMonth(iso: string): string {
   return formatInTimeZone(new Date(iso), TIMEZONE, 'd')
 }
+
+/**
+ * «Өнөөдөр» / «Маргааш» — эсвэл юу ч биш.
+ *
+ * Огноо уншсан хүн толгойдоо ҮРГЭЛЖ нэг тооцоо хийдэг: «энэ чинь хэддэх
+ * өдөр билээ». Хамгийн ойрын хоёр өдрийг нэрлэснээр тэр тооцоо арилна.
+ * Гуравдахь өдрөөс цааш нэр өгөх нь эсрэгээрээ — «нөгөөдөр» гэдэг нь
+ * огнооноос удаан ойлгогддог.
+ */
+export function relativeDay(iso: string, from: Date = new Date()): 'today' | 'tomorrow' | null {
+  const target = dayKey(iso)
+  if (target === dayKey(from.toISOString())) return 'today'
+  if (target === dayKey(addDays(from, 1).toISOString())) return 'tomorrow'
+  return null
+}
+
 /** `2026-08-29` хэлбэрээр — өдрөөр бүлэглэхэд ашиглана (УБ-ын цагаар). */
 export function dayKey(iso: string): string {
   return formatInTimeZone(new Date(iso), TIMEZONE, 'yyyy-MM-dd')
