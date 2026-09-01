@@ -1150,6 +1150,11 @@ textarea.ctl { resize: vertical; min-height: 7rem; }
     background-color var(--t-1) linear;
 }
 
+.chip:hover {
+  border-color: var(--line-strong);
+  color: var(--foreground);
+}
+
 /* ── Шошго ────────────────────────────────────────────────────────────────
    Өнгө байхгүй тул төлөвийг ХЭЛБЭР заана:
      дүүрсэн   → баталгаажсан      тод хүрээ → анхаарал шаардсан
