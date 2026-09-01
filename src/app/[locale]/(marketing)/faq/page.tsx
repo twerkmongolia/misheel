@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation'
-import { Empty } from '@/components/ui'
+import { Arrow, ButtonLink, Empty } from '@/components/ui'
 import { getDictionary, loc, isLocale } from '@/lib/i18n'
 import { getFaq } from '@/lib/data'
 import { PageBanner } from '@/components/site/PageBanner'
@@ -41,6 +41,17 @@ export default async function FaqPage({ params }: { params: Promise<{ locale: st
               <p className="t-body max-w-[58ch] pb-7 text-muted">{loc(item, 'answer', locale)}</p>
             </details>
           ))}
+
+          {/* Жагсаалтын төгсгөл нь ХААЛТ биш ЗАМ байх ёстой. Арван хоёр
+              асуулт уншаад хариултаа олоогүй хүн яг тэр агшинд «за яахав»
+              гэж хуудсаа хаадаг — тэнд нь дараагийн алхмыг тавина. */}
+          <div className="flex flex-col items-start gap-4 pt-10" data-rv>
+            <p className="t-small text-muted">{t.contact.lead}</p>
+            <ButtonLink href={`/${locale}/contact`} variant="secondary">
+              {t.contact.title}
+              <Arrow />
+            </ButtonLink>
+          </div>
         </div>
       )}
     </div>
