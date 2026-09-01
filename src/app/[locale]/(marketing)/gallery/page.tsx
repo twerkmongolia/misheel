@@ -67,7 +67,16 @@ export default async function GalleryPage({ params }: { params: Promise<{ locale
   if (!isLocale(locale)) notFound()
 
   const t = getDictionary(locale)
-  const items = await getGallery()
+
+  /* Үрийн өгөгдөл нь `gallery_items` -д `/media/studio-1.svg` … гэсэн
+     ЗУРСАН орлуулагчийг байрлуулдаг. Тэдгээр нь гэрэл зураг биш, зөвхөн
+     «энд зураг орно» гэж хэлэх зориулалттай — тиймээс тэднийг «дүүрсэн
+     галерей» гэж тооцвол жинхэнэ зураг хэзээ ч гарахгүй.
+
+     Дүрэм: галерей бол ГЭРЭЛ ЗУРГИЙН цуглуулга. Вектор (`.svg`) файл
+     энд хэзээ ч жинхэнэ агуулга байж чадахгүй тул орлуулагч гэж үзнэ. */
+  const fromDb = (await getGallery()).filter((item) => !/\.svg(\?|$)/i.test(item.url))
+  const items = fromDb.length > 0 ? fromDb : localGallery()
 
   return (
     <>
