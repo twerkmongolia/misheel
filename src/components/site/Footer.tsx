@@ -2,6 +2,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { content, getDictionary, type Locale } from '@/lib/i18n'
 import { getSiteContent } from '@/lib/data'
+import { FacebookIcon, InstagramIcon } from '@/components/ui'
 
 /**
  * Хуудасны хөл — сэтгүүлийн colophon.
@@ -39,9 +40,13 @@ export async function Footer({ locale }: { locale: Locale }) {
   ]
 
   const socials = [
-    info.instagram && { label: 'Instagram', href: `https://instagram.com/${info.instagram}` },
-    info.facebook && { label: 'Facebook', href: String(info.facebook) },
-  ].filter(Boolean) as { label: string; href: string }[]
+    info.instagram && {
+      label: 'Instagram',
+      href: `https://instagram.com/${info.instagram}`,
+      Icon: InstagramIcon,
+    },
+    info.facebook && { label: 'Facebook', href: String(info.facebook), Icon: FacebookIcon },
+  ].filter(Boolean) as { label: string; href: string; Icon: typeof InstagramIcon }[]
 
   return (
     // Доод самбар хөвж байдаг тул төгсгөлийн мөрүүд түүний ард дарагдахгүйн
@@ -111,17 +116,20 @@ export async function Footer({ locale }: { locale: Locale }) {
           )}
           {info.address && <span className="t-small max-w-[26ch] text-muted">{info.address}</span>}
 
+          {/* Хөлд зай хомс, нэр нь давтагдсан мэдээлэл — Instagram гэдгийг
+              дүрс нь өөрөө хэлнэ. Нэр `aria-label` дээр үлдэнэ. */}
           {socials.length > 0 && (
-            <div className="mt-1 flex flex-wrap gap-x-5 gap-y-2">
-              {socials.map((social) => (
+            <div className="mt-1 -ml-2.5 flex flex-wrap gap-1">
+              {socials.map(({ label, href, Icon }) => (
                 <a
-                  key={social.label}
-                  href={social.href}
+                  key={label}
+                  href={href}
                   rel="noreferrer noopener"
                   target="_blank"
-                  className="lnk t-label text-muted hover:text-foreground"
+                  aria-label={label}
+                  className="icon-btn"
                 >
-                  {social.label}
+                  <Icon />
                 </a>
               ))}
             </div>

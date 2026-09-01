@@ -618,6 +618,39 @@ select:disabled {
    өөр хэмнэл — тиймээс өгүүлбэр дунд нэг л удаа утга үүсгэнэ. */
 .t-it { font-style: italic; letter-spacing: -0.018em; }
 
+/* ── Лого ─────────────────────────────────────────────────────────────────
+   Брэндийн нэр 17px дээр Playfair -ээр бичигдэж байв. Гэтэл энэ систем
+   өөрөө «Didone -ийг 24px -ээс ДООШ хэзээ ч биш» гэж тогтоосон (§ дээрх
+   ҮСГИЙН СИСТЕМ): тэр хэмжээнд нимгэн зурлагууд нь дэлгэц дээр сарнина.
+   Лого бол хуудсан дээрх хамгийн жижиг гарчиг тул тэр дүрмийг хамгийн
+   түрүүнд, хамгийн харагдах газраа зөрчиж байлаа.
+
+   Оронд нь grotesque, том үсэг, өргөн зай. ГУРАВ ДАХЬ ФОНТ НЭМЭЭГҮЙ —
+   сайт хоёр дуу хоолойтой бөгөөд гурав дахь нь тэр бүтцийг эвдэнэ.
+   Ингэснээр лого нь serif гарчгуудтайгаа ЭСРЭГ ТЭСРЭГ болж, үг биш
+   ТЭМДЭГ мэт уншигдана — хажуудаа дүрэс тавихгүйгээр.
+
+   Сүүлийн үсгийн ард үлдэх зайг сөрөг захаар нөхнө: `letter-spacing` нь
+   үсэг БҮРИЙН ард зай нэмдэг тул эцсийнх нь блокийг баруун тийш хазайлгана. */
+.wordmark {
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.16em;
+  margin-right: -0.16em;
+  text-transform: uppercase;
+}
+
+/* Өргөн дэлгэцэд зай нээгдэнэ — тэнд лого арай томорч, задарна */
+@media (min-width: 1280px) {
+  .wordmark {
+    font-size: 0.9375rem;
+    letter-spacing: 0.18em;
+    margin-right: -0.18em;
+  }
+}
+
 /* Гарчгийн анхдагч — засаагүй хуудсууд ч системд харьяалагдана */
 h1, h2 {
   font-family: var(--font-display), ui-serif, Georgia, serif;
@@ -1147,13 +1180,19 @@ textarea.ctl { resize: vertical; min-height: 7rem; }
   transition:
     color var(--t-1) linear,
     border-color var(--t-1) linear,
-    background-color var(--t-1) linear;
+    background-color var(--t-1) linear,
+    transform var(--t-1) var(--ease);
 }
 
+/* Нэг пикселийн өргөлт. Чип бол ЖИЖИГ бай — өнгө солих нь хангалттай
+   тодорхой ч, хуруу хаана байгааг хөдөлгөөн хамгийн хурдан хэлдэг. */
 .chip:hover {
   border-color: var(--line-strong);
   color: var(--foreground);
+  transform: translateY(-1px);
 }
+
+.chip:active { transform: translateY(0); transition-duration: 90ms; }
 
 /* Сонгогдсон нь ЭРГЭНЭ — монохром системд боломжтой хамгийн хүчтэй ялгаа */
 .chip-on {

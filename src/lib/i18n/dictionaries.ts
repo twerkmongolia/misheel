@@ -257,6 +257,10 @@ const mn = {
     updated: 'Мэдээлэл шинэчлэгдлээ.',
     profile: 'Профайл',
   },
+  faq: {
+    lead: 'Хамгийн олон давтагддаг асуултууд, тойруу үггүй хариулттай.',
+    asideTitle: 'Хариултаа олсонгүй юу?',
+  },
   contact: {
     title: 'Холбоо барих',
     message: 'Мессеж',
@@ -546,6 +550,10 @@ const en: Dictionary = {
     newPassword: 'New password',
     updated: 'Saved.',
     profile: 'Profile',
+  },
+  faq: {
+    lead: 'The questions we hear most, answered without the runaround.',
+    asideTitle: 'Still looking for an answer?',
   },
   contact: {
     title: 'Contact',

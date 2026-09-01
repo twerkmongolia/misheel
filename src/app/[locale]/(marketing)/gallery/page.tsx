@@ -101,7 +101,14 @@ export default async function GalleryPage({ params }: { params: Promise<{ locale
               {items.map((item, index) => {
                 const wide = index % 5 === 0
                 return (
-                  <div key={item.id} data-rv="clip" className={wide ? 'col-span-2' : ''}>
+                  /* `group` — доторх `.card-media` hover дээр томрох
+                     нөхцөл (§ globals.css). Галерейн нүд дарагддаггүй ч
+                     хөдөлгөөн нь зургийг «амьд» болгоно. */
+                  <div
+                    key={item.id}
+                    data-rv="clip"
+                    className={`group overflow-hidden ${wide ? 'col-span-2' : ''}`}
+                  >
                     <Media
                       src={item.url}
                       alt={locale === 'en' && item.alt_en ? item.alt_en : item.alt_mn}

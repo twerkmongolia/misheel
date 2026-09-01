@@ -80,7 +80,7 @@ export function SessionRow({
   ].filter(Boolean)
 
   return (
-    <li className="group relative border-b border-line last:border-b-0">
+    <li data-rv className="group relative border-b border-line last:border-b-0">
       {/* Hover нь ДЭВСГЭР БИШ ЗУРААС. Дэвсгэр нь мөрийг өнгөт хавтан болгож,
           хуудасны бусад хэсгээс тасалж авдаг; зураас нь зөвхөн «гар энд
           байна» гэж заагаад орхино. Систем бүхэлдээ шугамаар баригдсан. */}
@@ -96,7 +96,10 @@ export function SessionRow({
       >
         {/* ── 1 · Цаг ────────────────────────────────────────────────── */}
         <div className="flex items-baseline gap-2.5 md:block">
-          <p className="t-num text-[1.75rem] md:text-[1.875rem]">
+          {/* Цаг нь мөрийн зангуу — hover дээр өчүүхэн томорно. Хөдөлгөөн нь
+              зүүн ирмэгийн зураастай хамт «энэ мөр гарын доор байна» гэдгийг
+              хоёр өөр цэгээс хэлнэ. */}
+          <p className="t-num origin-left text-[1.75rem] transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.06] md:text-[1.875rem]">
             {formatTime(session.starts_at)}
           </p>
           <p className="t-meta text-muted md:mt-1.5">

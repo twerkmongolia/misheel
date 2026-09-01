@@ -62,7 +62,10 @@ export function SessionList({
           >
             {/* ── Өдрийн зангуу ────────────────────────────────────────
                 Утсан дээр хэвтээ мөр, дэлгэц дээр босоо баганы толгой. */}
-            <div className="mb-4 flex flex-wrap items-center gap-x-3 gap-y-2 lg:sticky lg:top-28 lg:mb-0 lg:block">
+            <div
+              data-rv
+              className="mb-4 flex flex-wrap items-center gap-x-3 gap-y-2 lg:sticky lg:top-28 lg:mb-0 lg:block"
+            >
               {near && <span className="tag tag-fill lg:mb-3">{t.common[near]}</span>}
               <h3 className="t-label text-foreground">{weekdayLong(first.starts_at, locale)}</h3>
               <span className="t-meta text-muted tabular-nums lg:mt-1 lg:block">
@@ -72,7 +75,7 @@ export function SessionList({
 
             {/* Бүлгийн дээд шугам тод, мөр хоорондынх нимгэн — эрэмбэ нь
                 шугамын ЖИНД. Хоёулаа ижил байвал бүлэг мэдэгдэхээ болино. */}
-            <ul className="border-t border-line-strong">
+            <ul className="border-t border-line-strong" data-stagger>
               {daySessions.map((session) => (
                 <SessionRow
                   key={session.id}

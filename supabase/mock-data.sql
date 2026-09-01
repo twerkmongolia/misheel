@@ -1,19 +1,31 @@
 -- ═══════════════════════════════════════════════════════════════════════════
--- Twerk Mongolia — НҮҮР ХУУДАСНЫ ЗАГВАР ХАРАХ ТҮР ӨГӨГДӨЛ
+-- Twerk Mongolia — ЗАГВАР ХАРАХ ТҮР ӨГӨГДӨЛ (зурагтайгаа хамт)
 --
--- Зорилго: нүүрний бүлэг БҮРИЙГ дүүрэн өгөгдөлтэй нь харах. Хоосон бүлэг
--- зохиомжийг харуулахгүй — хэвтээ зам нэг хайрцагтай бол зам биш, шатласан
--- хөрөг хоёрхон байвал шат биш.
+-- Зорилго: хуудас БҮРИЙГ дүүрэн өгөгдөлтэй нь харах. Хоосон хэсэг зохиомжийг
+-- харуулахгүй — хэвтээ зам нэг хайрцагтай бол зам биш, шатласан хөрөг
+-- хоёрхон байвал шат биш.
 --
--- ⚠️ Энэ бол ТҮР өгөгдөл. Харж дуусаад `mock-home-cleanup.sql` -ийг
+-- Юу орох вэ:
+--   2  байршил          4  багш           7  хичээлийн төрөл
+--   6  хуваарийн цаг    4  бараа          7  барааны хувилбар
+--   4  барааны зураг
+--
+-- ЗУРАГ нь энэ файлд ШУУД орсон. Урьд нь хийсвэр орлуулагч заагаад, дараа нь
+-- тусдаа скриптээр дарж бичдэг байв — хоёр алхам, хоёр файл. Одоо нэг.
+--
+-- Зургууд public/media/mock/ дотор БЭЛЭН байгаа: жинхэнэ гэрэл зургаас
+-- зүсэгдсэн. Файл байхгүй байсан ч эвдэрсэн зураг ГАРАХГҮЙ — сервер замыг
+-- шалгаад, олдохгүй бол монохром орлуулагч зурна.
+--
+-- ⚠️ Энэ бол ТҮР өгөгдөл. Харж дуусаад mock-data-cleanup.sql -ийг
 --    ажиллуулж бүрэн устгана.
 --
--- Бүх мөрийн id нь `dddddddd-` -ээр эхэлнэ. Цэвэрлэгээ яг үүгээр л олно
--- — жинхэнэ өгөгдөлд хуруу хүрэхгүй.
+-- Бүх мөрийн id нь dddddddd- гэж эхэлнэ. Цэвэрлэгээ яг үүгээр л олно —
+-- жинхэнэ өгөгдөлд хуруу хүрэхгүй.
 --
--- Дахин ажиллуулахад аюулгүй (`on conflict do nothing`).
+-- Дахин ажиллуулахад аюулгүй (on conflict do nothing).
 --
--- Ажиллуулах: Supabase Dashboard → SQL Editor → буулгаад Run.
+-- Ажиллуулах: Supabase Dashboard -> SQL Editor -> буулгаад Run.
 -- ═══════════════════════════════════════════════════════════════════════════
 
 -- ── Байршил ────────────────────────────────────────────────────────────────
@@ -40,19 +52,19 @@ insert into instructors (id, slug, name, bio_mn, bio_en, photo_url, instagram, s
 ('dddddddd-0002-4000-8000-000000000001', 'mock-saraa', 'Сараа',
  'Twerk Mongolia-гийн үүсгэн байгуулагч. 8 жилийн туршлагатай, анхан шатны хичээлүүдийг хөтөлдөг.',
  'Founder of Twerk Mongolia. Eight years of experience, leads the beginner classes.',
- '/media/studio-1.svg', 'saraa.dance', 1, true),
+ '/media/mock/instructor-1.jpg', 'saraa.dance', 1, true),
 ('dddddddd-0002-4000-8000-000000000002', 'mock-nomin', 'Номин',
  'Choreography болон ахисан түвшний хичээл заадаг. Олон улсын тэмцээний шагналт.',
  'Teaches choreography and advanced classes. International competition medalist.',
- '/media/studio-2.svg', 'nomin.moves', 2, true),
+ '/media/mock/instructor-2.jpg', 'nomin.moves', 2, true),
 ('dddddddd-0002-4000-8000-000000000003', 'mock-tsetseg', 'Цэцэг',
  'Stretching болон биеийн бэлтгэлийн хичээл. Дасгал зүтгэлтний мэргэжилтэн.',
  'Stretching and conditioning classes. Certified fitness trainer.',
- '/media/studio-3.svg', 'tsetseg.flex', 3, true),
+ '/media/mock/instructor-3.jpg', 'tsetseg.flex', 3, true),
 ('dddddddd-0002-4000-8000-000000000004', 'mock-anu', 'Ану',
  'Heels болон dancehall. Тайзны хөдөлгөөн, илэрхийлэлд төвлөрдөг.',
  'Heels and dancehall. Focused on stage movement and expression.',
- null, 'anu.heels', 4, true)
+ '/media/mock/instructor-4.jpg', 'anu.heels', 4, true)
 on conflict do nothing;
 
 -- ── Хичээлийн төрөл ────────────────────────────────────────────────────────
@@ -70,31 +82,31 @@ insert into class_types (id, slug, name_mn, name_en, desc_mn, desc_en, level, du
 ('dddddddd-0003-4000-8000-000000000001', 'mock-twerk-basics', 'Twerk үндэс', 'Twerk Basics',
  'Огт туршлагагүй хүнд зориулсан. Үндсэн хөдөлгөөн, хэмнэл, биеийн байрлалыг эхнээс нь заана.',
  'For complete beginners. Core movements, rhythm and body positioning from scratch.',
- 'beginner', 60, '/media/studio-4.svg', 35000, 1, true),
+ 'beginner', 60, '/media/mock/class-twerk-basics.jpg', 35000, 1, true),
 ('dddddddd-0003-4000-8000-000000000002', 'mock-choreography', 'Choreography', 'Choreography',
  'Дуу бүрд бүтэн бүжиг сурна. Үндсэн хөдөлгөөнүүдийг мэддэг хүнд тохиромжтой.',
  'Learn a full routine to a track. Suited to those who know the basics.',
- 'intermediate', 75, '/media/studio-5.svg', 40000, 2, true),
+ 'intermediate', 75, '/media/mock/class-choreography.jpg', 40000, 2, true),
 ('dddddddd-0003-4000-8000-000000000003', 'mock-advanced-flow', 'Ахисан түвшин', 'Advanced Flow',
  'Хурд, техник, тайз дээрх илэрхийлэл. Дор хаяж 6 сар бүжиглэсэн байх шаардлагатай.',
  'Speed, technique and stage presence. Requires at least six months of practice.',
- 'advanced', 90, '/media/studio-6.svg', 45000, 3, true),
+ 'advanced', 90, '/media/mock/class-advanced.jpg', 45000, 3, true),
 ('dddddddd-0003-4000-8000-000000000004', 'mock-stretch', 'Stretch & Conditioning', 'Stretch & Conditioning',
  'Уян хатан байдал, тэсвэр. Бүжгийн хичээлийг нөхөх дасгалууд.',
  'Flexibility and stamina. A complement to the dance classes.',
- 'beginner', 60, '/media/studio-1.svg', 30000, 4, true),
+ 'beginner', 60, '/media/mock/class-stretch.jpg', 30000, 4, true),
 ('dddddddd-0003-4000-8000-000000000005', 'mock-heels', 'Heels', 'Heels',
  'Өндөр өсгийтэй бүжиг. Тэнцвэр, алхаа, өөртөө итгэх итгэл.',
  'Dancing in heels. Balance, walk and confidence.',
- 'intermediate', 75, '/media/studio-2.svg', 42000, 5, true),
+ 'intermediate', 75, '/media/mock/class-heels.jpg', 42000, 5, true),
 ('dddddddd-0003-4000-8000-000000000006', 'mock-dancehall', 'Dancehall', 'Dancehall',
  'Ямайкийн уламжлалт хөдөлгөөнүүд. Хэмнэл сайтай, хөгжилтэй хичээл.',
  'Traditional Jamaican movement. Rhythm-heavy and a lot of fun.',
- 'beginner', 60, null, 35000, 6, true),
+ 'beginner', 60, '/media/mock/class-dancehall.jpg', 35000, 6, true),
 ('dddddddd-0003-4000-8000-000000000007', 'mock-technique', 'Twerk техник', 'Twerk Technique',
  'Ганц хөдөлгөөнийг задалж, цэвэрлэх. Ахисан түвшний бэлтгэл.',
  'Breaking a single move down and cleaning it up. Advanced conditioning.',
- 'advanced', 90, null, 50000, 7, true)
+ 'advanced', 90, '/media/mock/class-technique.jpg', 50000, 7, true)
 on conflict do nothing;
 
 -- ── Хуваарь ────────────────────────────────────────────────────────────────
@@ -187,12 +199,13 @@ insert into products (id, slug, name_mn, name_en, desc_mn, desc_en, category, ba
  'Canvas tote with the Twerk Mongolia logo.', 'merch', 25000, 4, true)
 on conflict do nothing;
 
--- Сүүлийн бараа ЗУРАГГҮЙ — 5:4 харьцаатай монохром орлуулагчийг
--- зурагтай хайрцгуудын хажууд харна.
+-- Дөрвүүлээ зурагтай. Орлуулагч ямар харагдахыг үзэх бол мөрийг нь
+-- устгаад дахин ажиллуул — код хөндөх шаардлагагүй.
 insert into product_images (id, product_id, url, alt, sort_order) values
-('dddddddd-0006-4000-8000-000000000001', 'dddddddd-0005-4000-8000-000000000001', '/media/studio-2.svg', 'Crop top', 1),
-('dddddddd-0006-4000-8000-000000000002', 'dddddddd-0005-4000-8000-000000000002', '/media/studio-3.svg', 'Joggers', 1),
-('dddddddd-0006-4000-8000-000000000003', 'dddddddd-0005-4000-8000-000000000003', '/media/studio-4.svg', 'Өвдөгний хамгаалалт', 1)
+('dddddddd-0006-4000-8000-000000000001', 'dddddddd-0005-4000-8000-000000000001', '/media/mock/product-crop-top.jpg', 'Crop top', 1),
+('dddddddd-0006-4000-8000-000000000002', 'dddddddd-0005-4000-8000-000000000002', '/media/mock/product-joggers.jpg', 'Joggers', 1),
+('dddddddd-0006-4000-8000-000000000003', 'dddddddd-0005-4000-8000-000000000003', '/media/mock/product-knee-pads.jpg', 'Өвдөгний хамгаалалт', 1),
+('dddddddd-0006-4000-8000-000000000004', 'dddddddd-0005-4000-8000-000000000004', '/media/mock/product-tote.jpg', 'Tote цүнх', 1)
 on conflict do nothing;
 
 -- Нүүрэнд харагдах үнэ нь `min(variant.price)` — сонголтууд өөр өөр үнэтэй

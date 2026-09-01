@@ -61,13 +61,14 @@ export async function Header({ locale }: { locale: Locale }) {
       <HeaderShell>
         <div className="shell flex h-20 items-center gap-8">
           {/* ── Лого ────────────────────────────────────────────────────
-              Дүрсгүй. Өндөр ялгаралтай serif -ээр бичсэн нэр өөрөө тэмдэг
-              болно — хажууд нь дүрс тавих нь тэр эрчийг сулруулна. */}
+              Дүрсгүй: нэр өөрөө тэмдэг болно — хажууд нь дүрс тавих нь тэр
+              эрчийг сулруулна. Үсэг нь grotesque, том үсэг, өргөн зайтай
+              (§ globals.css `.wordmark`) — 17px дээр Didone ажиллахгүй. */}
           <Link
             href={`/${locale}`}
             className="group flex shrink-0 items-baseline gap-2.5 whitespace-nowrap"
           >
-            <span className="font-display text-[1.0625rem] leading-none font-medium tracking-[-0.03em] transition-opacity duration-300 group-hover:opacity-60">
+            <span className="wordmark transition-opacity duration-300 group-hover:opacity-60">
               Twerk Mongolia
             </span>
             {/* Хотын шошго — масthead -ийн дэд гарчиг. Зөвхөн өргөн дэлгэцэд:
