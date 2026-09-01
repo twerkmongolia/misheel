@@ -474,6 +474,25 @@ body::before {
   color: var(--background);
 }
 
+/* ── Заагч ────────────────────────────────────────────────────────────────
+   Tailwind v4 -ийн preflight нь `button` -оос `cursor: pointer` -ийг АВЧ
+   ХАЯСАН (v3 -д байсан). Үүний үр дүнд дарж болох бүх зүйл дээр заагч нь
+   сум хэвээр үлдэж, «энэ товч уу, эсвэл зүгээр текст үү» гэдэг эргэлзээ
+   төрдөг. Тиймээс дүрмийг гараар буцаана — дарагдах чадвартай БҮХ элемент
+   дээр нэг мөрөөр. */
+button,
+summary,
+label[for],
+[role='button'],
+[role='tab'],
+[type='button'],
+[type='submit'],
+[type='reset'],
+[type='checkbox'],
+[type='radio'],
+select {
+  cursor: pointer;
+}
 /* Фокусын хүрээ дугуй БИШ — систем бүхэлдээ 3px радиустай */
 :focus-visible {
   outline: 2px solid var(--foreground);
