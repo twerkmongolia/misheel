@@ -40,3 +40,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Эх гэрэл зургууд — зөвхөн локал. Эндээс `public/media/**` руу зүсэж
+# гаргадаг (§ public/media/banners/README.md). Түүхий файлууд 5MB хүртэл
+# тул git-д оруулбал repo байнга хүндэрнэ.
+/media-source
