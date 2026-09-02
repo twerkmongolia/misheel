@@ -361,6 +361,46 @@ export async function updateInstructor(formData: FormData): Promise<void> {
   redirect('/admin/instructors?ok=1')
 }
 
+/**
+ * Хичээлийн төрлийг засна.
+ *
+ * Үнэ, хугацаа өөрчлөгдөхөд АЛЬ ХЭДИЙН товлогдсон хичээлүүд хөндөгдөхгүй:
+ * `class_sessions` нь өөрийн `price` -тэй бөгөөд түүнийг үүсэх мөчид хуулж
+ * авдаг. Өнөөдөр үнээ өсгөхөд өчигдөр бүртгүүлсэн хүнээс нэмж авах нь
+ * буруу тул энэ нь ЗӨВ зан — гэхдээ ажилтанд мэдэгдэх ёстой.
+ */
+export async function updateClassType(formData: FormData): Promise<void> {
+  await requireStaff()
+
+  const id = uuid.safeParse(formData.get('id'))
+  const parsed = z
+    .object({
+      name_mn: z.string().trim().min(2),
+      name_en: z.string().trim().default(''),
+      desc_mn: z.string().trim().default(''),
+      desc_en: z.string().trim().default(''),
+      level: z.enum(['beginner', 'intermediate', 'advanced']),
+      duration_min: z.coerce.number().int().min(15).max(240),
+      base_price: z.coerce.number().int().min(0),
+    })
+    .safeParse(Object.fromEntries(formData))
+
+  if (!id.success || !parsed.success) {
+    redirect(
+      `/admin/schedule?error=${encodeURIComponent(parsed.success ? 'Хичээл олдсонгүй' : (parsed.error.issues[0]?.message ?? 'invalid'))}`,
+    )
+  }
+
+  const supabase = await createClient()
+  const { error } = await supabase.from('class_types').update(parsed.data).eq('id', id.data)
+  if (error) redirect(`/admin/schedule?error=${encodeURIComponent(error.message)}`)
+
+  await audit('class_type.update', 'class_types', id.data, {})
+  revalidatePath('/admin/schedule')
+  revalidatePath('/', 'layout')
+  redirect('/admin/schedule?ok=1')
+}
+
 /* ── Дэлгүүр ───────────────────────────────────────────────────────────── */
 
 /** Барааны цонх дахин нээгдэхийн тулд id-г хаяг руу залгана (§ CardDialog). */
