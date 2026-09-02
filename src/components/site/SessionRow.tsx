@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { Button } from '@/components/ui'
-import { bookSession } from '@/actions/bookings'
+import { bookSession, joinWaitlist, leaveWaitlist } from '@/actions/bookings'
 import { getDictionary, loc, type Locale } from '@/lib/i18n'
 import { formatMnt, formatTime } from '@/lib/format'
 import type { SessionView } from '@/lib/data'
@@ -36,12 +36,15 @@ export function SessionRow({
   session,
   locale,
   booked = false,
+  waiting = false,
   back,
   hide,
 }: {
   session: SessionView
   locale: Locale
   booked?: boolean
+  /** Хэрэглэгч хүлээлгийн жагсаалтад орсон эсэх. */
+  waiting?: boolean
   back?: string
   /**
    * Хуудасны гарчигтай ДАВХАРДСАН талбарыг хасна.
@@ -155,6 +158,29 @@ export function SessionRow({
                   {t.schedule.book}
                 </Button>
               </form>
+            ) : full && !cancelled && !past ? (
+              /* Дүүрсэн хичээлд «Дүүрсэн» гэж бичээд орхих нь мухардал.
+                 Хүлээлгийн жагсаалт нь суудал гармагц холбогдох боломж
+                 үлдээнэ — сурагч буцаж ирэхийг санахгүй байсан ч. */
+              <form action={waiting ? leaveWaitlist : joinWaitlist} className="relative z-10">
+                <input type="hidden" name="session_id" value={session.id} />
+                <input type="hidden" name="locale" value={locale} />
+                {back && <input type="hidden" name="back" value={back} />}
+                {waiting ? (
+                  <Button
+                    type="submit"
+                    variant="ghost"
+                    className="btn-sm"
+                    title={t.schedule.leaveWaitlist}
+                  >
+                    <span aria-hidden>✓</span> {t.schedule.onWaitlist}
+                  </Button>
+                ) : (
+                  <Button type="submit" variant="secondary" className="btn-sm">
+                    {t.schedule.joinWaitlist}
+                  </Button>
+                )}
+              </form>
             ) : (
               <span className={`btn btn-sm ${booked ? 'btn-done' : 'btn-state'}`}>
                 {booked ? (
@@ -163,8 +189,6 @@ export function SessionRow({
                   </>
                 ) : cancelled ? (
                   t.schedule.cancelled
-                ) : full ? (
-                  t.common.full
                 ) : (
                   t.booking.past
                 )}
