@@ -284,9 +284,72 @@ export async function createInstructor(formData: FormData): Promise<void> {
   const supabase = await createClient()
   const slug = await uniqueSlug(supabase, 'instructors', parsed.data.name)
 
-  const { error } = await supabase.from('instructors').insert({
-    ...parsed.data,
-    slug,
+  const { data: instructor, error } = await supabase
+    .from('instructors')
+    .insert({
+      ...parsed.data,
+      slug,
+      instagram: parsed.data.instagram || null,
+      photo_url: parsed.data.photo_url || null,
+    })
+    .select('id')
+    .single()
+
+  if (error || !instructor) {
+    redirect(`/admin/instructors?error=${encodeURIComponent(error?.message ?? 'Багш нэмэгдсэнгүй')}`)
+  }
+
+  await audit('instructor.create', 'instructors', instructor.id, { slug })
+
+  /* Зураг нь заавал биш. Багш аль хэдийн үүссэн тул зураг дээр алдаа гарвал
+     бүхэлд нь бүтэлгүйтсэн мэт мессеж өгвөл ажилтан төөрнө — юу болсныг
+     ЯГ хэлээд, дахин оролдох боломжийг үлдээнэ.
+
+     Байршуулах нь багшийн id мэдэгдсэний ДАРАА болно: файлын зам түүнээс
+     угсрагддаг тул урьдчилж хийж болохгүй. */
+  const [photo] = pickFiles(formData)
+  if (photo) {
+    const uploaded = await uploadImage(supabase, 'instructors', instructor.id, photo)
+    if ('error' in uploaded) {
+      redirect(
+        `/admin/instructors?error=${encodeURIComponent(`Багш нэмэгдлээ, гэвч зураг ороогүй — ${uploaded.error}`)}`,
+      )
+    }
+    await supabase.from('instructors').update({ photo_url: uploaded.url }).eq('id', instructor.id)
+  }
+
+  revalidatePath('/admin/instructors')
+  // Нийтийн «Багш нар» хуудас ч шинэчлэгдэх ёстой
+  revalidatePath('/', 'layout')
+  redirect('/admin/instructors?ok=1')
+}
+
+/**
+ * Багшийн мэдээллийг засна.
+ *
+ * `slug` -г ЗОРИУДААР хөндөхгүй: нийтийн сайтын хаяг (`/mn/instructors/saraa`)
+ * түүн дээр тогтдог тул нэр засах бүрд хаяг өөрчлөгдвөл гадны холбоос,
+ * хуваалцсан хуудас бүгд эвдэрнэ.
+ *
+ * Зураг нь заавал биш: шинэ файл ирвэл л солино, эс тэгвэл хуучин нь үлдэнэ.
+ */
+export async function updateInstructor(formData: FormData): Promise<void> {
+  await requireStaff()
+
+  const id = uuid.safeParse(formData.get('id'))
+  const parsed = instructorSchema.safeParse(Object.fromEntries(formData))
+
+  if (!id.success || !parsed.success) {
+    redirect(
+      `/admin/instructors?error=${encodeURIComponent(parsed.success ? 'Багш олдсонгүй' : (parsed.error.issues[0]?.message ?? 'invalid'))}`,
+    )
+  }
+
+  const supabase = await createClient()
+  const patch: Partial<Instructor> = {
+    name: parsed.data.name,
+    bio_mn: parsed.data.bio_mn,
+    bio_en: parsed.data.bio_en,
     instagram: parsed.data.instagram || null,
     photo_url: parsed.data.photo_url || null,
   })
