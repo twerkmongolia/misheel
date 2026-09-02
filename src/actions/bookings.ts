@@ -66,6 +66,55 @@ export async function bookSession(formData: FormData): Promise<void> {
   redirect(`${back}?booked=1`)
 }
 
+/* ── Хүлээлгийн жагсаалт ───────────────────────────────────────────────────
+   Хичээл дүүрэхэд сурагчийн хийж чадах цорын ганц зүйл нь «дараа дахин
+   ороод үзэх» байв — тэгээд ихэнх нь буцаж ирдэггүй. Хүснэгт нь эхнээсээ
+   схемд байсан ч хаана ч ашиглагдаагүй.
+
+   Энэ нь мэдэгдэл ИЛГЭЭХГҮЙ: суудал гарахад ажилтан хүснэгтээс хараад
+   өөрөө холбогдоно (§ admin/schedule). Автомат мэдэгдэл нь и-мэйл/SMS
+   үйлчилгээ шаардах тул тусдаа ажил. */
+
+export async function joinWaitlist(formData: FormData): Promise<void> {
+  const locale = localeFrom(formData)
+  const back = backTo(formData, locale)
+  const sessionId = z.string().uuid().safeParse(formData.get('session_id'))
+
+  if (!sessionId.success) redirect(`${back}?error=UNKNOWN`)
+
+  const user = await getUser()
+  if (!user) redirect(`/${locale}/login?next=${encodeURIComponent(back)}`)
+
+  const supabase = await createClient()
+  /* `unique (session_id, user_id)` тул давхар дарахад алдаа буцаана —
+     түүнийг АЛДАА гэж үзэхгүй: хэрэглэгчийн хүсэл аль хэдийн биелсэн. */
+  const { error } = await supabase
+    .from('waitlist')
+    .upsert({ session_id: sessionId.data, user_id: user.id }, { onConflict: 'session_id,user_id' })
+
+  if (error) redirect(`${back}?error=UNKNOWN`)
+
+  revalidatePath(`/${locale}/schedule`)
+  redirect(`${back}?waitlisted=1`)
+}
+
+export async function leaveWaitlist(formData: FormData): Promise<void> {
+  const locale = localeFrom(formData)
+  const back = backTo(formData, locale)
+  const sessionId = z.string().uuid().safeParse(formData.get('session_id'))
+
+  if (!sessionId.success) redirect(`${back}?error=UNKNOWN`)
+
+  const user = await getUser()
+  if (!user) redirect(`/${locale}/login?next=${encodeURIComponent(back)}`)
+
+  const supabase = await createClient()
+  await supabase.from('waitlist').delete().eq('session_id', sessionId.data).eq('user_id', user.id)
+
+  revalidatePath(`/${locale}/schedule`)
+  redirect(`${back}?left=1`)
+}
+
 export async function cancelBooking(formData: FormData): Promise<void> {
   const locale = localeFrom(formData)
   const back = backTo(formData, locale)
