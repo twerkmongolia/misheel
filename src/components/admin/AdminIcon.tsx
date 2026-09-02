@@ -11,8 +11,6 @@ export type NavIcon =
   | 'mail'
   | 'history'
   | 'chevron'
-  | 'sun'
-  | 'moon'
   | 'percent'
   | 'wallet'
   | 'clock'
@@ -102,13 +100,6 @@ const paths: Record<NavIcon, React.ReactNode> = {
     </>
   ),
   chevron: <path d="M14.5 6 8.5 12l6 6" />,
-  sun: (
-    <>
-      <circle cx="12" cy="12" r="4" />
-      <path d="M12 2.5v2M12 19.5v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M2.5 12h2M19.5 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4" />
-    </>
-  ),
-  moon: <path d="M20 13.4A8.2 8.2 0 0 1 10.6 4a8.2 8.2 0 1 0 9.4 9.4Z" />,
   percent: (
     <>
       <circle cx="7.8" cy="7.8" r="2.8" />

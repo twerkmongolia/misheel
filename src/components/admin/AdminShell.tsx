@@ -17,7 +17,6 @@ export type NavItem = {
 export type NavGroup = { label?: string; items: NavItem[] }
 
 const NAV_COOKIE = 'tm_admin_nav'
-const SCHEME_COOKIE = 'tm_admin_scheme'
 
 function remember(name: string, value: string) {
   document.cookie = `${name}=${value}; path=/; max-age=${60 * 60 * 24 * 365}; samesite=lax`
@@ -26,29 +25,27 @@ function remember(name: string, value: string) {
 /**
  * Удирдлагын бүрхүүл — зүүн тал дүрсний зурвас, дээр толгой мөр.
  *
- * Хоёр төлвийг эзэмшинэ: өнгөний горим ба зурвас хумигдсан эсэх. Хоёулаа
- * cookie-д хадгалагдана — сервер уншиж чаддаг тул эхний зурагтаа ЗӨВ гарна.
- * localStorage бол зөвхөн effect дотор уншигдах тул хуудас бүрд буруу
- * өнгө/өргөнтэй нэг хүрээ анивчина.
+ * ГАНЦ төлөв эзэмшинэ: зурвас хумигдсан эсэх. Cookie-д хадгалагдана —
+ * сервер уншиж чаддаг тул эхний зурагтаа ЗӨВ өргөнтэй гарна. localStorage
+ * бол зөвхөн effect дотор уншигдах тул хуудас бүрд буруу өргөнтэй нэг
+ * хүрээ анивчина.
  *
- * Горим нь сайтынхаас ТУСДАА: `<html data-theme>` -д хүрэхгүй, зөвхөн энэ
- * wrapper -ийн `color-scheme` -ийг сольдог (§ globals.css `.admin-shell`).
+ * Өмнө нь энд өнгөний горимын товч бас байсан (өөрийн cookie, өөрийн
+ * `data-scheme`). Сайт бүхэлдээ ганц горимтой болсон тул хасагдав —
+ * удирдлага нийтийн сайттай ИЖИЛ палитр ашиглана.
  */
 export function AdminShell({
   groups,
   profile,
   defaultCollapsed,
-  defaultScheme,
   children,
 }: {
   groups: NavGroup[]
   profile: { name: string; role: string }
   defaultCollapsed: boolean
-  defaultScheme: 'light' | 'dark'
   children: React.ReactNode
 }) {
   const [collapsed, setCollapsed] = useState(defaultCollapsed)
-  const [scheme, setScheme] = useState(defaultScheme)
   // Самбарыг НЭЭСЭН үеийн зам. Хуудас солигдонгуут өөрөө хаагдана —
   // effect-гүйгээр, шинэ хуудасны дээр өлгөөтэй үлдэхгүй.
   const [sheetPath, setSheetPath] = useState<string | null>(null)
@@ -70,17 +67,8 @@ export function AdminShell({
     remember(NAV_COOKIE, next ? '1' : '0')
   }
 
-  const toggleScheme = () => {
-    const next = scheme === 'dark' ? 'light' : 'dark'
-    setScheme(next)
-    remember(SCHEME_COOKIE, next)
-  }
-
   return (
-    <div
-      className="admin-shell flex min-h-screen flex-1 bg-background text-foreground"
-      data-scheme={scheme}
-    >
+    <div className="admin-shell flex min-h-screen flex-1 bg-background text-foreground">
       {/* ── Зүүн зурвас ────────────────────────────────────────────────── */}
       <aside
         /* Дэвсгэргүй — зурвасыг зөвхөн ШУГАМ тусгаарлана. Өөр өнгийн
@@ -162,16 +150,6 @@ export function AdminShell({
             </span>
 
             <div className="ml-auto flex items-center gap-1">
-              <button
-                type="button"
-                onClick={toggleScheme}
-                aria-label={scheme === 'dark' ? 'Гэрэлтэй горим' : 'Харанхуй горим'}
-                title={scheme === 'dark' ? 'Гэрэлтэй горим' : 'Харанхуй горим'}
-                className="icon-btn"
-              >
-                <AdminIcon name={scheme === 'dark' ? 'sun' : 'moon'} className="h-[18px] w-[18px]" />
-              </button>
-
               <Link
                 href="/mn"
                 className="hidden h-9 items-center gap-1.5 rounded-lg px-3 text-[13px] text-muted transition-colors hover:bg-surface-2 hover:text-foreground sm:flex"
@@ -264,15 +242,6 @@ export function AdminShell({
                   {item.label}
                 </Link>
               ))}
-
-              <button
-                type="button"
-                onClick={toggleScheme}
-                className="flex h-12 items-center gap-3 rounded-lg px-3 text-[15px] text-foreground transition-colors active:bg-surface-2"
-              >
-                <AdminIcon name={scheme === 'dark' ? 'sun' : 'moon'} className="h-5 w-5 shrink-0" />
-                {scheme === 'dark' ? 'Гэрэлтэй горим' : 'Харанхуй горим'}
-              </button>
 
               <Link
                 href="/mn"

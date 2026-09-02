@@ -4,6 +4,7 @@ import { useEffect, useState, useSyncExternalStore } from 'react'
 import { createPortal } from 'react-dom'
 import { usePathname } from 'next/navigation'
 import { NavLink } from './NavLink'
+import { ContactTrigger } from './ContactDialog'
 import { TAB, TAB_ACTIVE, TAB_IDLE, TAB_LABEL } from './tab'
 
 export type MenuItem = { href: string; label: string }
@@ -23,11 +24,14 @@ const subscribeNever = () => () => {}
  */
 export function MobileMenu({
   label,
+  contactLabel,
   primary,
   secondary,
   footer,
 }: {
   label: string
+  /** «Холбоо барих» — холбоос биш, цонх нээдэг тул тусад нь дамжина. */
+  contactLabel: string
   primary: MenuItem[]
   secondary: MenuItem[]
   footer?: React.ReactNode
@@ -67,7 +71,7 @@ export function MobileMenu({
   // serif: цэс бол хуудасны агуулгын жагсаалт, удирдлагын самбар биш.
   const row =
     'group flex items-center justify-between gap-3 border-b border-line py-4 ' +
-    'font-display text-[1.375rem] font-medium tracking-[-0.02em] leading-none ' +
+    'font-display text-[1.45rem] font-semibold uppercase tracking-[0.01em] leading-none ' +
     'text-foreground-soft transition-colors duration-200 ' +
     'aria-[current=page]:text-foreground active:text-foreground'
 
@@ -138,6 +142,14 @@ export function MobileMenu({
               <Chevron />
             </NavLink>
           ))}
+
+          {/* Цонх нээгдэхийн өмнө цэс ЗААВАЛ хаагдана: `closeIfNavigating`
+              нь зам солигдоход л ажилладаг ч энд зам солигдохгүй, тиймээс
+              цэс цонхны ард нээлттэй үлдэнэ. */}
+          <ContactTrigger className={`${row} w-full text-left`} onClick={() => setOpen(false)}>
+            {contactLabel}
+            <Chevron />
+          </ContactTrigger>
 
           <div className="h-8" />
 

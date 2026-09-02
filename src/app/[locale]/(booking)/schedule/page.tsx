@@ -4,7 +4,7 @@ import { Alert, Empty } from '@/components/ui'
 import { SessionList } from '@/components/site/SessionList'
 import { bookingErrorMessage } from '@/lib/errors'
 import { getDictionary, loc, isLocale } from '@/lib/i18n'
-import { addDays, dayKey, dayOfMonth, formatDayShort, weekdayShort, weekStart } from '@/lib/format'
+import { addDays, weekStart } from '@/lib/format'
 import {
   getClassTypes,
   getInstructors,
@@ -80,27 +80,6 @@ export default async function SchedulePage({
 
   const hasFilter = Boolean(search.class || search.instructor || search.level)
 
-  /* Долоо хоногийн тойм — өдөр тус бүрд хэдэн хичээл байгаа. Хоосон өдөр ч
-     ЖАГСААЛТАД БАЙХ ёстой: «Бямбад хичээл алга» гэдгийг мэдэхийн тулд бүх
-     хуудсыг гүйлгэх шаардлагагүй болно. */
-  const counts = new Map<string, number>()
-  for (const session of filtered) {
-    const key = dayKey(session.starts_at)
-    counts.set(key, (counts.get(key) ?? 0) + 1)
-  }
-
-  const week = Array.from({ length: 7 }, (_, index) => {
-    const date = addDays(from, index).toISOString()
-    const key = dayKey(date)
-    return { key, date, count: counts.get(key) ?? 0 }
-  })
-
-  const todayKey = dayKey(new Date().toISOString())
-  const range = `${formatDayShort(from.toISOString(), locale)} – ${formatDayShort(
-    addDays(from, 6).toISOString(),
-    locale,
-  )}`
-
   /* Хуудасны бүх төлөв ХАЯГАНД амьдарна: долоо хоног, гурван шүүлт. Тиймээс
      ганц холбоос үүсгэгчээс бүх шилжилт гарна — долоо хоног солих ч, шүүлт
      солих ч ялгаагүй. Ингэснээр «шүүлтээ хадгалаад дараа долоо хоног руу
@@ -123,8 +102,6 @@ export default async function SchedulePage({
     instructor: search.instructor,
     level: search.level,
   }
-
-  const weekLink = (week: number) => href({ ...current, w: week })
 
   /* Шүүлтийн эгнээ — нэр, идэвхтэй утга, сонголтууд. Хоосон мөр («Бүгд» -ээс
      өөр сонголтгүй) огт гарахгүй: сонгох юмгүй шүүлт бол чимээ. */
@@ -173,95 +150,6 @@ export default async function SchedulePage({
         {search.waitlisted && <Alert tone="good">{t.schedule.waitlisted}</Alert>}
         {search.left && <Alert tone="neutral">{t.schedule.waitlistLeft}</Alert>}
         {search.error && <Alert tone="danger">{bookingErrorMessage(t, search.error)}</Alert>}
-
-        {/* ══ 1 · БИ ХААНА БАЙНА ═════════════════════════════════════════
-            Долоо хоногийн шилжилт БА долоо хоногийн тойм нь урьд нь хоёр
-            тусдаа блок байв: гарчиг, сум нэг мөрөнд, доор нь өдрүүдийн
-            зурвас. Хоёулаа нэг л асуултад («аль долоо хоног, аль өдөр»)
-            хариулдаг тул НЭГ хяналт болгож нийлүүлэв — сум нь зурвасын
-            хоёр үзүүрт суусан есөн нүдтэй эгнээ. Нэг зүйлийг хоёр газар
-            хайх шаардлагагүй болно. */}
-        <section className="flex flex-col gap-4">
-          <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
-            <h2 className="t-h3">{offset === 0 ? t.schedule.thisWeek : range}</h2>
-            <p className="t-meta text-muted tabular-nums">
-              {offset === 0 && (
-                <>
-                  {range}
-                  <span className="text-faint"> · </span>
-                </>
-              )}
-              {filtered.length} {t.schedule.sessionCount}
-              {offset !== 0 && (
-                <>
-                  <span className="text-faint"> · </span>
-                  <Link href={weekLink(0)} className="lnk hover:text-foreground">
-                    {t.schedule.thisWeek}
-                  </Link>
-                </>
-              )}
-            </p>
-          </div>
-
-          <nav className="grid grid-cols-[2rem_repeat(7,minmax(0,1fr))_2rem] divide-x divide-line overflow-hidden border-y border-line sm:grid-cols-[2.75rem_repeat(7,minmax(0,1fr))_2.75rem]">
-            <Link
-              href={weekLink(offset - 1)}
-              aria-label={t.schedule.weekPrev}
-              className="grid place-items-center text-muted transition-colors duration-200 hover:bg-surface hover:text-foreground"
-            >
-              <span aria-hidden>←</span>
-            </Link>
-
-            {week.map((day) => {
-              const isToday = day.key === todayKey
-              const open = day.count > 0
-
-              /* Өнөөдөр нь ЭРГЭНЭ — хар дэвсгэр, цагаан тоо. Монохром
-                 системд «энэ бол өнөөдөр» гэдгийг хэлэх хамгийн хүчтэй
-                 арга нь өнгө нэмэх биш, байгаа хоёр өнгөө сольж тавих. */
-              const cell = [
-                'group flex flex-col items-center py-3.5 transition-colors duration-200',
-                isToday ? 'bg-foreground text-background' : open ? 'hover:bg-surface' : 'opacity-40',
-              ].join(' ')
-
-              const body = (
-                <>
-                  <span className={`t-label ${isToday ? 'opacity-70' : 'text-muted'}`}>
-                    {weekdayShort(day.date, locale)}
-                  </span>
-                  <span className="t-num mt-1.5 text-[1.375rem] transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-110 sm:text-[1.75rem]">
-                    {dayOfMonth(day.date)}
-                  </span>
-                  <span
-                    className={`t-meta mt-1 tabular-nums ${
-                      isToday ? 'opacity-70' : open ? 'text-foreground' : 'text-faint'
-                    }`}
-                  >
-                    {day.count || '—'}
-                  </span>
-                </>
-              )
-
-              return open ? (
-                <Link key={day.key} href={`#day-${day.key}`} className={cell}>
-                  {body}
-                </Link>
-              ) : (
-                <span key={day.key} className={cell} aria-label={t.schedule.noneThisDay}>
-                  {body}
-                </span>
-              )
-            })}
-
-            <Link
-              href={weekLink(offset + 1)}
-              aria-label={t.schedule.weekNext}
-              className="grid place-items-center text-muted transition-colors duration-200 hover:bg-surface hover:text-foreground"
-            >
-              <span aria-hidden>→</span>
-            </Link>
-          </nav>
-        </section>
 
         {/* ══ 2 · ШҮҮЛТ — ЭВХЭГДСЭН ══════════════════════════════════════
             Гурван эгнээ чип нь хуудасны эхэнд 200px эзэлж, хичээлүүдийг

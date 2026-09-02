@@ -1,7 +1,8 @@
 import { notFound } from 'next/navigation'
-import { Arrow, ButtonLink, Empty, Eyebrow } from '@/components/ui'
+import { Arrow, Empty, Eyebrow } from '@/components/ui'
 import { getDictionary, loc, isLocale } from '@/lib/i18n'
 import { getFaq } from '@/lib/data'
+import { ContactTrigger } from '@/components/site/ContactDialog'
 import { PageBanner } from '@/components/site/PageBanner'
 
 /* ───────────────────────────────────────────────────────────────────────────
@@ -83,14 +84,13 @@ export default async function FaqPage({ params }: { params: Promise<{ locale: st
               <Eyebrow>{t.contact.directTitle}</Eyebrow>
               <h2 className="t-h3">{t.faq.asideTitle}</h2>
               <p className="t-small max-w-[36ch] text-muted">{t.contact.lead}</p>
-              <ButtonLink
-                href={`/${locale}/contact`}
-                variant="secondary"
-                className="w-full sm:w-auto"
-              >
+              {/* Асуултынхаа хариуг олоогүй хүн ХАМГИЙН ойрхон бичих
+                  боломжтой байх ёстой. Хуудас солиод буцаж ирэх нь тэр
+                  хүнийг жагсаалтын эхэнд буцаана. */}
+              <ContactTrigger className="btn btn-line w-full sm:w-auto">
                 {t.contact.title}
                 <Arrow />
-              </ButtonLink>
+              </ContactTrigger>
             </div>
           </aside>
         </div>

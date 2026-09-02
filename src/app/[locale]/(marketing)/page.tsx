@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import type { CSSProperties, ReactNode } from 'react'
 import { Arrow, ButtonLink, Empty, Eyebrow } from '@/components/ui'
+import { ContactTrigger } from '@/components/site/ContactDialog'
 import { Media } from '@/components/site/media'
 import { SessionList } from '@/components/site/SessionList'
 import { VideoEmbed } from '@/components/site/VideoEmbed'
@@ -161,14 +162,15 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           Утсан дээр давхарлал утгагүй — босоо дараалал болж задарна:
           гарчиг, тайлбар, үйлдэл, дараа нь зураг бүтэн өргөнөөр.
           ══════════════════════════════════════════════════════════════════ */}
-      <section className="relative pt-10 sm:pt-16 lg:pt-20">
-        <div className="glow -top-32 left-[6%] h-96 w-96" />
-        <div className="glow glow-soft top-24 right-[4%] h-80 w-[28rem]" />
-        <div
-          aria-hidden
-          className="mesh pointer-events-none absolute inset-x-0 -top-24 -z-10 h-[46rem] opacity-70"
-        />
-
+      <section className="relative">
+        {/* Баатар нь ХАВТГАЙ САМБАР дээр сууна: дэлгэцийн хоёр ирмэг хүртэл
+            үргэлжилсэн `--surface`, доороо ганц шугам. Өмнө нь энд торон
+            дэвсгэр, хоёр прожектор байсан — тэдгээр нь гүн үүсгэдэг ч
+            хуудасны эхлэлийг БҮДГЭРҮҮЛДЭГ. Нэг өнгийн блок нь эсрэгээрээ:
+            «энд эхэлж байна, эндээс доош өөр зүйл» гэдгийг ганц шугамаар
+            хэлнэ. Мөн ачаалал хөнгөрнө — blur(110px) хоёр давхарга,
+            хоёр давхар градиент маск бүгд хасагдав. */}
+        <div className="border-b border-line bg-surface pt-10 pb-16 sm:pt-16 sm:pb-20 lg:pt-20">
         <div className="shell">
           <div className="g12 items-center gap-y-12">
             {/* ── Мэдэгдэл ─────────────────────────────────────────────── */}
@@ -248,6 +250,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             </div>
           </div>
         </div>
+        </div>
 
         {/* ── Үзүүлэлт ───────────────────────────────────────────────────
             Тусдаа хэсэг БИШ — баатрын доод ирмэгийн шугам. Гарчиг ба
@@ -292,10 +295,10 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                 {classTypes.map((classType) => (
                   <span
                     key={classType.id}
-                    className="font-display flex items-center gap-10 text-[1.75rem] leading-none font-medium tracking-[-0.02em] whitespace-nowrap text-foreground-soft italic sm:text-[2.5rem]"
+                    className="font-display flex items-center gap-10 text-[1.75rem] leading-none font-bold tracking-[0.01em] whitespace-nowrap text-foreground-soft uppercase sm:text-[2.5rem]"
                   >
                     {loc(classType, 'name', locale)}
-                    <span aria-hidden className="h-1 w-1 rounded-full bg-faint not-italic" />
+                    <span aria-hidden className="h-1.5 w-1.5 shrink-0 rounded-full bg-faint" />
                   </span>
                 ))}
               </div>
@@ -367,7 +370,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
                 <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 p-5 text-white">
                   <div className="min-w-0">
-                    <p className="font-display text-[1.375rem] leading-tight font-medium tracking-[-0.02em]">
+                    <p className="font-display text-[1.45rem] leading-tight font-semibold tracking-[0.005em]">
                       {loc(classType, 'name', locale)}
                     </p>
                     <p className="t-meta mt-1.5 text-white/65">
@@ -421,7 +424,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                     overlay
                   />
                   <div className="absolute inset-x-0 bottom-0 p-5 text-white">
-                    <p className="font-display text-[1.25rem] leading-tight font-medium tracking-[-0.02em]">
+                    <p className="font-display text-[1.3rem] leading-tight font-semibold tracking-[0.005em]">
                       {instructor.name}
                     </p>
                     {/* Товч намтар нь hover дээр ГАРЧ ирнэ: тайван үедээ
@@ -514,10 +517,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       {/* ══ Төгсгөлийн уриалга ════════════════════════════════════════════
           Хуудас жагсаалтаар дуусах ёсгүй. Бүтэн өргөн тууз, ганц мэдэгдэл,
           ганц үндсэн үйлдэл — сонголт нэг л үлдсэнийг зохиомж хэлнэ. */}
-      <section className="bleed relative isolate mt-[var(--bay)] overflow-hidden border-y border-line py-24 sm:py-32">
-        <div className="glow -top-32 left-1/2 h-80 w-[34rem] -translate-x-1/2" />
-        <div aria-hidden className="mesh pointer-events-none absolute inset-0 opacity-60" />
-
+      <section className="bleed relative isolate mt-[var(--bay)] overflow-hidden border-y border-line bg-surface py-24 sm:py-32">
         <div className="shell relative">
           <div className="g12 items-end gap-y-8">
             <h2 className="t-h1 col-span-12 max-w-[16ch] lg:col-span-7" data-rv>
@@ -534,9 +534,12 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                   {t.schedule.book}
                   <Arrow />
                 </ButtonLink>
-                <ButtonLink href={`/${locale}/contact`} variant="ghost" className="btn-lg">
+                {/* Хуудас руу үсрэхгүй — цонх нээгдэнэ. Уриалгын хажууд
+                    байгаа хоёрдогч зам тул хэрэглэгчийг эндээс хөдөлгөх нь
+                    үндсэн товчны эрчийг тасалдаг. */}
+                <ContactTrigger className="btn btn-bare btn-lg">
                   {t.nav.contact}
-                </ButtonLink>
+                </ContactTrigger>
               </div>
             </div>
           </div>

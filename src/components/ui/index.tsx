@@ -59,6 +59,56 @@ export function InstagramIcon({ className = '' }: { className?: string }) {
   )
 }
 
+export function PhoneIcon({ className = '' }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      className={`${socialSvg} ${className}`}
+    >
+      <path d="M6.4 3.5h3.1l1.5 3.9-2 1.5a11.2 11.2 0 0 0 6.1 6.1l1.5-2 3.9 1.5v3.1a2 2 0 0 1-2.2 2A16.6 16.6 0 0 1 4.4 5.7a2 2 0 0 1 2-2.2Z" />
+    </svg>
+  )
+}
+
+export function MailIcon({ className = '' }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      className={`${socialSvg} ${className}`}
+    >
+      <rect x="3" y="5.5" width="18" height="13" rx="2.6" />
+      <path d="m4.2 7.6 7.8 5.8 7.8-5.8" />
+    </svg>
+  )
+}
+
+export function MapPinIcon({ className = '' }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      className={`${socialSvg} ${className}`}
+    >
+      <path d="M12 21.2s6.8-5.6 6.8-11a6.8 6.8 0 1 0-13.6 0c0 5.4 6.8 11 6.8 11Z" />
+      <circle cx="12" cy="10.2" r="2.5" />
+    </svg>
+  )
+}
+
 export function FacebookIcon({ className = '' }: { className?: string }) {
   return (
     <svg

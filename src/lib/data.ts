@@ -1,5 +1,6 @@
 import 'server-only'
 
+import { cache } from 'react'
 import { createClient } from '@/lib/supabase/server'
 import { isSupabaseConfigured } from '@/lib/supabase/env'
 import type {
@@ -54,12 +55,34 @@ function attach(
   }))
 }
 
-export async function getSiteContent(keys: string[]): Promise<Map<string, SiteContent>> {
+/**
+ * Сайтын агуулга — БҮХНИЙГ нэг л удаа.
+ *
+ * `site_content` бол цөөн мөртэй түлхүүр/утгын хүснэгт (баатар, холбоо барих,
+ * бичлэг гэх мэт). Урьд нь дуудагч бүр өөрийн хэрэгтэй түлхүүрүүдээр тусдаа
+ * асуулга явуулдаг байв: нэг хуудас зурагдахад нүүр, хөл, холбоо барих цонх
+ * гурвуулаа өөр өөр асуулга илгээж, гурван удаа сүлжээгээр очно.
+ *
+ * Хүснэгт нь бүтнээрээ ч хямд тул нэг л удаа татаад `cache()` -д хийнэ.
+ * React-ийн `cache` нь ХҮСЭЛТИЙН хүрээнд ажилладаг: нэг хуудас зурагдах
+ * туршид хэдэн ч дуудагч байсан нэг л асуулга явна.
+ */
+const allSiteContent = cache(async (): Promise<Map<string, SiteContent>> => {
   if (!isSupabaseConfigured()) return new Map()
 
   const supabase = await createClient()
-  const { data } = await supabase.from('site_content').select('*').in('key', keys)
+  const { data } = await supabase.from('site_content').select('*')
   return indexBy(data ?? [], 'key')
+})
+
+export async function getSiteContent(keys: string[]): Promise<Map<string, SiteContent>> {
+  const all = await allSiteContent()
+  return new Map(
+    keys.flatMap((key) => {
+      const row = all.get(key)
+      return row ? [[key, row] as const] : []
+    }),
+  )
 }
 
 export async function getClassTypes(includeInactive = false): Promise<ClassType[]> {

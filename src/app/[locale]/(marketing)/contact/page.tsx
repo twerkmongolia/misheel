@@ -1,8 +1,9 @@
 import { notFound } from 'next/navigation'
-import { Arrow, ButtonLink, Eyebrow, FacebookIcon, InstagramIcon, Section } from '@/components/ui'
+import { Arrow, ButtonLink, Eyebrow } from '@/components/ui'
+import { ChannelList } from '@/components/site/ChannelList'
+import { contactChannels, type Channel } from '@/lib/contact'
 import { content, getDictionary, isLocale } from '@/lib/i18n'
 import { getSiteContent } from '@/lib/data'
-import { ContactForm } from './ContactForm'
 import { PageBanner } from '@/components/site/PageBanner'
 
 /* ───────────────────────────────────────────────────────────────────────────
@@ -21,16 +22,21 @@ import { PageBanner } from '@/components/site/PageBanner'
    Одоо шууд сувгууд нь МӨР болов (§ `SessionRow` -той нэг хэл): дээр нь
    шошго, доор нь том утга, баруун талд сум. Дарж болох гэдэг нь хэлбэрээс
    нь уншигдана.
-   ─────────────────────────────────────────────────────────────────────── */
 
-type Channel = {
-  label: string
-  value: string
-  href: string
-  external?: boolean
-  /** Брэндийн дүрс — зөвхөн сүлжээний сувагт. Утас, и-мэйлд шошго нь өөрөө хангалттай. */
-  Icon?: typeof InstagramIcon
-}
+   ── Форм хаана байна вэ ────────────────────────────────────────────────
+   ХААНА Ч БАЙХГҮЙ. Мессежийн форм нь `contact_messages` хүснэгт рүү бичдэг
+   байсан ч түүнийг УНШИХ хуудас удирдлагад байгаагүй — бичсэн хүн хариу
+   хүлээж, хэн ч хараагүй. Ажилладаггүй суваг санал болгохоос үзүүлэхгүй
+   нь дээр тул форм, түүний server action хоёулаа хасагдав.
+
+   Одоо холбоо барих гэдэг нь ШУУД СУВГУУД: утас, Instagram, Facebook,
+   и-мэйл. Навбарын «Холбоо барих» дарахад эдгээр нь ЦОНХ болж гарна
+   (§ site/ContactDialog.tsx); энэ хуудас нь тэдгээрийг хаяг, газрын
+   зурагтай нь хамт бүтнээр харуулна.
+
+   Жагсаалтын бүтэц нь `lib/contact.ts` -д — хоёр газар тус тусад нь барьвал
+   эрт орой хэзээ нэгэн цагт зөрнө.
+   ─────────────────────────────────────────────────────────────────────── */
 
 export default async function ContactPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
@@ -40,106 +46,83 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
   const site = await getSiteContent(['contact'])
   const info = content(site.get('contact'), locale)
 
-  const phone = String(info.phone ?? '')
-  const email = String(info.email ?? '')
   const address = String(info.address ?? '')
-  const instagram = String(info.instagram ?? '')
-  const facebook = String(info.facebook ?? '')
 
-  /* Дараалал нь ХУРДААР эрэмбэлэгдэнэ: утас хамгийн шууд, хаяг хамгийн удаан.
-     Хоосон талбар (`site_content` дээр бөглөөгүй) огт мөр эзлэхгүй. */
+  /* Утас, сүлжээ, и-мэйл — цонхтой ИЖИЛ жагсаалт, ганц эх сурвалжаас
+     (§ lib/contact.ts). Хаяг нь зөвхөн энэ хуудсанд нэмэгдэнэ: газрын
+     зураг нээх нь цонхонд хийх ажил биш. */
   const channels: Channel[] = [
-    phone && { label: t.auth.phone, value: phone, href: `tel:${phone.replace(/\s/g, '')}` },
-    instagram && {
-      label: 'Instagram',
-      value: `@${instagram}`,
-      href: `https://instagram.com/${instagram}`,
-      external: true,
-      Icon: InstagramIcon,
-    },
-    facebook && {
-      label: 'Facebook',
-      value: 'Twerk Mongolia',
-      href: facebook,
-      external: true,
-      Icon: FacebookIcon,
-    },
-    email && { label: t.auth.email, value: email, href: `mailto:${email}` },
-    address && {
-      label: t.contact.address,
-      value: address,
-      href: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`,
-      external: true,
-    },
-  ].filter(Boolean) as Channel[]
+    ...contactChannels(info, t),
+    ...(address
+      ? [
+          {
+            label: t.contact.address,
+            value: address,
+            href: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`,
+            external: true,
+            icon: 'map' as const,
+          },
+        ]
+      : []),
+  ]
 
   return (
     <>
       <PageBanner page="contact" title={t.contact.title} lead={t.contact.lead} />
 
-      <div className="shell g12 gap-y-16 pt-12 pb-[var(--bay-sm)] sm:pt-16">
-        {/* ── Форм — хуудасны үндсэн үйлдэл, 7 багана ─────────────────── */}
-        <div className="col-span-12 lg:col-span-7">
-          <Section eyebrow={t.contact.formEyebrow} title={t.contact.formTitle}>
-            <ContactForm t={t} />
-          </Section>
-        </div>
+      {/* ── ЦАГААН БЛОК ─────────────────────────────────────────────────
+          Хуудсан дээрх ганц эргүүлсэн хэсэг. Шалтгаан нь чимэглэл биш
+          ЭРЭМБЭ: холбоо барих нь энэ хуудасны цорын ганц зорилго тул
+          хамгийн хүчтэй эсрэг тэсрэгийг өөртөө авна. Харанхуй сайтын
+          дундах цагаан талбай нь гүйлгэж яваа нүдийг ҮРГЭЛЖ зогсооно.
 
-        {/* ── Шууд сувгууд — 4 багана, зайтай ─────────────────────────────
-            Хоёр баганын хооронд НЭГ багана хоосон үлдэнэ: форм ба шууд
-            холбоо хоёр нь ижил зүйлийн хоёр хувилбар биш, ӨӨР зам гэдгийг
-            зай нь хэлнэ. */}
-        <aside className="col-span-12 flex flex-col lg:col-span-4 lg:col-start-9">
-          <div data-rv>
-            <Eyebrow>{t.contact.directTitle}</Eyebrow>
-          </div>
+          Доторх бүрдлүүд өөрчлөгдөөгүй — палитр нь савнаасаа өвлөгддөг
+          тул товч, оролт, карт бүгд өөрөө эргэнэ (§ globals.css
+          `.panel-invert`). */}
+      <div className="panel-invert">
+        <div className="shell g12 gap-y-16 pt-16 pb-[var(--bay-sm)] sm:pt-20">
+          {/* ── Мэдэгдэл — 5 багана ────────────────────────────────────────
+            Урьд нь энд «Бидэнд бичээрэй» товч байсан нь цонх нээдэг байв —
+            гэтэл тэр цонх нь ЯГ баруун талд аль хэдийн харагдаж буй
+            сувгуудыг үзүүлдэг. Нэг хуудсан дээр нэг зүйлийг хоёр удаа
+            санал болгох нь сонголт биш, эргэлзээ төрүүлнэ. */}
+          <div className="col-span-12 flex flex-col items-start gap-7 lg:col-span-5">
+            <div data-rv>
+              <Eyebrow>{t.contact.directTitle}</Eyebrow>
+            </div>
 
-          <div className="hr hr-draw mt-5" data-rv="line" />
+            <h2 className="t-h2" data-rv>
+              {t.contact.title}
+            </h2>
 
-          <div className="flex flex-col">
-            {channels.map((channel) => (
-              <a
-                key={channel.label}
-                href={channel.href}
-                {...(channel.external ? { target: '_blank', rel: 'noreferrer noopener' } : {})}
-                className="group flex items-center justify-between gap-5 border-b border-line py-5 transition-colors"
-                data-rv
-              >
-                <span className="min-w-0">
-                  {/* Дүрс нь шошгыг СОЛИХГҮЙ, дэргэд нь зогсоно: Instagram
-                      гэдгийг дүрсээр нь агшин зуур таних боловч дэлгэц
-                      уншигчид, дүрс ачаалагдаагүй үед нэр нь хэвээр байна. */}
-                  <span className="flex items-center gap-2 text-muted">
-                    {channel.Icon && <channel.Icon />}
-                    <span className="t-label">{channel.label}</span>
-                  </span>
-                  <span className="t-h3 mt-1.5 block underline-offset-4 group-hover:underline">
-                    {channel.value}
-                  </span>
-                </span>
-                <Arrow className="shrink-0 text-muted transition-transform duration-300 group-hover:translate-x-1 group-hover:text-foreground" />
-              </a>
-            ))}
-          </div>
+            {/* Хариу өгөх хугацааг ХЭЛНЭ. «Хэзээ хариу ирэх бол» гэсэн
+              эргэлзээ нь холбоо барихаас няцаадаг хамгийн түгээмэл шалтгаан. */}
+            <p className="t-lead max-w-[30ch] text-muted" data-rv>
+              {t.contact.replyNote}
+            </p>
 
-          {/* Хариу өгөх хугацааг ХЭЛНЭ. «Хэзээ хариу ирэх бол» гэсэн
-              эргэлзээ нь мессеж бичихээс няцаадаг хамгийн түгээмэл шалтгаан. */}
-          <p className="t-meta mt-6 text-muted" data-rv>
-            {t.contact.replyNote}
-          </p>
-
-          {/* Холбоо барихаар ирсэн хүмүүсийн ихэнх нь ХУВААРЬ хайж байдаг —
+            {/* Холбоо барихаар ирсэн хүмүүсийн ихэнх нь ХУВААРЬ хайж байдаг —
               асуухаас нь өмнө хариултыг нь санал болгоно. */}
-          <ButtonLink
-            href={`/${locale}/schedule`}
-            variant="secondary"
-            className="mt-8 w-full sm:w-auto sm:self-start"
-            data-rv
-          >
-            {t.nav.schedule}
-            <Arrow />
-          </ButtonLink>
-        </aside>
+            <ButtonLink
+              href={`/${locale}/schedule`}
+              variant="secondary"
+              className="w-full sm:w-auto"
+              data-rv
+            >
+              {t.nav.schedule}
+              <Arrow />
+            </ButtonLink>
+          </div>
+
+          {/* ── Шууд сувгууд — 6 багана ─────────────────────────────────────
+            Хуудасны гол агуулга. Мөр бүр дээрээ шошго, доороо том утга,
+            баруун талдаа сум: дарж болох гэдэг нь хэлбэрээс нь уншигдана. */}
+          <aside className="col-span-12 flex flex-col lg:col-span-6 lg:col-start-7">
+            <div data-rv>
+              <ChannelList channels={channels} />
+            </div>
+          </aside>
+        </div>
       </div>
     </>
   )

@@ -23,6 +23,7 @@ export function HeaderShell({ children }: { children: React.ReactNode }) {
   return (
     <header className="pointer-events-none sticky top-0 z-40">
       <div
+        data-lifted={lifted}
         className={`pointer-events-auto relative border-b transition-[transform,background-color,border-color] duration-500 ease-out ${
           hidden ? '-translate-y-full' : 'translate-y-0'
         } ${

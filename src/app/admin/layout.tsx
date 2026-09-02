@@ -61,10 +61,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   // Урьдчилсан шалгалт proxy дээр байгаа ч жинхэнэ шалгалт энд.
   const [profile, store] = await Promise.all([requireStaff(), cookies()])
 
-  // Хоёр тохиргоог серверээс уншина — эхний зурагтаа зөв өнгө, зөв өргөнтэй
-  // гарна. Горимын анхдагч нь ГЭРЭЛТЭЙ (§ globals.css `.admin-shell`).
+  // Зурвасны өргөнийг серверээс уншина — эхний зурагтаа зөв өргөнтэй гарна.
   const collapsed = store.get('tm_admin_nav')?.value === '1'
-  const scheme = store.get('tm_admin_scheme')?.value === 'dark' ? 'dark' : 'light'
 
   // Цэсийг эрхээр нь шүүнэ. Хуудас өөрөө ч `requireAdmin()` -тэй тул энэ нь
   // зөвхөн харагдац — хамгаалалт биш.
@@ -75,7 +73,6 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       groups={nav}
       profile={{ name: profile.full_name ?? 'Админ', role: profile.role }}
       defaultCollapsed={collapsed}
-      defaultScheme={scheme}
     >
       {children}
     </AdminShell>

@@ -1,14 +1,29 @@
 import Image from 'next/image'
 import Link from 'next/link'
+import { Arrow, FacebookIcon, InstagramIcon } from '@/components/ui'
 import { content, getDictionary, type Locale } from '@/lib/i18n'
 import { getSiteContent } from '@/lib/data'
-import { FacebookIcon, InstagramIcon } from '@/components/ui'
 
 /**
- * Хуудасны хөл — сэтгүүлийн colophon.
+ * Хуудасны хөл — харанхуй хуудсан дээр хэвтэх ЦАГААН КАРТ.
  *
- * Хамгийн доод мөрөнд аварга нэр. Уншихад биш: хуудас дуусахдаа тамга
- * дардаг. Зурлагаар зурагдсан тул дэвсгэрийг дардаггүй, зөвхөн зааглана.
+ * ── Яагаад карт ───────────────────────────────────────────────────────────
+ * Өмнө нь хөл нь дэлгэцийн хоёр ирмэг хүртэл үргэлжилсэн, зөвхөн дээд
+ * шугамаараа зааглагдсан харанхуй талбай байв. Тэр нь агуулгын үргэлжлэл
+ * мэт уншигдаж, «хуудас дууслаа» гэдгийг хэлж чаддаггүй байлаа.
+ *
+ * Карт нь эсрэгээрээ: дөрвөн талаараа хаагдсан, доороо зайтай биет.
+ * Гүйлгэж яваа хүн түүний доод ирмэгийг хараад цааш юу ч байхгүйг мэднэ —
+ * үг ашиглалгүйгээр.
+ *
+ * ── Яагаад цагаан ─────────────────────────────────────────────────────────
+ * Сайт бүхэлдээ харанхуй тул эргүүлсэн блок нь хамгийн хүчтэй ЗОГСООХ
+ * дохио. Хөлд яг тэр хэрэгтэй. Дээд талын өдрийн тууз ч мөн цагаан —
+ * хуудас цагаанаар эхэлж, цагаанаар төгсөж, хооронд нь харанхуй агуулга
+ * хаалттай байна.
+ *
+ * Доторх бүрдлүүд дахин бичигдээгүй: палитр нь саванаасаа өвлөгддөг тул
+ * товч, дүрст товч, шугам бүгд өөрөө эргэнэ (§ globals.css `.panel-invert`).
  */
 export async function Footer({ locale }: { locale: Locale }) {
   const t = getDictionary(locale)
@@ -49,128 +64,150 @@ export async function Footer({ locale }: { locale: Locale }) {
   ].filter(Boolean) as { label: string; href: string; Icon: typeof InstagramIcon }[]
 
   return (
-    // Доод самбар хөвж байдаг тул төгсгөлийн мөрүүд түүний ард дарагдахгүйн
-    // тулд гар утсанд нэмэлт зай — самбарын өндөр + амьсгал.
-    <footer className="relative mt-32 overflow-hidden border-t border-line pb-24 lg:pb-0">
-      <div className="glow glow-soft -bottom-48 left-1/2 h-80 w-[40rem] -translate-x-1/2" />
-
-      <div className="shell g12 gap-y-14 pt-20 pb-16">
-        {/* ── Мэдэгдэл ────────────────────────────────────────────────
-            Хөл нь холбоосын хогийн сав биш. Эхлээд ганц өгүүлбэр, дараа нь
-            ганц үйлдэл — ёроолд хүрсэн хүн дээш эргэж гүйлгэх ёсгүй. */}
-        <div className="col-span-12 flex flex-col items-start gap-7 lg:col-span-5" data-rv>
-          <p className="t-h3 max-w-[24ch] text-balance">
-            {hero.subtitle ?? t.brand}
-          </p>
-          <Link href={`/${locale}/schedule`} className="btn btn-line">
-            {t.nav.booking}
-            <svg
-              viewBox="0 0 16 16"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="square"
-              aria-hidden="true"
-              className="ico h-3.5 w-3.5"
-            >
-              <path d="M2 8h11M9 4l4 4-4 4" />
-            </svg>
-          </Link>
-        </div>
-
-        {columns.map((column) => (
-          <nav
-            key={String(column.heading)}
-            className="col-span-6 flex flex-col gap-4 sm:col-span-4 lg:col-span-2"
-            data-rv
-          >
-            <p className="t-label text-faint">{column.heading}</p>
-            <div className="flex flex-col gap-2.5">
-              {column.items.map((item) => (
-                <Link key={item.href} href={item.href} className={link}>
-                  {item.label}
+    // Гар утсанд доод самбар хөвж байдаг тул картын доод ирмэг түүний ард
+    // дарагдахгүйн тулд нэмэлт зай — самбарын өндөр + амьсгал.
+    <footer className="mt-[var(--bay)] pb-28 lg:pb-10">
+      <div className="shell">
+        <div className="panel-invert overflow-hidden rounded-[var(--r-xl)]" data-rv="scale">
+          <div className="px-6 pt-14 pb-12 sm:px-10 sm:pt-16 lg:px-14">
+            <div className="g12 gap-y-12">
+              {/* ── Мэдэгдэл ────────────────────────────────────────────
+                  Хөл нь холбоосын хогийн сав биш. Эхлээд ганц өгүүлбэр,
+                  дараа нь ганц үйлдэл — ёроолд хүрсэн хүн дээш эргэж
+                  гүйлгэх ёсгүй. */}
+              <div className="col-span-12 flex flex-col items-start gap-7 lg:col-span-5">
+                <p className="t-h2 max-w-[16ch] text-balance">{hero.subtitle ?? t.brand}</p>
+                <Link href={`/${locale}/schedule`} className="btn btn-solid">
+                  {t.nav.booking}
+                  <Arrow />
                 </Link>
-              ))}
-            </div>
-          </nav>
-        ))}
+              </div>
 
-        <address
-          className="col-span-12 flex flex-col gap-4 not-italic sm:col-span-4 lg:col-span-3"
-          data-rv
-        >
-          <p className="t-label text-faint">{t.nav.contact}</p>
-
-          {info.phone && (
-            <a
-              href={`tel:${String(info.phone).replace(/\s/g, '')}`}
-              className="t-h3 w-fit tabular-nums transition-opacity duration-200 hover:opacity-60"
-            >
-              {info.phone}
-            </a>
-          )}
-          {info.email && (
-            <a href={`mailto:${info.email}`} className={link}>
-              {info.email}
-            </a>
-          )}
-          {info.address && <span className="t-small max-w-[26ch] text-muted">{info.address}</span>}
-
-          {/* Хөлд зай хомс, нэр нь давтагдсан мэдээлэл — Instagram гэдгийг
-              дүрс нь өөрөө хэлнэ. Нэр `aria-label` дээр үлдэнэ. */}
-          {socials.length > 0 && (
-            <div className="mt-1 -ml-2.5 flex flex-wrap gap-1">
-              {socials.map(({ label, href, Icon }) => (
-                <a
-                  key={label}
-                  href={href}
-                  rel="noreferrer noopener"
-                  target="_blank"
-                  aria-label={label}
-                  className="icon-btn"
+              {columns.map((column) => (
+                <nav
+                  key={String(column.heading)}
+                  className="col-span-6 flex flex-col gap-4 sm:col-span-4 lg:col-span-2"
                 >
-                  <Icon />
-                </a>
+                  <p className="t-label text-faint">{column.heading}</p>
+                  <div className="flex flex-col gap-2.5">
+                    {column.items.map((item) => (
+                      <Link key={item.href} href={item.href} className={link}>
+                        {item.label}
+                      </Link>
+                    ))}
+                  </div>
+                </nav>
               ))}
+
+              <address className="col-span-12 flex flex-col gap-4 not-italic sm:col-span-4 lg:col-span-3">
+                <p className="t-label text-faint">{t.nav.contact}</p>
+
+                {info.phone && (
+                  <a
+                    href={`tel:${String(info.phone).replace(/\s/g, '')}`}
+                    className="t-h3 w-fit tabular-nums transition-opacity duration-200 hover:opacity-60"
+                  >
+                    {info.phone}
+                  </a>
+                )}
+                {info.email && (
+                  <a href={`mailto:${info.email}`} className={link}>
+                    {info.email}
+                  </a>
+                )}
+                {info.address && (
+                  <span className="t-small max-w-[26ch] text-muted">{info.address}</span>
+                )}
+
+                {/* Хөлд зай хомс, нэр нь давтагдсан мэдээлэл — Instagram
+                    гэдгийг дүрс нь өөрөө хэлнэ. Нэр `aria-label` дээр үлдэнэ. */}
+                {socials.length > 0 && (
+                  <div className="mt-1 -ml-2.5 flex flex-wrap gap-1">
+                    {socials.map(({ label, href, Icon }) => (
+                      <a
+                        key={label}
+                        href={href}
+                        rel="noreferrer noopener"
+                        target="_blank"
+                        aria-label={label}
+                        className="icon-btn"
+                      >
+                        <Icon />
+                      </a>
+                    ))}
+                  </div>
+                )}
+              </address>
             </div>
-          )}
-        </address>
-      </div>
+          </div>
 
-      {/* ── Тамга ──────────────────────────────────────────────────────
-          Дэлгэцийн өргөнийг бүтэн дүүргэнэ. `92%` нь захын зайг үлдээж,
-          нэр ирмэгт тулахаас сэргийлнэ — нэр нь зүсэгдэхгүй, багтана. */}
-      <div aria-hidden className="shell overflow-hidden pb-4">
-        <p
-          className="font-display leading-[0.76] font-medium tracking-[-0.055em] whitespace-nowrap text-transparent select-none"
-          style={{
-            fontSize: 'min(12.6vw, 11rem)',
-            WebkitTextStroke: '1px var(--line-strong)',
-          }}
-        >
-          Twerk Mongolia
-        </p>
-      </div>
+          {/* ── Тамга ──────────────────────────────────────────────────
+              Картын өргөнийг бүтэн дүүргэнэ. Уншихад биш: хуудас дуусахдаа
+              тамга дардаг. Зурлагаар зурагдсан (дүүргэлтгүй) тул доорх
+              мөрийг дардаггүй, зөвхөн зааглана.
 
-      <div className="shell flex flex-col gap-4 border-t border-line py-6 sm:flex-row sm:items-center sm:justify-between">
-        <p className="t-meta text-faint">© {new Date().getFullYear()} Twerk Mongolia</p>
+              ⚠️ Хэмжээ нь ХАРАГДАХ ХЭСГЭЭС биш КАРТААС хамаарна. Эхний
+              оролдлогод `15.5vw` байсан нь картын өргөнөөс халиж, нэр нь
+              «TWERK MONGO…» гэж дундуураа тасарч байв — зориудын зүсэлт
+              биш, эвдэрсэн зохиомж мэт уншигдана.
 
-        <a
-          href="https://tsstark.com"
-          target="_blank"
-          rel="noreferrer noopener"
-          className="group flex items-center gap-2 text-faint transition-colors duration-200 hover:text-foreground"
-        >
-          <span className="t-meta">powered by</span>
-          <Image
-            src="/media/tsstark-logo.png"
-            alt=""
-            width={264}
-            height={264}
-            className="logo-invert h-5 w-5 opacity-70 transition-opacity duration-200 group-hover:opacity-100"
-          />
-          <span className="t-meta font-semibold">TS Stark</span>
-        </a>
+              Картын дотоод өргөн ≈ `100vw − 2×--shell-pad − 2×дотоод зай`.
+              Oswald bold дээр «Twerk Mongolia» нь ойролцоогоор 6.3em
+              өргөнтэй тул `11vw` нь бүх өргөнд зайтай багтана. Дээд хязгаар
+              нь 9.5rem: багана 88rem дээр тогтдог тул vw цаашид ургахад
+              нэр дахин халина.
+
+              Доод талаараа бага зэрэг зүсэгдэнэ (`-mb`) — суурь шугам нь
+              доорх мөрийн хүрээтэй нийлж, тамга дарагдсан мэт мэдрэгдэнэ.
+
+              Зурлага нь ХАР (`--foreground`), дүүргэлт нь тунгалаг. Өмнө нь
+              бүдэг саарал (`--line-strong`) байсан нь тамга биш угаагдсан
+              ул мөр мэт уншигдаж байв. Хар зурлага нь эрч өгөх ч дүүргэлт
+              нь хоосон хэвээр тул хөлийн холбоосуудтай өрсөлдөхгүй —
+              «зурсан» биш «дарсан» тамга. Токеноор бичсэн тул самбар
+              хэзээ нэгэн цагт харанхуй болбол зурлага нь өөрөө цагаан
+              болно. */}
+          <div aria-hidden className="overflow-hidden px-6 sm:px-10 lg:px-14">
+            <p
+              className="font-display -mb-[0.1em] leading-[0.82] font-bold tracking-[0.005em] whitespace-nowrap text-transparent uppercase select-none"
+              style={{
+                fontSize: 'min(11vw, 9.5rem)',
+                WebkitTextStroke: '1.5px var(--foreground)',
+              }}
+            >
+              Twerk Mongolia
+            </p>
+          </div>
+
+          {/* ── Доод мөр ───────────────────────────────────────────────
+              Картын дотор, өөрийн шугамаар зааглагдсан. Дэвсгэрийг нэг шат
+              бүдгэрүүлснээр «энэ бол агуулга биш, гарын үсэг» гэдгийг
+              хэлнэ. */}
+          <div className="border-t border-line bg-surface px-6 py-5 sm:px-10 lg:px-14">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <p className="t-meta text-muted">© {new Date().getFullYear()} Twerk Mongolia</p>
+
+              <a
+                href="https://tsstark.com"
+                target="_blank"
+                rel="noreferrer noopener"
+                className="group flex items-center gap-2 text-muted transition-colors duration-200 hover:text-foreground"
+              >
+                <span className="t-meta">powered by</span>
+                {/* Лого нь ХАР зурлагатай, дэвсгэргүй. Хөл цагаан болсон
+                    тул эргүүлэх шаардлагагүй — `logo-invert` хасагдав. */}
+                <Image
+                  src="/media/tsstark-logo.png"
+                  alt=""
+                  width={264}
+                  height={264}
+                  className="h-5 w-5 opacity-60 transition-opacity duration-200 group-hover:opacity-100"
+                />
+                <span className="t-meta font-semibold">TS Stark</span>
+              </a>
+            </div>
+          </div>
+        </div>
       </div>
     </footer>
   )

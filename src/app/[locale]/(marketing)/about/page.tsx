@@ -5,6 +5,7 @@ import { ButtonLink, Card, Eyebrow, Section } from '@/components/ui'
 import { Media } from '@/components/site/media'
 import { getDictionary, loc, isLocale, type Locale } from '@/lib/i18n'
 import { getInstructors } from '@/lib/data'
+import { ContactTrigger } from '@/components/site/ContactDialog'
 import { PageBanner } from '@/components/site/PageBanner'
 
 /**
@@ -278,9 +279,7 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
         <p className="max-w-[52ch] text-foreground-soft">{t.about.ctaBody}</p>
         <div className="flex flex-wrap gap-3 pt-1">
           <ButtonLink href={`/${locale}/schedule`}>{t.nav.schedule}</ButtonLink>
-          <ButtonLink href={`/${locale}/contact`} variant="secondary">
-            {t.nav.contact}
-          </ButtonLink>
+          <ContactTrigger className="btn btn-line">{t.nav.contact}</ContactTrigger>
         </div>
       </section>
     </div>

@@ -8,7 +8,7 @@ import { NavLink } from './NavLink'
 import { HeaderShell } from './HeaderShell'
 import { MobileMenu } from './MobileMenu'
 import { BottomNav } from './BottomNav'
-import { ThemeToggle } from './ThemeToggle'
+import { ContactTrigger } from './ContactDialog'
 
 /**
  * Сайтын толгой — сэтгүүлийн масthead шиг.
@@ -23,13 +23,13 @@ export async function Header({ locale }: { locale: Locale }) {
   const [profile, count] = await Promise.all([getProfile(), cartCount()])
   const staff = profile?.role === 'staff' || profile?.role === 'admin'
 
-  // Ширээний компьютерын гол цэс — таван зүйл.
+  /* Ширээний компьютерын гол цэс — таван зүйл. «Холбоо барих» энд БАЙХГҮЙ:
+     тэр нь хуудас нээдэггүй, цонх нээдэг тул холбоос биш товч (доор). */
   const primary = [
     { href: `/${locale}`, label: t.nav.home },
     { href: `/${locale}/schedule`, label: t.nav.booking },
     { href: `/${locale}/shop`, label: t.nav.shop },
     { href: `/${locale}/about`, label: t.nav.about },
-    { href: `/${locale}/contact`, label: t.nav.contact },
   ]
 
   // Гар утасны доод самбар — хамгийн олон дардаг дөрөв + цэс.
@@ -48,7 +48,6 @@ export async function Header({ locale }: { locale: Locale }) {
   const menuPrimary = [
     { href: `/${locale}/classes`, label: t.nav.classes },
     { href: `/${locale}/instructors`, label: t.nav.instructors },
-    { href: `/${locale}/contact`, label: t.nav.contact },
   ]
 
   const menuSecondary = [
@@ -59,40 +58,47 @@ export async function Header({ locale }: { locale: Locale }) {
   return (
     <>
       <HeaderShell>
-        <div className="shell flex h-20 items-center gap-8">
+        {/* Өндөр нь `.header-bar` -аас: дээд талд 5rem, гүйлгэсний дараа
+            4rem болж хумирна (§ globals.css). */}
+        <div className="shell header-bar flex items-center gap-8">
           {/* ── Лого ────────────────────────────────────────────────────
               Дүрсгүй: нэр өөрөө тэмдэг болно — хажууд нь дүрс тавих нь тэр
-              эрчийг сулруулна. Үсэг нь grotesque, том үсэг, өргөн зайтай
-              (§ globals.css `.wordmark`) — 17px дээр Didone ажиллахгүй. */}
+              эрчийг сулруулна. Нарийссан том үсэг (§ globals.css
+              `.wordmark`) нь урт нэрийг навбарын багахан зайд багтаана.
+
+              Өмнө нь хажууд нь «| УБ» гэсэн хотын шошго байв. Хасагдсан:
+              лого нь хамгийн эхэнд уншигддаг тул хамгийн ЦЭВЭР байх ёстой,
+              мөн хот нь хөл, холбоо барих хуудсанд аль хэдийн бичигдсэн —
+              навбар дээр давтагдах шаардлагагүй. */}
           <Link
             href={`/${locale}`}
-            className="group flex shrink-0 items-baseline gap-2.5 whitespace-nowrap"
+            className="wordmark shrink-0 whitespace-nowrap transition-opacity duration-300 hover:opacity-60"
           >
-            <span className="wordmark transition-opacity duration-300 group-hover:opacity-60">
-              Twerk Mongolia
-            </span>
-            {/* Хотын шошго — масthead -ийн дэд гарчиг. Зөвхөн өргөн дэлгэцэд:
-                нарийн дэлгэцэд лого өөрөө хангалттай. */}
-            <span aria-hidden className="hidden items-center gap-2.5 xl:flex">
-              <span className="h-3 w-px bg-line-strong" />
-              <span className="t-label text-faint">УБ</span>
-            </span>
+            Twerk Mongolia
           </Link>
 
-          <nav className="hidden flex-1 items-center justify-center gap-9 lg:flex">
+          <nav className="hidden flex-1 items-center justify-center gap-8 lg:flex xl:gap-10">
             {primary.map((item) => (
-              <NavLink key={item.href} href={item.href} className="nav-item t-small">
+              <NavLink key={item.href} href={item.href} className="nav-item">
                 {item.label}
               </NavLink>
             ))}
+
+            {/* Бусад мөртэй ЯГ ижил төрхтэй — хэрэглэгчид «энэ бол өөр
+                төрлийн зүйл» гэсэн дохио өгөх шаардлагагүй. Ялгаа нь зөвхөн
+                дарсны дараа мэдэгдэнэ: хуудас солигдохгүй, цонх нээгдэнэ. */}
+            <ContactTrigger className="nav-item">{t.nav.contact}</ContactTrigger>
           </nav>
 
           {/* ── Хэрэгсэл ───────────────────────────────────────────────── */}
-          <div className="ml-auto hidden items-center gap-2 lg:ml-0 lg:flex">
-            <ThemeToggle label={t.nav.theme} />
+          {/* ── Хэрэгсэл ────────────────────────────────────────────────
+              Гурван бүлэг, хоёр зураасаар зааглагдана: ХЭЛ · САГС · БҮРТГЭЛ.
+              Зураасгүй бол зургаан жижиг элемент нэг урт эгнээ болж, аль нь
+              алинтайгаа холбоотойг нүд ялгаж чадахгүй. */}
+          <div className="ml-auto hidden items-center gap-1 lg:ml-0 lg:flex">
             <LocaleSwitch current={locale} />
 
-            <span aria-hidden className="mx-2 h-4 w-px bg-line" />
+            <span aria-hidden className="mx-3 h-5 w-px bg-line" />
 
             <NavLink
               href={`/${locale}/cart`}
@@ -107,8 +113,10 @@ export async function Header({ locale }: { locale: Locale }) {
               )}
             </NavLink>
 
+            <span aria-hidden className="mx-3 h-5 w-px bg-line" />
+
             {profile ? (
-              <div className="flex items-center gap-4 pl-1">
+              <div className="flex items-center gap-5">
                 {staff && (
                   <Link href="/admin" className="lnk t-small text-muted hover:text-foreground">
                     {t.nav.admin}
@@ -125,14 +133,14 @@ export async function Header({ locale }: { locale: Locale }) {
                 </form>
               </div>
             ) : (
-              <Link href={`/${locale}/login`} className="btn btn-solid btn-sm ml-1">
+              <Link href={`/${locale}/login`} className="btn btn-solid btn-sm">
                 {t.nav.login}
               </Link>
             )}
           </div>
 
-          {/* Гар утсанд — сагс, горим. Үлдсэн навигаци доод самбарт байна. */}
-          <div className="ml-auto flex items-center gap-1 lg:hidden">
+          {/* Гар утсанд — зөвхөн сагс. Үлдсэн навигаци доод самбарт байна. */}
+          <div className="ml-auto flex items-center lg:hidden">
             <Link
               href={`/${locale}/cart`}
               aria-label={t.nav.cart}
@@ -145,8 +153,6 @@ export async function Header({ locale }: { locale: Locale }) {
                 </span>
               )}
             </Link>
-
-            <ThemeToggle label={t.nav.theme} className="h-11 w-11" />
           </div>
         </div>
       </HeaderShell>
@@ -156,6 +162,7 @@ export async function Header({ locale }: { locale: Locale }) {
         menu={
           <MobileMenu
             label={t.nav.menu}
+            contactLabel={t.nav.contact}
             primary={menuPrimary}
             secondary={menuSecondary}
             footer={
