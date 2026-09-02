@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 import { getUser, requireAdmin, requireStaff } from '@/lib/auth/dal'
-import type { OrderStatus } from '@/lib/supabase/database.types'
+import type { Instructor, OrderStatus } from '@/lib/supabase/database.types'
 
 /**
  * Удирдлагын үйлдлүүд.
@@ -247,7 +247,9 @@ export async function cancelSession(formData: FormData): Promise<void> {
 export async function toggleActive(formData: FormData): Promise<void> {
   await requireStaff()
 
-  const table = z.enum(['class_types', 'instructors', 'products', 'locations']).safeParse(formData.get('table'))
+  const table = z
+    .enum(['class_types', 'instructors', 'products', 'locations', 'faq_items'])
+    .safeParse(formData.get('table'))
   const id = uuid.safeParse(formData.get('id'))
   const next = formData.get('is_active') === 'true'
   const back = String(formData.get('back') ?? '/admin')
@@ -351,13 +353,23 @@ export async function updateInstructor(formData: FormData): Promise<void> {
     bio_mn: parsed.data.bio_mn,
     bio_en: parsed.data.bio_en,
     instagram: parsed.data.instagram || null,
-    photo_url: parsed.data.photo_url || null,
-  })
+  }
 
+  const [photo] = pickFiles(formData)
+  if (photo) {
+    const uploaded = await uploadImage(supabase, 'instructors', id.data, photo)
+    if ('error' in uploaded) {
+      redirect(`/admin/instructors?error=${encodeURIComponent(uploaded.error)}&open=${id.data}`)
+    }
+    patch.photo_url = uploaded.url
+  }
+
+  const { error } = await supabase.from('instructors').update(patch).eq('id', id.data)
   if (error) redirect(`/admin/instructors?error=${encodeURIComponent(error.message)}`)
 
-  await audit('instructor.create', 'instructors', null, { slug })
+  await audit('instructor.update', 'instructors', id.data, {})
   revalidatePath('/admin/instructors')
+  revalidatePath('/', 'layout')
   redirect('/admin/instructors?ok=1')
 }
 
@@ -440,6 +452,20 @@ const productSchema = z.object({
   base_price: z.coerce.number().int().min(0),
 })
 
+/**
+ * Барааны ЭХНИЙ хувилбар — «нэмэх» цонхонд хамт бөглөгдөнө.
+ *
+ * Хувилбаргүй бараа нь дэлгүүрт үнэгүй, нөөцгүй тул худалдаанд гарахгүй.
+ * Урьд нь бараа үүсгээд, дараа нь картыг нээж хувилбар нэмэх хоёр алхам
+ * байсан — хоёр дахь нь мартагдвал бараа чимээгүй үл үзэгдэх болдог.
+ * Одоо эхний хувилбар нь барааны хамт үүснэ.
+ */
+const firstVariantSchema = z.object({
+  size: z.string().trim().default(''),
+  color: z.string().trim().default(''),
+  stock_qty: z.coerce.number().int().min(0).default(0),
+})
+
 export async function createProduct(formData: FormData): Promise<void> {
   await requireStaff()
 
@@ -499,8 +525,9 @@ export async function createProduct(formData: FormData): Promise<void> {
 
   revalidatePath('/admin/products')
   revalidatePath('/', 'layout')
-  // Шинэ барааны цонхыг шууд нээнэ — дараагийн алхам нь ямагт хувилбар нэмэх.
-  redirect(`/admin/products?ok=1&open=${product.id}`)
+  /* Бараа нөөцтэйгээ үүссэн тул картыг заавал нээх шаардлагагүй болов.
+     Зураг эсвэл нэмэлт хэмжээ хэрэгтэй бол ажилтан өөрөө дарж орно. */
+  redirect('/admin/products?ok=1')
 }
 
 export async function addVariant(formData: FormData): Promise<void> {
@@ -605,37 +632,18 @@ async function saveProductImages(
   let order = count ?? 0
 
   for (const file of files) {
-    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
-      return `${file.name}: JPG, PNG, WEBP эсвэл AVIF байх ёстой`
-    }
-    if (file.size > MAX_IMAGE_BYTES) {
-      return `${file.name}: 5MB-аас хэтэрсэн байна`
-    }
-
-    const extension = file.name.split('.').pop()?.toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg'
-    const path = `products/${productId}/${crypto.randomUUID()}.${extension}`
-
-    const { error: uploadError } = await supabase.storage
-      .from('media')
-      .upload(path, file, { contentType: file.type, upsert: false })
-
-    if (uploadError) return uploadError.message
-
-    const {
-      data: { publicUrl },
-    } = supabase.storage.from('media').getPublicUrl(path)
+    const uploaded = await uploadImage(supabase, 'products', productId, file)
+    if ('error' in uploaded) return uploaded.error
 
     order += 1
     const { error } = await supabase.from('product_images').insert({
       product_id: productId,
-      url: publicUrl,
+      url: uploaded.url,
       alt,
       sort_order: order,
     })
 
     if (error) return error.message
-
-    await audit('product_image.upload', 'product_images', productId, { path })
   }
 
   return null
@@ -721,7 +729,275 @@ export async function updateOrderStatus(formData: FormData): Promise<void> {
   }
 
   revalidatePath('/admin/orders')
-  redirect('/admin/orders?ok=1')
+
+  /* Шүүлтээ хадгална. Урьд нь ямар ч тохиолдолд шүүлтгүй жагсаалт руу
+     буцдаг байсан тул «төлбөр хүлээж буй» гэж шүүгээд нэгийг шийдэх бүрд
+     шүүлт нь алдагдаж, дахин сонгох ёстой болдог байв. */
+  const back = String(formData.get('back') ?? '')
+  const safe = back.startsWith('/admin/orders') ? back : '/admin/orders'
+  redirect(`${safe}${safe.includes('?') ? '&' : '?'}ok=1`)
+}
+
+/* ── Галерей ───────────────────────────────────────────────────────────── */
+
+/**
+ * Галерейд зураг нэмнэ — олноор.
+ *
+ * Урьд нь галерей нь `public/media/gallery/` хавтас руу гараар файл хийж
+ * удирдагддаг байсан (§ marketing/gallery/page.tsx). Тэр нь програмистад
+ * хурдан ч, ажилтанд боломжгүй: серверийн файлын систем рүү хүрэх эрх
+ * хэрэггүй байх ёстой. Одоо Storage руу байршуулж, мөр үүсгэнэ — өгөгдлийн
+ * санд мөр гарсан даруйд хавтас нь ажиллахаа болино.
+ */
+export async function addGalleryImages(formData: FormData): Promise<void> {
+  await requireStaff()
+
+  const files = pickFiles(formData)
+  const altMn = String(formData.get('alt_mn') ?? '').trim()
+  const altEn = String(formData.get('alt_en') ?? '').trim()
+
+  if (files.length === 0) redirect('/admin/gallery?error=Зураг сонгоогүй байна')
+
+  const supabase = await createClient()
+  const { data: last } = await supabase
+    .from('gallery_items')
+    .select('sort_order')
+    .order('sort_order', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  let order = last?.sort_order ?? 0
+
+  for (const file of files) {
+    /* Мөр нь зурагнаас ӨМНӨ үүсэх боломжгүй (замд id нь хэрэгтэй), зураг нь
+       мөрөөс өмнө үүсэх ёсгүй (өнчин файл үлдэнэ). Тиймээс эхлээд түр
+       санамсаргүй нэрээр байршуулж, дараа нь мөр үүсгэнэ. */
+    const uploaded = await uploadImage(supabase, 'gallery', 'items', file)
+    if ('error' in uploaded) {
+      redirect(`/admin/gallery?error=${encodeURIComponent(uploaded.error)}`)
+    }
+
+    order += 1
+    const { error } = await supabase.from('gallery_items').insert({
+      url: uploaded.url,
+      alt_mn: altMn,
+      alt_en: altEn,
+      sort_order: order,
+    })
+    if (error) redirect(`/admin/gallery?error=${encodeURIComponent(error.message)}`)
+  }
+
+  await audit('gallery.add', 'gallery_items', null, { count: files.length })
+  revalidatePath('/admin/gallery')
+  revalidatePath('/', 'layout')
+  redirect('/admin/gallery?ok=1')
+}
+
+export async function updateGalleryItem(formData: FormData): Promise<void> {
+  await requireStaff()
+
+  const id = uuid.safeParse(formData.get('id'))
+  if (!id.success) redirect('/admin/gallery?error=Зураг олдсонгүй')
+
+  const supabase = await createClient()
+  const { error } = await supabase
+    .from('gallery_items')
+    .update({
+      alt_mn: String(formData.get('alt_mn') ?? '').trim(),
+      alt_en: String(formData.get('alt_en') ?? '').trim(),
+      sort_order: Number(formData.get('sort_order') ?? 0) || 0,
+    })
+    .eq('id', id.data)
+
+  if (error) redirect(`/admin/gallery?error=${encodeURIComponent(error.message)}`)
+
+  await audit('gallery.update', 'gallery_items', id.data, {})
+  revalidatePath('/admin/gallery')
+  revalidatePath('/', 'layout')
+  redirect('/admin/gallery?ok=1')
+}
+
+export async function deleteGalleryItem(formData: FormData): Promise<void> {
+  await requireStaff()
+
+  const id = uuid.safeParse(formData.get('id'))
+  if (id.success) {
+    const supabase = await createClient()
+    const { error } = await supabase.from('gallery_items').delete().eq('id', id.data)
+    if (error) redirect(`/admin/gallery?error=${encodeURIComponent(error.message)}`)
+    await audit('gallery.delete', 'gallery_items', id.data, {})
+  }
+
+  revalidatePath('/admin/gallery')
+  revalidatePath('/', 'layout')
+  redirect('/admin/gallery?ok=1')
+}
+
+/* ── Түгээмэл асуулт ───────────────────────────────────────────────────── */
+
+const faqSchema = z.object({
+  question_mn: z.string().trim().min(3),
+  question_en: z.string().trim().default(''),
+  answer_mn: z.string().trim().min(3),
+  answer_en: z.string().trim().default(''),
+  sort_order: z.coerce.number().int().min(0).default(0),
+})
+
+export async function createFaq(formData: FormData): Promise<void> {
+  await requireStaff()
+
+  const parsed = faqSchema.safeParse(Object.fromEntries(formData))
+  if (!parsed.success) {
+    redirect(`/admin/faq?error=${encodeURIComponent(parsed.error.issues[0]?.message ?? 'invalid')}`)
+  }
+
+  const supabase = await createClient()
+
+  /* Дараалал заагаагүй бол ЭЦЭСТ нь тавина. Шинэ асуулт бүр 0 дугаартай
+     гарч ирвэл жагсаалтын толгойд овоорч, гараар эрэмбэлэх ажил үүснэ. */
+  let order = parsed.data.sort_order
+  if (order === 0) {
+    const { data: last } = await supabase
+      .from('faq_items')
+      .select('sort_order')
+      .order('sort_order', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    order = (last?.sort_order ?? 0) + 1
+  }
+
+  const { error } = await supabase.from('faq_items').insert({ ...parsed.data, sort_order: order })
+  if (error) redirect(`/admin/faq?error=${encodeURIComponent(error.message)}`)
+
+  await audit('faq.create', 'faq_items', null, { question: parsed.data.question_mn })
+  revalidatePath('/admin/faq')
+  revalidatePath('/', 'layout')
+  redirect('/admin/faq?ok=1')
+}
+
+export async function updateFaq(formData: FormData): Promise<void> {
+  await requireStaff()
+
+  const id = uuid.safeParse(formData.get('id'))
+  const parsed = faqSchema.safeParse(Object.fromEntries(formData))
+
+  if (!id.success || !parsed.success) {
+    redirect(
+      `/admin/faq?error=${encodeURIComponent(parsed.success ? 'Асуулт олдсонгүй' : (parsed.error.issues[0]?.message ?? 'invalid'))}`,
+    )
+  }
+
+  const supabase = await createClient()
+  const { error } = await supabase.from('faq_items').update(parsed.data).eq('id', id.data)
+  if (error) redirect(`/admin/faq?error=${encodeURIComponent(error.message)}`)
+
+  await audit('faq.update', 'faq_items', id.data, {})
+  revalidatePath('/admin/faq')
+  revalidatePath('/', 'layout')
+  redirect('/admin/faq?ok=1')
+}
+
+/**
+ * Асуултыг УСТГАНА.
+ *
+ * Идэвхгүй болгох нь ихэнх тохиолдолд зөв ч (§ `toggleActive`), алдаатай
+ * бичсэн, давхардсан асуултыг үүрд нуугдмал байлгах нь жагсаалтыг хогийн
+ * сав болгоно. Устгал нь эргэхгүй тул зөвхөн энд — нийтийн сайтад
+ * харагддаггүй бичлэгт.
+ */
+export async function deleteFaq(formData: FormData): Promise<void> {
+  await requireStaff()
+
+  const id = uuid.safeParse(formData.get('id'))
+  if (id.success) {
+    const supabase = await createClient()
+    const { error } = await supabase.from('faq_items').delete().eq('id', id.data)
+    if (error) redirect(`/admin/faq?error=${encodeURIComponent(error.message)}`)
+    await audit('faq.delete', 'faq_items', id.data, {})
+  }
+
+  revalidatePath('/admin/faq')
+  revalidatePath('/', 'layout')
+  redirect('/admin/faq?ok=1')
+}
+
+/* ── Сайтын агуулга ────────────────────────────────────────────────────── */
+
+/**
+ * `site_content` мөрийг шинэчилнэ.
+ *
+ * Хүснэгт бүхэлдээ ХОЁР jsonb баганатай: `value_mn`, `value_en`. Талбарууд
+ * нь түлхүүр бүрд өөр (§ admin/content/page.tsx `GROUPS`) тул энэ үйлдэл
+ * тэдгээрийг нэрлэхгүй — формын талбарын нэрнээс нь уншина:
+ *
+ *   `mn__title`   → зөвхөн монгол хувилбарт
+ *   `en__title`   → зөвхөн англи хувилбарт
+ *   `both__phone` → хоёуланд нь (утас, Instagram зэрэг хэлнээс хамаарахгүй)
+ *
+ * Хуучин утгын ДЭЭР бичнэ, орлуулахгүй: формд ороогүй талбар (жишээ нь
+ * гараар нэмсэн түлхүүр) алдагдахгүй.
+ */
+export async function updateSiteContent(formData: FormData): Promise<void> {
+  await requireStaff()
+
+  const key = String(formData.get('key') ?? '').trim()
+  if (!key) redirect('/admin/content?error=Түлхүүр алга')
+
+  const supabase = await createClient()
+  const { data: existing } = await supabase
+    .from('site_content')
+    .select('value_mn, value_en')
+    .eq('key', key)
+    .maybeSingle()
+
+  type Value = Record<string, string | number>
+  const mn: Value = { ...((existing?.value_mn as Value) ?? {}) }
+  const en: Value = { ...((existing?.value_en as Value) ?? {}) }
+
+  /* Тоон талбарыг ТООГООР хадгална. jsonb дотор `"6"` ба `6` хоёр өөр зүйл —
+     сайт нь `cancel_cutoff_hours` -ийг тоо гэж уншдаг тул мөр болгож
+     хадгалбал цуцлах хугацаа чимээгүй ажиллахаа болино. */
+  const numeric = new Set(
+    String(formData.get('numeric') ?? '')
+      .split(',')
+      .map((name) => name.trim())
+      .filter(Boolean),
+  )
+
+  const cast = (name: string, raw: string) => {
+    if (!numeric.has(name)) return raw
+    const value = Number(raw)
+    return Number.isFinite(value) ? value : 0
+  }
+
+  for (const [field, raw] of formData.entries()) {
+    if (typeof raw !== 'string') continue
+    const value = raw.trim()
+
+    if (field.startsWith('mn__')) {
+      const name = field.slice(4)
+      mn[name] = cast(name, value)
+    } else if (field.startsWith('en__')) {
+      const name = field.slice(4)
+      en[name] = cast(name, value)
+    } else if (field.startsWith('both__')) {
+      const name = field.slice(6)
+      mn[name] = cast(name, value)
+      en[name] = cast(name, value)
+    }
+  }
+
+  const { error } = await supabase
+    .from('site_content')
+    .upsert({ key, value_mn: mn, value_en: en, updated_at: new Date().toISOString() })
+
+  if (error) redirect(`/admin/content?error=${encodeURIComponent(error.message)}`)
+
+  await audit('site_content.update', 'site_content', null, { key })
+  revalidatePath('/admin/content')
+  // Агуулга нь бүх нийтийн хуудсанд тархсан — бүхэлд нь шинэчилнэ
+  revalidatePath('/', 'layout')
+  redirect(`/admin/content?ok=1#${key}`)
 }
 
 /* ── Хэрэглэгчийн эрх ──────────────────────────────────────────────────── */
