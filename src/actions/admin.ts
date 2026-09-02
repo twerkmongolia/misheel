@@ -438,6 +438,46 @@ const MAX_IMAGE_BYTES = 5 * 1024 * 1024
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/avif']
 
 /**
+ * НЭГ зургийг Supabase Storage-д байршуулаад нийтийн хаягийг нь буцаана.
+ *
+ * Бараа, багш хоёр ижил шалгалт (төрөл, хэмжээ), ижил bucket, ижил замын
+ * хэвтэй тул логикийг нэг газар төвлөрүүлэв. Ялгаа нь зөвхөн `folder`:
+ * `products/<id>/…` эсвэл `instructors/<id>/…`.
+ *
+ * Алдааг ШИДЭХГҮЙ, буцаана — дуудагч тал бүр өөр өөр мессеж угсрах
+ * хэрэгтэй («бараа үүслээ, гэвч зураг ороогүй» гэх мэт).
+ */
+async function uploadImage(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  folder: 'products' | 'instructors' | 'gallery',
+  ownerId: string,
+  file: File,
+): Promise<{ url: string } | { error: string }> {
+  if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+    return { error: `${file.name}: JPG, PNG, WEBP эсвэл AVIF байх ёстой` }
+  }
+  if (file.size > MAX_IMAGE_BYTES) {
+    return { error: `${file.name}: 5MB-аас хэтэрсэн байна` }
+  }
+
+  const extension = file.name.split('.').pop()?.toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg'
+  const path = `${folder}/${ownerId}/${crypto.randomUUID()}.${extension}`
+
+  const { error } = await supabase.storage
+    .from('media')
+    .upload(path, file, { contentType: file.type, upsert: false })
+
+  if (error) return { error: error.message }
+
+  const {
+    data: { publicUrl },
+  } = supabase.storage.from('media').getPublicUrl(path)
+
+  await audit(`${folder}.image.upload`, folder, ownerId, { path })
+  return { url: publicUrl }
+}
+
+/**
  * Барааны зургуудыг Supabase Storage-д байршуулна.
  *
  * Файлыг `media` bucket дотор `products/<барааны id>/` замд хадгална.
