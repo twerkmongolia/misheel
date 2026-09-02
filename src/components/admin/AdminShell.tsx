@@ -39,15 +39,12 @@ export function AdminShell({
   profile,
   defaultCollapsed,
   defaultScheme,
-  fontClass = '',
   children,
 }: {
   groups: NavGroup[]
   profile: { name: string; role: string }
   defaultCollapsed: boolean
   defaultScheme: 'light' | 'dark'
-  /** Зөвхөн удирдлагад ачаалагддаг UI үсгийн `next/font` хувьсагч. */
-  fontClass?: string
   children: React.ReactNode
 }) {
   const [collapsed, setCollapsed] = useState(defaultCollapsed)
@@ -81,28 +78,31 @@ export function AdminShell({
 
   return (
     <div
-      className={`admin-shell flex min-h-screen flex-1 bg-background text-foreground ${fontClass}`}
+      className="admin-shell flex min-h-screen flex-1 bg-background text-foreground"
       data-scheme={scheme}
     >
       {/* ── Зүүн зурвас ────────────────────────────────────────────────── */}
       <aside
-        className={`sticky top-0 hidden h-screen shrink-0 flex-col border-r border-line bg-surface transition-[width] duration-200 ease-out lg:flex ${
-          collapsed ? 'w-[4.75rem] px-3' : 'w-[15rem] px-3'
-        } py-3`}
+        /* Дэвсгэргүй — зурвасыг зөвхөн ШУГАМ тусгаарлана. Өөр өнгийн
+           зурвас нь удирдлагыг «хоёр хэсэгтэй програм» мэт харагдуулдаг. */
+        className={`sticky top-0 hidden h-screen shrink-0 flex-col border-r border-line transition-[width] duration-200 ease-out lg:flex ${
+          collapsed ? 'w-[5rem] px-4' : 'w-[15.5rem] px-5'
+        } py-5`}
       >
+        {/* Лого нь нийтийн сайтынхтай ижил масthead — өнгөт дүрсэн товч биш.
+            Хумигдсан үед зөвхөн эхний үсэг үлдэнэ. */}
         <Link
           href="/admin"
-          className={`mb-4 flex h-10 items-center gap-2.5 rounded-lg transition-colors hover:bg-surface-2 ${
-            collapsed ? 'justify-center' : 'px-2'
+          className={`mb-6 flex h-10 items-center border-b border-line pb-6 transition-opacity duration-300 hover:opacity-60 ${
+            collapsed ? 'justify-center' : ''
           }`}
         >
-          <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-brand text-brand-ink">
-            <AdminIcon name="dashboard" className="h-4 w-4" />
-          </span>
-          {!collapsed && (
-            <span className="truncate text-[13px] leading-tight font-semibold">
-              Twerk Mongolia
-              <span className="block text-[11px] font-normal text-muted">Удирдлага</span>
+          {collapsed ? (
+            <span className="wordmark text-foreground">TM</span>
+          ) : (
+            <span className="min-w-0 truncate">
+              <span className="wordmark block">Twerk Mongolia</span>
+              <span className="t-meta mt-1.5 block text-faint">Удирдлага</span>
             </span>
           )}
         </Link>
@@ -115,9 +115,7 @@ export function AdminShell({
                 (collapsed ? (
                   index > 0 && <div className="mx-auto mb-2 h-px w-8 bg-line" />
                 ) : (
-                  <p className="mb-1 px-2 text-[10px] font-semibold tracking-[0.1em] text-faint uppercase">
-                    {group.label}
-                  </p>
+                  <p className="t-label mb-2 px-2 text-faint">{group.label}</p>
                 ))}
               {group.items.map((item) => (
                 <RailLink
@@ -136,8 +134,8 @@ export function AdminShell({
           onClick={toggleNav}
           aria-expanded={!collapsed}
           aria-label={collapsed ? 'Цэсийг дэлгэх' : 'Цэсийг хумих'}
-          className={`mt-3 flex h-9 w-full items-center gap-2.5 rounded-lg text-[13px] text-muted transition-colors hover:bg-surface-2 hover:text-foreground ${
-            collapsed ? 'justify-center' : 'px-2.5'
+          className={`t-meta mt-4 flex h-9 w-full items-center gap-2.5 border-t border-line pt-4 text-muted transition-colors hover:text-foreground ${
+            collapsed ? 'justify-center' : 'px-2'
           }`}
         >
           <AdminIcon
@@ -156,15 +154,11 @@ export function AdminShell({
           <div className="flex h-14 items-center gap-3 px-4 sm:px-6">
             {/* Утсан дээр толгой мөр = хуудасны нэр (апп шиг).
                 Дэлгэцэн дээр хаана байгааг сануулах зам. */}
-            <span className="truncate text-base font-semibold lg:hidden">
-              {current?.label ?? 'Удирдлага'}
-            </span>
-            <span className="hidden items-center gap-1.5 text-[13px] text-muted lg:flex">
+            <span className="t-h3 truncate lg:hidden">{current?.label ?? 'Удирдлага'}</span>
+            <span className="t-label hidden items-center gap-2.5 text-faint lg:flex">
               Удирдлага
-              <span aria-hidden="true" className="text-faint">
-                /
-              </span>
-              <span className="font-medium text-foreground">{current?.label ?? '—'}</span>
+              <span aria-hidden="true">/</span>
+              <span className="text-foreground">{current?.label ?? '—'}</span>
             </span>
 
             <div className="ml-auto flex items-center gap-1">
@@ -173,7 +167,7 @@ export function AdminShell({
                 onClick={toggleScheme}
                 aria-label={scheme === 'dark' ? 'Гэрэлтэй горим' : 'Харанхуй горим'}
                 title={scheme === 'dark' ? 'Гэрэлтэй горим' : 'Харанхуй горим'}
-                className="grid h-10 w-10 place-items-center rounded-lg text-muted transition-colors hover:bg-surface-2 hover:text-foreground lg:h-9 lg:w-9"
+                className="icon-btn"
               >
                 <AdminIcon name={scheme === 'dark' ? 'sun' : 'moon'} className="h-[18px] w-[18px]" />
               </button>
@@ -193,7 +187,7 @@ export function AdminShell({
                   <span className="block font-medium">{profile.name}</span>
                   <span className="block text-[11px] text-muted">{profile.role}</span>
                 </span>
-                <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-brand-soft text-xs font-semibold text-brand">
+                <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-line-strong text-xs font-semibold">
                   {profile.name.slice(0, 1).toUpperCase()}
                 </span>
               </div>
@@ -223,7 +217,7 @@ export function AdminShell({
             onClick={() => setSheetPath(pathname)}
             aria-expanded={sheetOpen}
             className={`flex min-w-0 flex-1 flex-col items-center gap-1 py-2 transition-colors ${
-              restActive || sheetOpen ? 'text-brand' : 'text-muted'
+              restActive || sheetOpen ? 'text-foreground' : 'text-muted'
             }`}
           >
             <AdminIcon name="menu" className="h-[22px] w-[22px]" />
@@ -245,7 +239,7 @@ export function AdminShell({
             <div className="mx-auto mt-2.5 h-1 w-9 rounded-full bg-line-strong" />
 
             <div className="flex items-center gap-3 px-4 py-4">
-              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-brand-soft text-sm font-semibold text-brand">
+              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-line-strong text-sm font-semibold">
                 {profile.name.slice(0, 1).toUpperCase()}
               </span>
               <span className="min-w-0 leading-tight">
@@ -262,7 +256,7 @@ export function AdminShell({
                   aria-current={item === current ? 'page' : undefined}
                   className={`flex h-12 items-center gap-3 rounded-lg px-3 text-[15px] transition-colors ${
                     item === current
-                      ? 'bg-brand-soft font-medium text-brand'
+                      ? 'font-medium text-foreground'
                       : 'text-foreground active:bg-surface-2'
                   }`}
                 >
@@ -305,13 +299,13 @@ function TabLink({ item, active }: { item: NavItem; active: boolean }) {
       href={item.href}
       aria-current={active ? 'page' : undefined}
       className={`relative flex min-w-0 flex-1 flex-col items-center gap-1 py-2 transition-colors ${
-        active ? 'text-brand' : 'text-muted'
+        active ? 'text-foreground' : 'text-muted'
       }`}
     >
       {active && (
         <span
           aria-hidden="true"
-          className="absolute top-0 h-[3px] w-8 rounded-b-full bg-brand"
+          className="absolute top-0 h-[2px] w-8 bg-foreground"
         />
       )}
       <AdminIcon name={item.icon} className="h-[22px] w-[22px]" />
@@ -342,14 +336,14 @@ function RailLink({
         // Дүүрэн ногоон товч цэс бүрд давтагдвал нүд ядрана — идэвхтэйг
         // бүдэг дэвсгэр + брэндийн өнгөт бичиг + зүүн зураасаар заана.
         active
-          ? 'bg-brand-soft font-medium text-brand'
+          ? 'font-medium text-foreground'
           : 'text-foreground-soft hover:bg-surface-2 hover:text-foreground'
       }`}
     >
       {active && !collapsed && (
         <span
           aria-hidden="true"
-          className="absolute top-1.5 bottom-1.5 -left-3 w-[3px] rounded-r-full bg-brand"
+          className="absolute top-1.5 bottom-1.5 -left-5 w-[2px] bg-foreground"
         />
       )}
       <AdminIcon name={item.icon} className="h-[17px] w-[17px] shrink-0" />
