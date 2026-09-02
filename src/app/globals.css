@@ -168,76 +168,65 @@
 .admin-shell[data-scheme='light'] { color-scheme: light; }
 .admin-shell[data-scheme='dark'] { color-scheme: dark; }
 
+/* ── Палитр ───────────────────────────────────────────────────────────────
+   Нийтийн сайтынхтай ЯГ ижил. Дахин бичих шаардлагатай нь `light-dark()`
+   зарлагдсан элемент дээрээ шийдэгддэгтэй холбоотой: `:root` дээрх токенууд
+   тэндээ шийдэгдчихсэн тул энд `color-scheme` сольсноор эргэхгүй.
+
+   Өмнө нь удирдлага өөрийн палитртай (цайвар саарал суурь, цагаан карт,
+   ногоон өргөлт) байв. Одоо ижил — өөр өнгө нь өөр бүтээгдэхүүн мэт
+   мэдрүүлдэг. Ажилтан нийтийн сайт, удирдлага хоёрын хооронд өдөрт олон
+   удаа шилждэг тул хоёр өөр ертөнц байх нь өөрөө ачаалал. */
 .admin-shell {
-  /* Хуудас цайвар саарал, карт цэвэр цагаан — картууд өөрөө өргөгдөж харагдана */
-  --background: light-dark(#F6F7F9, #0B0C0E);
-  --surface: light-dark(#FFFFFF, #131518);
-  --surface-2: light-dark(#F2F4F6, #1A1D21);
-  --surface-3: light-dark(#E5E8EC, #23262B);
+  --background: light-dark(#FFFFFF, #000000);
+  --surface: light-dark(#FAFAFA, #0A0A0A);
+  --surface-2: light-dark(#F1F1F1, #141414);
+  --surface-3: light-dark(#E6E6E6, #1E1E1E);
 
-  --line: light-dark(#E4E7EB, #26292E);
-  --line-strong: light-dark(#CBD1D8, #3A3E45);
+  --line: light-dark(#E3E3E3, #232323);
+  --line-strong: light-dark(#C4C4C4, #3A3A3A);
 
-  --foreground: light-dark(#0C1116, #F2F4F6);
-  --foreground-soft: light-dark(#3F4750, #B7BEC7);
-  --muted: light-dark(#6B7480, #838B95);
-  --faint: light-dark(#A3ABB4, #5A6068);
+  --foreground: light-dark(#000000, #FFFFFF);
+  --foreground-soft: light-dark(#454545, #B4B4B4);
+  --muted: light-dark(#6E6E6E, #757575);
+  --faint: light-dark(#A8A8A8, #4A4A4A);
 
-  --button: light-dark(#0C1116, #F2F4F6);
-  --button-ink: light-dark(#FFFFFF, #0B0C0E);
+  --button: light-dark(#000000, #FFFFFF);
+  --button-ink: light-dark(#FFFFFF, #000000);
 
-  --accent: light-dark(#0C1116, #F2F4F6);
-  --accent-ink: light-dark(#FFFFFF, #0B0C0E);
-  --accent-soft: light-dark(#EDEFF2, #1F2226);
+  --accent: light-dark(#000000, #FFFFFF);
+  --accent-ink: light-dark(#FFFFFF, #000000);
+  --accent-soft: light-dark(#F0F0F0, #1A1A1A);
 
-  /* Төлөвийн өнгө — удирдлагад хэлбэрээр биш ӨНГӨӨР ялгана. Дөрвүүлээ
-     дэвсгэр дээрээ 4.5:1 -ээс дээш харьцаатай (WCAG AA, жижиг текст). */
-  --good: light-dark(#116343, #4ADE80);
-  --good-soft: light-dark(#E4F4EC, #0E2A1C);
-  --warn: light-dark(#8A5A00, #FBBF24);
-  --warn-soft: light-dark(#FCF2DE, #2C2008);
-  --danger: light-dark(#A31D1D, #F87171);
-  --danger-soft: light-dark(#FBEAEA, #2A1112);
-  --info: light-dark(#1B4FBF, #93B4FD);
-  --info-soft: light-dark(#E8EEFC, #131E36);
+  /* Төлөв нь ӨНГӨӨР биш ХЭЛБЭРЭЭР ялгарна (§ `.tag`). Токенууд нь
+     монохром боловч утилит ангиуд (`text-warn` гэх мэт) ажилласаар байхын
+     тулд үлдэнэ — зөвхөн утга нь саарлын шатлал болов. */
+  --good: light-dark(#000000, #FFFFFF);
+  --good-soft: light-dark(#F2F2F2, #171717);
+  --warn: light-dark(#454545, #B4B4B4);
+  --warn-soft: light-dark(#F4F4F4, #141414);
+  --danger: light-dark(#000000, #FFFFFF);
+  --danger-soft: light-dark(#F2F2F2, #1A1A1A);
+  --info: light-dark(#454545, #B4B4B4);
+  --info-soft: light-dark(#F2F2F2, #1A1A1A);
 
-  --brand: light-dark(#116343, #4ADE80);
-  --brand-ink: light-dark(#FFFFFF, #05271A);
-  --brand-soft: light-dark(#E4F4EC, #0E2A1C);
+  --brand: var(--foreground);
+  --brand-ink: var(--background);
+  --brand-soft: var(--surface-2);
 
-  /* Хүрээ дангаараа гүнийг барихад сул — маш нимгэн сүүдэр нэмнэ. Харанхуйд
-     сүүдэр харагдахгүй тул тэнд гэрлэн хүрээгээр орлуулна. */
-  --shadow-card: light-dark(
-    0 1px 2px rgba(12, 17, 22, 0.05),
-    0 1px 2px rgba(0, 0, 0, 0.4)
-  );
-  --shadow-pop: light-dark(
-    0 12px 28px -10px rgba(12, 17, 22, 0.18),
-    0 12px 28px -10px rgba(0, 0, 0, 0.7)
-  );
+  /* Сүүдэр нь ГАНЦ зорилготой: хөвж буй давхарга (цонх). Тайван гадаргад
+     сүүдэр байхгүй — гүнийг шугам барина. */
+  --shadow-card: none;
+  --shadow-pop: var(--lift);
 }
 
-/* ── Удирдлагын үсэг ──────────────────────────────────────────────────────
-   Нийтийн сайтын `Unbounded` бол зурагт хуудасны үсэг: өргөн, тод, 20px-ээс
-   доош уншихад хэцүү. Өдөржин хүснэгт ширтэх орчинд ХЭРЭГГҮЙ. Удирдлага
-   бүхэлдээ нэг л гэр бүл — Inter — дээр суурилна (§ admin/layout.tsx).
-   ─────────────────────────────────────────────────────────────────────── */
+/* ── Үсэг ─────────────────────────────────────────────────────────────────
+   Тусдаа `--font-ui` -г ХАСАВ. Нийтийн сайт хоёр дуу хоолойтой: Playfair
+   (мэдэгдэл) + Inter (мэдээлэл). Удирдлагад ч яг тэр хоёр — гарчиг, том
+   тоо нь serif, их бие нь grotesque. Гурав дахь гэр бүл нэмэх нь нэг
+   бүтээгдэхүүнийг хоёр болгож хуваадаг.
 
-.admin-shell {
-  font-family: var(--font-ui), ui-sans-serif, system-ui, sans-serif;
-  /* Inter нь 14px дээр бага зэрэг сулхан харагддаг — өчүүхэн хумина */
-  letter-spacing: -0.006em;
-}
-
-/* Гарчгийн `--font-display` болон -0.035em шахалтыг энд буцаана: удирдлагын
-   гарчиг 20-30px, тэр хэмжээнд ийм шахалт үсгүүдийг наалдуулна. */
-.admin-shell :is(h1, h2, h3, h4) {
-  font-family: inherit;
-  letter-spacing: -0.018em;
-}
-
-/* Тоо БҮР баганадаа эгнэнэ — хүснэгт, үзүүлэлт, үнэ. Гараар `tabular-nums`
-   бичих шаардлагагүй болно. */
+   Тоо БҮР баганадаа эгнэнэ — хүснэгт, үзүүлэлт, үнэ. */
 .admin-shell :is(table, .tnum, input[type='number']) {
   font-variant-numeric: tabular-nums;
 }
@@ -246,17 +235,53 @@
    дэлгэц дээр зүгээр л бохирдол. */
 body:has(.admin-shell)::before { display: none; }
 
-/* Фокусын хүрээ брэндийн өнгөөр — хар хүрээ ногоон товчны дээр алга болдог */
-.admin-shell :focus-visible {
-  outline: 2px solid var(--brand);
-  outline-offset: 2px;
+/* ── Гадарга ──────────────────────────────────────────────────────────────
+   Хайрцаг биш ШУГАМ. 14px радиус, сүүдэртэй «хөвөгч карт» нь удирдлагыг
+   өөр програм мэт харагдуулж байв. Одоо сайтын `.card` -тай ижил: нимгэн
+   хүрээ, 3px радиус, сүүдэргүй. */
+.admin-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
 }
 
-/* «＋ Шинэ хичээл» сонгосон үед л нэмэлт талбарууд гарна.
-   JS шаардахгүй: `option:checked` нь сонголт солигдох бүрд шинэчлэгддэг тул
-   `:has()` -ээр эцэг формоос уншиж болно. Талбарууд нуугдмал үедээ `required`
-   БАЙХГҮЙ — хөтөч харагдахгүй талбар руу фокус хийж чадахгүй тул форм илгээх
-   боломжгүй болно. Шалгалт нь серверт (§ actions/admin.ts). */
+/* ── Харилцах цонх ────────────────────────────────────────────────────────
+   `<dialog>` -ийг `showModal()` -ээр нээнэ: фокусын урхи, Esc товч, дэвсгэр
+   бүрхүүл — бүгд хөтчөөс бэлнээр ирнэ. Дээд давхаргад (top layer) зурагдах ч
+   DOM-ын хувьд `.admin-shell` -ийн ХҮҮХЭД тул өнгө, үсэг өвлөгдөнө.
+   ─────────────────────────────────────────────────────────────────────── */
+
+.admin-dialog {
+  margin: auto;
+  width: min(46rem, calc(100vw - 2rem));
+  max-height: min(85vh, 52rem);
+  padding: 0;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r);
+  background: var(--background);
+  color: var(--foreground);
+  box-shadow: var(--lift);
+}
+
+/* `::backdrop` нь эх элементээсээ өнгө өвлөх нь хөтчөөс хамаарна — тиймээс
+   энд токен биш, шууд утга. */
+.admin-dialog::backdrop {
+  background: rgb(0 0 0 / 0.6);
+  backdrop-filter: blur(3px);
+}
+
+@media (max-width: 767px) {
+  /* Утсан дээр доороос мандах хуудас — гарын хүрэлцээнд ойр */
+  .admin-dialog {
+    width: 100vw;
+    max-width: 100vw;
+    max-height: 92vh;
+    margin: auto auto 0;
+    border-bottom: 0;
+    border-radius: var(--r) var(--r) 0 0;
+  }
+}
+
 .new-class-fields { display: none; }
 
 form:has(select[name='class_type_id'] option[value='new']:checked) .new-class-fields {
@@ -333,41 +358,49 @@ form:has(select[name='class_type_id'] option[value='new']:checked) .new-class-fi
   .admin-table :is(tbody, tr, td) { display: block; width: auto; }
 
   .admin-table tr {
-    padding: 0.75rem 0;
+    padding: 0.875rem 0;
     border-bottom: 1px solid var(--line);
   }
   .admin-table tr:last-child { border-bottom: 0; }
 
   .admin-table td {
     border: 0;
-    padding: 0.2rem 1rem;
+    padding: 0.25rem 1rem;
     text-align: left !important;
   }
 
   /* Шошготой нүд: зүүнд шошго, баруунд утга */
   .admin-table td[data-label] {
     display: flex;
-    align-items: center;
+    align-items: baseline;
     justify-content: space-between;
-    gap: 1rem;
+    gap: 1.25rem;
   }
+
+  /* Шошго нь сайтын `.t-label` -тай ижил хэмнэлтэй — 0.06em нь хэт нягт,
+     хажуудах утгаасаа ялгарахгүй байв. */
   .admin-table td[data-label]::before {
     content: attr(data-label);
     flex: none;
-    font-size: 11px;
+    font-size: 0.6875rem;
     font-weight: 600;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: var(--muted);
+    color: var(--faint);
   }
 
   /* Шошгогүй нүд = мөрийн гарчиг (эхний) эсвэл үйлдэл (сүүлийн) */
   .admin-table td:first-child {
-    padding-bottom: 0.45rem;
+    padding-bottom: 0.5rem;
     font-size: 0.9375rem;
     font-weight: 600;
   }
-  .admin-table td:not([data-label]):not(:first-child) { padding-top: 0.55rem; }
+  .admin-table td:not([data-label]):not(:first-child) { padding-top: 0.75rem; }
+
+  /* Үйлдлийн товчнууд утсан дээр эгнээ дүүрэн — гарчгийн доор шахагдсан
+     жижиг товч нь хамгийн олон дардаг зүйл байтал хамгийн бага бай болдог. */
+  .admin-table td:not([data-label]):not(:first-child) form { flex: 1 1 auto; }
+  .admin-table td:not([data-label]):not(:first-child) form .btn { width: 100%; }
 
   /* Хуруунд тохирсон хэмжээ. 16px нь iOS дээр фокуслахад хуудас
      томордоггүй болгох цорын ганц арга (Safari-ийн дүрэм). */
