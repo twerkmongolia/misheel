@@ -94,6 +94,35 @@ async function uniqueSlug(
   return slug
 }
 
+/**
+ * Барааны кодыг ӨӨРӨӨ зохионо.
+ *
+ * SKU нь өгөгдлийн санд давхардаж болохгүй ч ажилтанд утгагүй зүйл — түүнийг
+ * гараар бодуулах нь «шинэ бараа нэмэх» ажлыг хоёр дахин удаан болгодог.
+ * Тиймээс slug + хэмжээ/өнгөнөөс угсарна: `crop-top` + `M` → `CROP-TOP-M`.
+ * Давхарцвал ард нь тоо залгана.
+ */
+async function uniqueSku(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  slug: string,
+  size: string,
+  color: string,
+): Promise<string> {
+  /* `slugify` нь хоосон мөрөнд `'zuil'` буцаадаг (нэргүй бараа үүсэхээс
+     сэргийлсэн хамгаалалт). Тиймээс ХООСОН талбарыг түүн рүү огт оруулж
+     болохгүй — эс тэгвэл `CROP-TOP-ZUIL-ZUIL` гэсэн код гарна. */
+  const part = (value: string) =>
+    value.trim() ? slugify(value).replace(/-/g, '').toUpperCase().slice(0, 8) : ''
+
+  const base = [slug.toUpperCase(), part(size), part(color)].filter(Boolean).join('-').slice(0, 40)
+  const { data } = await supabase.from('product_variants').select('sku').like('sku', `${base}%`)
+  const used = new Set((data ?? []).map((row) => row.sku))
+
+  let sku = base
+  for (let n = 2; used.has(sku); n += 1) sku = `${base}-${n}`
+  return sku
+}
+
 /** Шинэ хичээлийн төрлийг үүсгээд id-г нь буцаана. */
 async function createClassTypeFrom(
   supabase: Awaited<ReturnType<typeof createClient>>,
@@ -330,6 +359,28 @@ export async function createProduct(formData: FormData): Promise<void> {
   }
 
   await audit('product.create', 'products', product.id, { slug })
+
+  /* Эхний хувилбар. Үнэ нь барааны үндсэн үнэ — цонхонд хоёр дахь үнэ
+     асуух нь эхний алхмыг зориудаар төвөгтэй болгоно; ялгаатай үнэтэй
+     хувилбарыг дараа нь картаас нэмнэ. */
+  const variant = firstVariantSchema.safeParse(Object.fromEntries(formData))
+  if (variant.success) {
+    const sku = await uniqueSku(supabase, slug, variant.data.size, variant.data.color)
+    const { error: variantError } = await supabase.from('product_variants').insert({
+      product_id: product.id,
+      sku,
+      size: variant.data.size || null,
+      color: variant.data.color || null,
+      price: parsed.data.base_price,
+      stock_qty: variant.data.stock_qty,
+    })
+    if (variantError) {
+      redirect(
+        `/admin/products?error=${encodeURIComponent(`Бараа үүслээ, гэвч нөөц ороогүй — ${variantError.message}`)}&open=${product.id}`,
+      )
+    }
+    await audit('variant.create', 'product_variants', null, { sku })
+  }
 
   // Зураг нь заавал биш. Бараа аль хэдийн үүссэн тул зураг дээр алдаа
   // гарвал бүхэлд нь бүтэлгүйтсэн мэт мессеж өгвөл ажилтан төөрнө.
