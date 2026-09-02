@@ -31,12 +31,14 @@ export function SessionList({
   sessions,
   locale,
   booked,
+  waiting,
   back,
   hide,
 }: {
   sessions: SessionView[]
   locale: Locale
   booked?: Set<string>
+  waiting?: Set<string>
   back?: string
   hide?: 'classType' | 'instructor'
 }) {
@@ -82,6 +84,7 @@ export function SessionList({
                   session={session}
                   locale={locale}
                   booked={booked?.has(session.id) ?? false}
+                  waiting={waiting?.has(session.id) ?? false}
                   back={back}
                   hide={hide}
                 />

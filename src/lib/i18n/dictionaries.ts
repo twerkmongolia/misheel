@@ -147,6 +147,11 @@ const mn = {
     // Цөөхөн суудал үлдсэн үед: «Сүүлийн 2 суудал». Яаралтай гэдгийг
     // хэлбэрээр биш ҮГЭЭР хэлнэ — тэр нь хамгийн шууд.
     seatsLast: 'Сүүлийн',
+    joinWaitlist: 'Хүлээлгийн жагсаалт',
+    onWaitlist: 'Жагсаалтад байна',
+    leaveWaitlist: 'Жагсаалтаас гарах',
+    waitlisted: 'Хүлээлгийн жагсаалтад орлоо. Суудал гарвал бид тантай холбогдоно.',
+    waitlistLeft: 'Хүлээлгийн жагсаалтаас гарлаа.',
     with: 'багш',
     at: 'байршил',
     loginToBook: 'Бүртгүүлэхийн тулд нэвтэрнэ үү',
@@ -441,6 +446,11 @@ const en: Dictionary = {
     cancelled: 'Cancelled',
     seatsLeft: 'seats left',
     seatsLast: 'Only',
+    joinWaitlist: 'Join waitlist',
+    onWaitlist: 'On the waitlist',
+    leaveWaitlist: 'Leave waitlist',
+    waitlisted: 'You are on the waitlist. We will call you if a seat opens up.',
+    waitlistLeft: 'You have left the waitlist.',
     with: 'with',
     at: 'at',
     loginToBook: 'Log in to book',

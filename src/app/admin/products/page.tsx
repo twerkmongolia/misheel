@@ -3,7 +3,6 @@ import {
   Alert,
   Badge,
   Button,
-  Disclosure,
   EmptyState,
   Field,
   FileInput,
@@ -11,11 +10,13 @@ import {
   Input,
   Panel,
   PageHeader,
+  SearchBox,
   Table,
   Td,
   Textarea,
   Th,
 } from '@/components/admin/ui'
+import { FormDialog } from '@/components/admin/FormDialog'
 import { AdminIcon } from '@/components/admin/AdminIcon'
 import { CardDialog } from '@/components/admin/CardDialog'
 import {
@@ -95,65 +96,118 @@ function ProductCard({ product }: { product: ProductView }) {
 export default async function AdminProductsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ ok?: string; error?: string; open?: string }>
+  searchParams: Promise<{ q?: string; ok?: string; error?: string; open?: string }>
 }) {
   const search = await searchParams
   if (!isSupabaseConfigured()) return <Alert tone="warn">Supabase тохируулаагүй байна.</Alert>
 
-  const products = await getProducts(true)
+  const all = await getProducts(true)
+
+  /* Бараа нь `getProducts` -оор бүхэлдээ ирдэг (хувилбар, зурагтайгаа) тул
+     хайлтыг САНАХ ОЙД хийнэ — өгөгдлийн сан руу дахин очих шаардлагагүй.
+     Барааны тоо зуугаар хэмжигдэх тул энэ нь хэмжээндээ зөв. */
+  const term = (search.q ?? '').trim().toLowerCase()
+  const products = term
+    ? all.filter((product) =>
+        [product.name_mn, product.name_en, product.category, product.slug]
+          .join(' ')
+          .toLowerCase()
+          .includes(term),
+      )
+    : all
 
   return (
     <>
       <PageHeader
         title="Бараа"
-        description="Карт дээр дарж мэдээлэл, зураг, нөөцийг нь өөрчилнө."
+        description={
+          term
+            ? `«${term}» хайлтад ${products.length} бараа таарлаа.`
+            : 'Карт дээр дарж мэдээлэл, зураг, нөөцийг нь өөрчилнө.'
+        }
+        actions={
+          <FormDialog
+            trigger="Шинэ бараа"
+            title="Шинэ бараа нэмэх"
+            subtitle="Нэр, үнэ, нөөцийг нэг дор. Нэмэлт хэмжээ, зургийг дараа нь картаас."
+            defaultOpen={Boolean(search.error)}
+          >
+            <form action={createProduct} className="flex flex-col gap-4">
+                <div className="grid gap-5 sm:grid-cols-2">
+                  <Field label="Нэр (MN)">
+                    <Input name="name_mn" required />
+                  </Field>
+                  <Field label="Нэр (EN)">
+                    <Input name="name_en" />
+                  </Field>
+                  <Field label="Ангилал">
+                    <Input name="category" defaultValue="merch" />
+                  </Field>
+                  <Field label="Үндсэн үнэ (₮)">
+                    <Input type="number" name="base_price" defaultValue={50000} min={0} step={1000} required />
+                  </Field>
+                  <Field
+                    label="Зураг"
+                    hint="Заавал биш · олноор сонгож болно · JPG / PNG / WEBP, 5MB хүртэл"
+                    className="sm:col-span-2"
+                  >
+                    <FileInput name="file" multiple accept="image/jpeg,image/png,image/webp,image/avif" />
+                  </Field>
+                </div>
+
+                <Field label="Тайлбар (MN)">
+                  <Textarea name="desc_mn" rows={3} />
+                </Field>
+
+                {/* ── Эхний хувилбар ──────────────────────────────────────
+                    Хувилбаргүй бараа нь дэлгүүрт үнэгүй, нөөцгүй тул
+                    худалдаанд ГАРАХГҮЙ. Урьд нь бараа үүсгээд, дараа нь
+                    картыг нээж хувилбар нэмэх хоёр алхам байсан — хоёр дахь
+                    нь мартагдвал бараа чимээгүй үл үзэгдэх болдог.
+
+                    Барааны кодыг (SKU) энд асуухгүй: нэр, хэмжээ, өнгөнөөс
+                    сервер өөрөө угсарна (§ actions/admin.ts `uniqueSku`).
+                    Ажилтанд утгагүй кодыг гараар бодуулах нь энэ ажлыг
+                    хоёр дахин удаан болгодог. */}
+                <fieldset className="flex flex-col gap-5 border-t border-line pt-5">
+                  <legend className="sr-only">Эхний хувилбар</legend>
+                  <p className="t-label text-muted">Эхний хувилбар</p>
+
+                  <div className="grid gap-5 sm:grid-cols-3">
+                    <Field label="Хэмжээ" hint="Заавал биш">
+                      <Input name="size" placeholder="M" />
+                    </Field>
+                    <Field label="Өнгө" hint="Заавал биш">
+                      <Input name="color" placeholder="Хар" />
+                    </Field>
+                    <Field label="Нөөц (ширхэг)">
+                      <Input type="number" name="stock_qty" defaultValue={0} min={0} required />
+                    </Field>
+                  </div>
+                </fieldset>
+
+                <FormActions>
+                  <Button type="submit" variant="primary">
+                    Бараа нэмэх
+                  </Button>
+                </FormActions>
+              </form>
+          </FormDialog>
+        }
       />
 
       {search.ok && <Alert tone="good">Хадгалагдлаа.</Alert>}
       {search.error && <Alert tone="danger">{search.error}</Alert>}
 
-      <Disclosure summary="Шинэ бараа нэмэх">
-        <form action={createProduct} className="flex flex-col gap-4">
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <Field label="Нэр (MN)">
-              <Input name="name_mn" required />
-            </Field>
-            <Field label="Нэр (EN)">
-              <Input name="name_en" />
-            </Field>
-            <Field label="Ангилал">
-              <Input name="category" defaultValue="merch" />
-            </Field>
-            <Field label="Үндсэн үнэ (₮)">
-              <Input type="number" name="base_price" defaultValue={50000} min={0} step={1000} required />
-            </Field>
-            <Field
-              label="Зураг"
-              hint="Заавал биш · олноор сонгож болно · JPG / PNG / WEBP, 5MB хүртэл"
-              className="sm:col-span-2"
-            >
-              <FileInput name="file" multiple accept="image/jpeg,image/png,image/webp,image/avif" />
-            </Field>
-          </div>
+      <SearchBox placeholder="Барааны нэр эсвэл ангилал" defaultValue={term} />
 
-          <Field label="Тайлбар (MN)">
-            <Textarea name="desc_mn" rows={3} />
-          </Field>
-
-          <FormActions>
-            <Button type="submit" variant="primary">
-              Бараа нэмэх
-            </Button>
-          </FormActions>
-        </form>
-      </Disclosure>
 
       {products.length === 0 ? (
         <Panel flush>
           <EmptyState icon="tag" title="Бараа бүртгэгдээгүй" hint="Эхний бараагаа дээрээс нэмнэ үү." />
         </Panel>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
           {products.map((product) => (
             <CardDialog
               key={product.id}
@@ -204,7 +258,7 @@ export default async function AdminProductsPage({
                           <button
                             type="submit"
                             aria-label="Зураг устгах"
-                            className="grid h-7 w-7 place-items-center rounded-full border border-line bg-surface text-muted shadow-[var(--shadow-card)] transition-colors hover:border-danger hover:bg-danger-soft hover:text-danger"
+                            className="grid h-7 w-7 place-items-center rounded-[var(--r)] border border-line-strong bg-background text-muted transition-colors hover:border-foreground hover:text-foreground"
                           >
                             <AdminIcon name="trash" className="h-3.5 w-3.5" />
                           </button>

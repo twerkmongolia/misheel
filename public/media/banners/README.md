@@ -64,8 +64,8 @@ cp ~/Downloads/<файл>.jpg public/media/banners/shop.jpg
 | `classes.jpg`      | Facetune_19-09-2024               | шалан дээрх бүлэг              |
 | `shop.jpg`         | Facetune_11-09-2024               | студи, эгнээ — хувцас, гутал   |
 | `contact.jpg`      | Facetune_26-04-2026               | тайз, TWERK MONGOLIA LED       |
-| `schedule.jpg`     | hero.jpg — **түр**                | эгнээ гүн рүү                  |
-| `faq.jpg`          | hero.jpg — **түр**                | хана, эгнээний төгсгөл         |
+| `schedule.jpg`     | Facetune_17-05-2026               | RED AJIP тайз                  |
+| `faq.jpg`          | IMG_1448                          | студийн эгнээ, өөр өнцөг       |
 
 ### Ашиглагдаагүй эх зургууд
 
@@ -74,7 +74,6 @@ cp ~/Downloads/<файл>.jpg public/media/banners/shop.jpg
 
 | Файл                     | Хэмжээ      | Юу харагдах                          |
 | ------------------------ | ----------- | ------------------------------------ |
-| `IMG_1448.jpeg`          | 2738×1825   | студи, эгнээ (өөр өнцөг) — гэрэлтэй  |
 | `IMG_5407.jpeg`          | 9504×6336   | RED AJIP тайз, өргөн                 |
 | `Facetune_17-05-2026`    | 6143×4095   | RED AJIP тайз, үзэгчдийн гар         |
 | `Facetune_03-06-2026`    | 4116×5146   | ZUNII ZUGAA тайз                     |

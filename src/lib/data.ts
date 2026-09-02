@@ -163,6 +163,21 @@ export async function getMyBookedSessionIds(userId: string | null): Promise<Set<
   return new Set((data ?? []).map((row) => row.session_id))
 }
 
+/**
+ * Тухайн хэрэглэгч ХҮЛЭЭЛГИЙН ЖАГСААЛТАД байгаа хичээлүүд.
+ *
+ * `getMyBookedSessionIds` -тэй ижил хэв: мөр бүрд асуулт явуулахын оронд
+ * нэг удаа татаад Set болгоно.
+ */
+export async function getMyWaitlistSessionIds(userId: string | null): Promise<Set<string>> {
+  if (!userId || !isSupabaseConfigured()) return new Set()
+
+  const supabase = await createClient()
+  const { data } = await supabase.from('waitlist').select('session_id').eq('user_id', userId)
+
+  return new Set((data ?? []).map((row) => row.session_id))
+}
+
 export type ProductView = Product & {
   images: ProductImage[]
   variants: ProductVariant[]

@@ -5,7 +5,13 @@ import { SessionList } from '@/components/site/SessionList'
 import { bookingErrorMessage } from '@/lib/errors'
 import { getDictionary, loc, isLocale } from '@/lib/i18n'
 import { addDays, dayKey, dayOfMonth, formatDayShort, weekdayShort, weekStart } from '@/lib/format'
-import { getClassTypes, getInstructors, getMyBookedSessionIds, getSessionsBetween } from '@/lib/data'
+import {
+  getClassTypes,
+  getInstructors,
+  getMyBookedSessionIds,
+  getMyWaitlistSessionIds,
+  getSessionsBetween,
+} from '@/lib/data'
 import { getUser } from '@/lib/auth/dal'
 import { PageBanner } from '@/components/site/PageBanner'
 
@@ -16,6 +22,8 @@ type Search = {
   level?: string
   booked?: string
   cancelled?: string
+  waitlisted?: string
+  left?: string
   error?: string
 }
 
@@ -58,7 +66,10 @@ export default async function SchedulePage({
     getInstructors(true),
     getUser(),
   ])
-  const booked = await getMyBookedSessionIds(user?.id ?? null)
+  const [booked, waiting] = await Promise.all([
+    getMyBookedSessionIds(user?.id ?? null),
+    getMyWaitlistSessionIds(user?.id ?? null),
+  ])
 
   const filtered = sessions.filter((session) => {
     if (search.class && session.classType?.slug !== search.class) return false
@@ -159,6 +170,8 @@ export default async function SchedulePage({
       <div className="shell flex flex-col gap-8 pt-10 pb-[var(--bay-sm)] sm:pt-12">
         {search.booked && <Alert tone="good">{t.booking.success}</Alert>}
         {search.cancelled && <Alert tone="neutral">{t.booking.cancelled}</Alert>}
+        {search.waitlisted && <Alert tone="good">{t.schedule.waitlisted}</Alert>}
+        {search.left && <Alert tone="neutral">{t.schedule.waitlistLeft}</Alert>}
         {search.error && <Alert tone="danger">{bookingErrorMessage(t, search.error)}</Alert>}
 
         {/* ══ 1 · БИ ХААНА БАЙНА ═════════════════════════════════════════
@@ -330,6 +343,7 @@ export default async function SchedulePage({
             sessions={filtered}
             locale={locale}
             booked={booked}
+            waiting={waiting}
             back={`/${locale}/schedule${offset !== 0 ? `?w=${offset}` : ''}`}
           />
         )}
