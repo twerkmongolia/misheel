@@ -1,24 +1,6 @@
 import { cookies } from 'next/headers'
-import { Inter } from 'next/font/google'
 import { requireStaff } from '@/lib/auth/dal'
 import { AdminShell, type NavGroup } from '@/components/admin/AdminShell'
-
-/**
- * Удирдлагын үсэг.
- *
- * Нийтийн сайт `Unbounded` + `Manrope` -оор явдаг. Тэр хослол шөнийн студийн
- * дүр төрхөд зөв ч, өдөржин хүснэгт уншдаг дэлгэцэд буруу: `Unbounded` бол
- * зурагт хуудасны үсэг — 13px дээр өргөн, уншихад залхаамжтай. Inter нь
- * интерфейсэд зориулж зурагдсан, кирилл бүрэн, тоонууд нь ижил өргөнтэй.
- *
- * `next/font` -ыг ЭНД дуудсан нь санаатай — үсгийн файл зөвхөн `/admin`
- * замуудад ачаалагдана, нийтийн зочин үүнийг татахгүй.
- */
-const ui = Inter({
-  variable: '--font-ui',
-  subsets: ['latin', 'latin-ext', 'cyrillic'],
-  display: 'swap',
-})
 
 /**
  * Цэсийг бүлэглэв — холбоосууд нэг урт багана болвол нүд алдана.
@@ -53,9 +35,19 @@ const groups: NavGroup[] = [
   },
 ]
 
+/* Сайтын агуулга нь АЖИЛТАНД нээлттэй — утас, хаяг солих нь эрхийн асуудал
+   биш, өдөр тутмын ажил. */
+const contentGroup: NavGroup = {
+  label: 'Агуулга',
+  items: [
+    { href: '/admin/content', label: 'Сайтын агуулга', icon: 'file' },
+    { href: '/admin/faq', label: 'Түгээмэл асуулт', icon: 'info' },
+    { href: '/admin/gallery', label: 'Галерей', icon: 'image' },
+  ],
+}
+
 /** Зөвхөн админд харагдах хэсэг — ажилтан эрх олгож чадахгүй. */
 const adminGroup: NavGroup = {
-  label: 'Тохиргоо',
   items: [{ href: '/admin/access', label: 'Админ', icon: 'shield' }],
 }
 
@@ -76,7 +68,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   // Цэсийг эрхээр нь шүүнэ. Хуудас өөрөө ч `requireAdmin()` -тэй тул энэ нь
   // зөвхөн харагдац — хамгаалалт биш.
-  const nav = profile.role === 'admin' ? [...groups, adminGroup] : groups
+  const nav = profile.role === 'admin' ? [...groups, contentGroup, adminGroup] : [...groups, contentGroup]
 
   return (
     <AdminShell
@@ -84,7 +76,6 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       profile={{ name: profile.full_name ?? 'Админ', role: profile.role }}
       defaultCollapsed={collapsed}
       defaultScheme={scheme}
-      fontClass={ui.variable}
     >
       {children}
     </AdminShell>
