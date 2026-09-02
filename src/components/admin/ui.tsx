@@ -394,6 +394,97 @@ export function FilterChip({
   )
 }
 
+/* ── Хайлт ба хуудаслалт ───────────────────────────────────────────────── */
+
+/**
+ * Хайлтын мөр — JavaScript-гүй GET форм.
+ *
+ * Хайлт нь хаяганд үлддэг (`?q=…`) тул хуудсыг хуваалцах, сэргээх, буцах
+ * товч бүгд ажиллана. Хайсан үгээ талбарт нь эргүүлж тавина — юу хайснаа
+ * мартах нь хамгийн олон давтагддаг эвгүй мөч.
+ */
+export function SearchBox({
+  placeholder,
+  defaultValue,
+  hidden = {},
+}: {
+  placeholder: string
+  defaultValue?: string
+  /** Хайхад ХАДГАЛАГДАХ бусад шүүлт (төлөв, ангилал гэх мэт). */
+  hidden?: Record<string, string | undefined>
+}) {
+  return (
+    <form className="flex items-end gap-3">
+      {Object.entries(hidden).map(([name, value]) =>
+        value ? <input key={name} type="hidden" name={name} value={value} /> : null,
+      )}
+      <label className="flex min-w-0 flex-1 flex-col gap-1.5">
+        <span className="t-label text-muted">Хайх</span>
+        <Input name="q" defaultValue={defaultValue} placeholder={placeholder} />
+      </label>
+      <Button type="submit">Хайх</Button>
+      {defaultValue ? (
+        <ButtonLink href="?" variant="ghost">
+          Цэвэрлэх
+        </ButtonLink>
+      ) : null}
+    </form>
+  )
+}
+
+/**
+ * Хуудаслалт.
+ *
+ * Жагсаалтууд 100-200 мөрөөр таслагдаж, түүнээс цааш ХҮРЭХ АРГАГҮЙ байв —
+ * 300 дахь захиалга оршин байсаар атал харагдахгүй. Одоо хязгаар нь
+ * хуудасны хэмжээ болж, цаашлах зам гарлаа.
+ *
+ * Нийт тоог харуулна: «41–60 / 312». Хуудасны дугаар ганцаараа хаана
+ * байгааг хэлдэггүй.
+ */
+export function Pager({
+  page,
+  pageSize,
+  total,
+  href,
+}: {
+  page: number
+  pageSize: number
+  total: number
+  /** Хуудасны дугаараас хаяг угсарна — бусад шүүлт хадгалагдана. */
+  href: (page: number) => string
+}) {
+  const pages = Math.max(1, Math.ceil(total / pageSize))
+  if (pages <= 1) return null
+
+  const from = (page - 1) * pageSize + 1
+  const to = Math.min(page * pageSize, total)
+
+  return (
+    <nav className="flex items-center justify-between gap-4 border-t border-line pt-4">
+      <span className="t-meta text-muted tnum">
+        {from}–{to} / {total}
+      </span>
+
+      <span className="flex items-center gap-2">
+        {page > 1 ? (
+          <ButtonLink href={href(page - 1)} size="sm">
+            ← Өмнөх
+          </ButtonLink>
+        ) : null}
+        <span className="t-meta text-faint tnum">
+          {page} / {pages}
+        </span>
+        {page < pages ? (
+          <ButtonLink href={href(page + 1)} size="sm">
+            Дараах →
+          </ButtonLink>
+        ) : null}
+      </span>
+    </nav>
+  )
+}
+
 /* ── Хүснэгт ───────────────────────────────────────────────────────────── */
 
 /**
