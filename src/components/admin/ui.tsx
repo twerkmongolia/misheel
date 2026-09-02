@@ -22,24 +22,28 @@ import { AdminIcon, type NavIcon } from './AdminIcon'
 type Variant = 'primary' | 'secondary' | 'ghost' | 'danger'
 type Size = 'sm' | 'md'
 
+/**
+ * Товч нь НИЙТИЙН САЙТЫН товч (§ globals.css `.btn`). Өмнө нь удирдлага
+ * өөрийн гэсэн дугуйрсан, ногоон, сүүдэртэй товчтой байв — өөр өнгө, өөр
+ * хэлбэр нь хоёр өөр програм мэт мэдрүүлдэг.
+ *
+ * Hover дээр дүүргэлт доороос дээш ЭРГЭНЭ: цагаан товч хар болж, хар товч
+ * цагаан болно. Монохром системд боломжтой цорын ганц жинхэнэ өөрчлөлт.
+ */
 const variants: Record<Variant, string> = {
-  primary: 'bg-brand text-brand-ink hover:brightness-110 active:brightness-95 shadow-[var(--shadow-card)]',
-  secondary: 'border border-line-strong bg-surface text-foreground hover:bg-surface-2 hover:border-foreground-soft',
-  ghost: 'text-foreground-soft hover:bg-surface-2 hover:text-foreground',
-  // Устгал — бүдгээр эхэлж, hover дээр л улаан болно. Санамсаргүй дарахаас сэргийлнэ.
-  danger: 'border border-line text-muted hover:border-danger hover:bg-danger-soft hover:text-danger',
+  primary: 'btn-solid',
+  secondary: 'btn-line',
+  ghost: 'btn-bare',
+  // Тасархай хүрээ — санамсаргүй дарахаас ХЭЛБЭРЭЭРЭЭ сэргийлнэ.
+  danger: 'btn-risk',
 }
 
 const sizes: Record<Size, string> = {
-  sm: 'h-[30px] gap-1.5 rounded-lg px-2.5 text-xs',
-  md: 'h-9 gap-2 rounded-lg px-3.5 text-sm',
+  sm: 'btn-sm',
+  md: '',
 }
 
-const buttonBase =
-  // `admin-btn` — утсан дээр хуруунд тохирсон өндөр (§ globals.css)
-  'admin-btn inline-flex shrink-0 items-center justify-center font-medium whitespace-nowrap ' +
-  'transition-[background-color,border-color,color,filter] duration-150 ' +
-  'disabled:pointer-events-none disabled:opacity-40'
+const buttonBase = 'btn'
 
 export function Button({
   variant = 'secondary',
@@ -80,12 +84,25 @@ export function PageHeader({
   actions?: ReactNode
 }) {
   return (
-    <header className="flex flex-wrap items-start justify-between gap-4">
-      <div className="min-w-0">
-        <h1 className="text-[26px] leading-tight font-semibold">{title}</h1>
-        {description && <p className="mt-1.5 max-w-[68ch] text-sm text-muted">{description}</p>}
+    <header className="flex flex-col gap-5">
+      <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-4">
+        <div className="min-w-0">
+          {/* Гарчиг нь serif — нийтийн сайттай нэг дуу хоолой. Тайлбар нь
+              чимэг биш: «энэ дэлгэц юу хийдэг вэ» гэдгийг шинэ ажилтанд
+              зааж өгнө. */}
+          <h1 className="t-h2">{title}</h1>
+          {description && <p className="t-small mt-2 max-w-[68ch] text-muted">{description}</p>}
+        </div>
+        {/* Утсан дээр үйлдэл нь БҮТЭН ӨРГӨН болно. Гарчгийн хажууд шахагдсан
+            жижиг товч нь хамгийн олон дардаг зүйл байтал хамгийн бага бай
+            болдог — 44px хүрэлцээний доод хэмжээнд ч хүрэхгүй. */}
+        {actions && (
+          <div className="flex w-full shrink-0 flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center">
+            {actions}
+          </div>
+        )}
       </div>
-      {actions && <div className="flex shrink-0 flex-wrap items-center gap-2">{actions}</div>}
+      <div className="hr" />
     </header>
   )
 }
@@ -109,17 +126,24 @@ export function Panel({
   className?: string
 }) {
   return (
-    <section className={`admin-card overflow-hidden ${className}`}>
+    <section className={`flex flex-col ${className}`}>
       {(title || actions) && (
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-5 py-3.5">
+        <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2 border-b border-line pb-3.5">
           <div className="min-w-0">
-            {title && <h2 className="text-sm font-semibold">{title}</h2>}
-            {description && <p className="mt-0.5 text-xs text-muted">{description}</p>}
+            {/* Хуудсанд ГУРВАН түвшний эрэмбэ байх ёстой:
+                  хуудасны нэр  → `t-h2`, serif, 28-44px
+                  хэсгийн нэр   → `t-h3`, sans, 17-21px   ← энэ
+                  баганын нэр   → `t-label`, 11px
+                Эхний оролдлогод хэсгийн нэрийг 11px шошго болгосон нь
+                дунд түвшинг бүхэлд нь алгасаж, гарчиг ба хүснэгтийн толгой
+                хоёрыг ижил жинтэй болгож байв. */}
+            {title && <h2 className="t-h3">{title}</h2>}
+            {description && <p className="t-meta mt-1.5 text-muted">{description}</p>}
           </div>
-          {actions && <div className="flex shrink-0 items-center gap-2">{actions}</div>}
+          {actions && <div className="flex shrink-0 items-center gap-3">{actions}</div>}
         </div>
       )}
-      <div className={flush ? '' : 'p-5'}>{children}</div>
+      <div className={flush ? '' : 'pt-5'}>{children}</div>
     </section>
   )
 }
@@ -149,7 +173,7 @@ export function Disclosure({
     <details open={defaultOpen} className="admin-card group overflow-hidden">
       <summary className="flex cursor-pointer list-none items-center gap-2.5 px-5 py-3.5 text-sm font-semibold transition-colors hover:bg-surface-2 [&::-webkit-details-marker]:hidden">
         <span
-          className={`grid h-6 w-6 shrink-0 place-items-center rounded-md bg-brand-soft text-brand ${
+          className={`grid h-6 w-6 shrink-0 place-items-center rounded-[var(--r)] border border-line text-foreground ${
             icon === 'plus' ? 'transition-transform duration-200 group-open:rotate-45' : ''
           }`}
         >
@@ -177,29 +201,28 @@ export function StatCard({
   hint?: ReactNode
   href?: string
 }) {
+  /* Тоо нь serif — нийтийн сайтын «том тоо» -той нэг дуу хоолой (§ `.t-num`).
+     Хайрцаг байхгүй: дээд шугам нь үзүүлэлтүүдийг тусгаарлана. Дөрвөн
+     сүүдэртэй карт зэрэгцэхээс илүү тайван, өгөгдөл нь илүү тод. */
   const body = (
     <>
-      <div className="flex items-center justify-between gap-3">
-        <span className="text-sm text-muted">{label}</span>
-        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-surface-2 text-foreground-soft">
-          <AdminIcon name={icon} className="h-[17px] w-[17px]" />
-        </span>
-      </div>
-      {/* Утсан дээр тоо, тайлбар нэг мөрөнд — 4 карт багана болж
-          дэлгэцийг эзлэхгүй. Дэлгэцэн дээр урьдын адил доошоо. */}
-      <div className="mt-2 flex items-baseline justify-between gap-2 sm:mt-3 sm:block">
-        <span className="text-[26px] leading-none font-semibold tracking-[-0.02em] tnum sm:block sm:text-[30px]">
-          {value}
-        </span>
-        <span className="text-xs text-muted tnum sm:mt-2 sm:block sm:h-4">{hint}</span>
-      </div>
+      <span className="t-label flex items-center gap-2 text-muted">
+        <AdminIcon name={icon} className="h-3.5 w-3.5 shrink-0" />
+        {label}
+      </span>
+      <span className="t-num mt-3 block text-[2rem] sm:text-[2.5rem]">{value}</span>
+      <span className="t-meta mt-2 block h-4 text-muted">{hint}</span>
     </>
   )
 
-  const shell = 'admin-card p-4 transition-colors sm:p-5'
+  /* Дөрвөн блок ЗЭРЭГЦЭХ тул тус бүрдээ дээд зураастай байвал дөрвөн
+     тасархай зураас болж, эвдэрсэн шугам мэт харагдана. Оронд нь блокууд
+     нь хоорондоо БОСОО зураасаар тусгаарлагдаж, гадна талаараа нэг бүтэн
+     зурвас үүсгэнэ (§ `StatRow` доор). */
+  const shell = 'group block px-4 py-4 transition-colors sm:px-5 sm:py-5'
 
   return href ? (
-    <Link href={href} className={`${shell} block hover:border-line-strong hover:bg-surface-2/40`}>
+    <Link href={href} className={`${shell} hover:bg-surface`}>
       {body}
     </Link>
   ) : (
@@ -207,48 +230,78 @@ export function StatCard({
   )
 }
 
+/**
+ * Үзүүлэлтийн зурвас — `StatCard` -уудыг багтаана.
+ *
+ * Хуваарийн хуудасны долоо хоногийн зурваст ашигласан хэв: гадна талаараа
+ * дээд, доод шугам, дотроо босоо тусгаарлагч. Дөрвөн тусдаа карт биш НЭГ
+ * хэрэгсэл мэт уншигдана.
+ */
+export function StatRow({ children }: { children: ReactNode }) {
+  return (
+    /* `divide-y` -г ХЭРЭГЛЭЖ БОЛОХГҮЙ: тэр нь DOM дараалалд тулгуурлан
+       ЭХНИЙХЭЭС бусад бүх хүүхдэд дээд хүрээ нэмдэг. Хоёр баганат торонд
+       хоёр дахь нүд нь мөрийн БАРУУН талд суудаг ч дээрээ зураастай болж,
+       эхний нүдтэйгээ зөрнө. Тиймээс хүрээг байрлалаар нь өгнө:
+
+         утас  (1 багана)  — эхнийхээс бусад бүгд дээрээ зураастай
+         sm    (2 багана)  — 3 дахиас хойш дээрээ, тэгш нүд зүүн талдаа
+         lg    (4 багана)  — хэвтээ зураас алга, эхнийхээс бусад зүүн талдаа */
+    <div
+      className="grid border-y border-line [&>*+*]:border-t [&>*+*]:border-line
+                 sm:grid-cols-2 sm:[&>*+*]:border-t-0 sm:[&>*:nth-child(2n)]:border-l sm:[&>*:nth-child(n+3)]:border-t
+                 lg:grid-cols-4 lg:[&>*+*]:border-l lg:[&>*:nth-child(n+3)]:border-t-0"
+    >
+      {children}
+    </div>
+  )
+}
+
 /* ── Төлөв ─────────────────────────────────────────────────────────────── */
 
 export type Tone = 'neutral' | 'good' | 'warn' | 'danger' | 'info'
 
-const badgeTones: Record<Tone, string> = {
-  neutral: 'bg-surface-2 text-muted ring-line',
-  good: 'bg-good-soft text-good ring-good/20',
-  warn: 'bg-warn-soft text-warn ring-warn/20',
-  danger: 'bg-danger-soft text-danger ring-danger/20',
-  info: 'bg-info-soft text-info ring-info/20',
-}
-
 /**
- * Төлөвийн шошго — цэг + текст.
+ * Төлөвийн шошго.
  *
- * Цэг нь өнгө ялгаж чаддаггүй хүнд ч байрлалаараа ялгарах нэмэлт дохио
- * (өнгө дангаараа мэдээлэл дамжуулж БОЛОХГҮЙ — WCAG 1.4.1).
+ * Монохром систем дээр өнгө байхгүй тул ялгааг ХЭЛБЭР үүсгэнэ — нийтийн
+ * сайттай яг ижил дүрэм (§ globals.css `.tag`):
+ *
+ *   good    → дүүрсэн        · баталгаажсан, дууссан
+ *   info    → бүдэг дүүргэлт · явцад буй
+ *   warn    → тод хүрээ      · анхаарал шаардсан
+ *   danger  → тасархай хүрээ · цуцлагдсан, боломжгүй
+ *   neutral → бүдэг дүүргэлт · энгийн мэдээлэл
+ *
+ * Өнгө дангаараа мэдээлэл дамжуулж БОЛОХГҮЙ (WCAG 1.4.1) — энд өнгө огт
+ * байхгүй тул текст ба хэлбэр хоёулаа ажиллана.
  */
-export function Badge({ tone = 'neutral', children }: { tone?: Tone; children: ReactNode }) {
-  return (
-    <span
-      className={`inline-flex shrink-0 items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium whitespace-nowrap ring-1 ring-inset ${badgeTones[tone]}`}
-    >
-      <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-current opacity-70" />
-      {children}
-    </span>
-  )
+const badgeTones: Record<Tone, string> = {
+  neutral: 'tag-mute',
+  good: 'tag-fill',
+  warn: 'tag-line',
+  danger: 'tag-dash',
+  info: 'tag-mute',
 }
 
+export function Badge({ tone = 'neutral', children }: { tone?: Tone; children: ReactNode }) {
+  return <span className={`tag ${badgeTones[tone]}`}>{children}</span>
+}
+
+/** Ялгаа нь зүүн ирмэгийн ХЭВ болон текстийн жинд — өнгөнд биш. */
 const alertTones: Record<Tone, { box: string; icon: NavIcon }> = {
-  neutral: { box: 'bg-surface-2 text-foreground-soft border-line', icon: 'info' },
-  good: { box: 'bg-good-soft text-good border-good/25', icon: 'success' },
-  warn: { box: 'bg-warn-soft text-warn border-warn/25', icon: 'alert' },
-  danger: { box: 'bg-danger-soft text-danger border-danger/25', icon: 'alert' },
-  info: { box: 'bg-info-soft text-info border-info/25', icon: 'info' },
+  neutral: { box: 'border-line text-foreground-soft', icon: 'info' },
+  good: { box: 'border-foreground text-foreground', icon: 'success' },
+  warn: { box: 'border-line-strong border-dashed text-foreground-soft', icon: 'alert' },
+  danger: { box: 'border-foreground border-l-[3px] font-medium text-foreground', icon: 'alert' },
+  info: { box: 'border-line text-foreground-soft', icon: 'info' },
 }
 
 export function Alert({ tone = 'neutral', children }: { tone?: Tone; children: ReactNode }) {
   const { box, icon } = alertTones[tone]
   return (
-    <div className={`flex items-start gap-2.5 rounded-lg border px-4 py-3 text-sm ${box}`}>
-      <AdminIcon name={icon} className="mt-px h-4 w-4 shrink-0" />
+    <div className={`t-small flex items-start gap-3 border-l-2 bg-surface px-5 py-4 ${box}`} role="status">
+      <AdminIcon name={icon} className="mt-0.5 h-4 w-4 shrink-0" />
       <span className="min-w-0">{children}</span>
     </div>
   )
@@ -256,13 +309,13 @@ export function Alert({ tone = 'neutral', children }: { tone?: Tone; children: R
 
 export function EmptyState({ icon, title, hint }: { icon: NavIcon; title: ReactNode; hint?: ReactNode }) {
   return (
-    <div className="flex flex-col items-center gap-3 px-6 py-14 text-center">
-      <span className="grid h-11 w-11 place-items-center rounded-xl bg-surface-2 text-faint">
-        <AdminIcon name={icon} className="h-5 w-5" />
+    <div className="flex flex-col items-center gap-4 border border-dashed border-line px-5 py-14 text-center">
+      <span className="grid h-11 w-11 place-items-center rounded-full border border-dashed border-line-strong text-muted">
+        <AdminIcon name={icon} className="h-[18px] w-[18px]" />
       </span>
       <div>
-        <p className="text-sm font-medium">{title}</p>
-        {hint && <p className="mt-1 text-sm text-muted">{hint}</p>}
+        <p className="t-small font-medium">{title}</p>
+        {hint && <p className="t-small mt-1 max-w-[42ch] text-muted">{hint}</p>}
       </div>
     </div>
   )
@@ -270,10 +323,9 @@ export function EmptyState({ icon, title, hint }: { icon: NavIcon; title: ReactN
 
 /* ── Формын элементүүд ─────────────────────────────────────────────────── */
 
-const control =
-  'w-full rounded-lg border border-line bg-surface px-3 text-sm text-foreground ' +
-  'placeholder:text-faint transition-colors hover:border-line-strong ' +
-  'focus:border-brand focus:outline-none disabled:opacity-50'
+/* Хайрцаг биш ШУГАМ — фокуслахад доод шугам зүүнээс баруун тийш татагдана
+   (§ globals.css `.ctl`). Нийтийн сайтын формтой яг ижил. */
+const control = 'ctl'
 
 export function Field({
   label,
@@ -288,45 +340,31 @@ export function Field({
 }) {
   return (
     <label className={`flex flex-col gap-1.5 ${className}`}>
-      <span className="text-xs font-medium text-foreground-soft">{label}</span>
+      <span className="t-label text-muted">{label}</span>
       {children}
-      {hint && <span className="text-xs text-muted">{hint}</span>}
+      {hint && <span className="t-meta text-faint">{hint}</span>}
     </label>
   )
 }
 
 export function Input({ className = '', ...props }: ComponentProps<'input'>) {
-  return <input className={`${control} h-9 ${className}`} {...props} />
+  return <input className={`${control} ${className}`} {...props} />
 }
 
 export function Select({ className = '', ...props }: ComponentProps<'select'>) {
-  return <select className={`${control} h-9 ${className}`} {...props} />
+  return <select className={`${control} ${className}`} {...props} />
 }
 
 export function Textarea({ className = '', ...props }: ComponentProps<'textarea'>) {
-  return <textarea className={`${control} py-2 ${className}`} rows={3} {...props} />
+  return <textarea className={`${control} ${className}`} rows={3} {...props} />
 }
 
-/** Файл сонгогч — хөтчийн анхдагч төрх бусад оролтоос эрс тусгаардаг. */
-export function FileInput({ className = '', ...props }: ComponentProps<'input'>) {
-  return (
-    <input
-      type="file"
-      className={
-        'h-9 cursor-pointer rounded-lg border border-line bg-surface px-2 py-[5px] text-xs ' +
-        'text-muted transition-colors hover:border-line-strong ' +
-        'file:mr-2.5 file:cursor-pointer file:rounded-md file:border-0 file:bg-surface-3 ' +
-        `file:px-2.5 file:py-1 file:text-xs file:font-medium file:text-foreground ${className}`
-      }
-      {...props}
-    />
-  )
-}
+export { FileInput } from './FileInput'
 
 /** Формын доод мөр — үндсэн үйлдэл баруун талд, тусгаарлах зураастай. */
 export function FormActions({ children }: { children: ReactNode }) {
   return (
-    <div className="mt-1 flex flex-wrap items-center justify-end gap-2 border-t border-line pt-4">
+    <div className="mt-2 flex flex-wrap items-center justify-end gap-3 border-t border-line pt-5">
       {children}
     </div>
   )
@@ -347,11 +385,9 @@ export function FilterChip({
     <Link
       href={href}
       aria-current={active ? 'true' : undefined}
-      className={`inline-flex h-8 items-center rounded-full border px-3 text-xs font-medium whitespace-nowrap transition-colors ${
-        active
-          ? 'border-transparent bg-brand text-brand-ink'
-          : 'border-line bg-surface text-muted hover:border-line-strong hover:text-foreground'
-      }`}
+      /* Нийтийн сайтын шүүлтийн чиптэй ижил (§ globals.css `.chip`).
+         Сонгогдсон нь ЭРГЭНЭ — дугуй бөмбөлөг биш, 3px булантай. */
+      className={`chip ${active ? 'chip-on' : ''}`}
     >
       {children}
     </Link>
@@ -370,7 +406,7 @@ export function Table({ children, minWidth = 640 }: { children: ReactNode; minWi
       <table
         // `admin-table` нь жижиг дэлгэц дээр мөрийг карт болгож задална
         // (§ globals.css «Утасны төрх»). `--tbl-min` нь зөвхөн md-ээс дээш.
-        className="admin-table text-sm [&_tbody_tr:hover]:bg-surface-2/60 [&_tbody_tr:last-child>td]:border-b-0"
+        className="admin-table t-small [&_tbody_tr:hover]:bg-surface [&_tbody_tr:last-child>td]:border-b-0"
         style={{ '--tbl-min': `${minWidth}px` } as React.CSSProperties}
       >
         {children}
@@ -390,7 +426,9 @@ export function Th({
 }) {
   return (
     <th
-      className={`border-b border-line bg-surface-2/50 px-4 py-2.5 text-[11px] font-semibold tracking-[0.06em] text-muted uppercase ${
+      /* Дэвсгэргүй. Хүснэгтийн толгойг өнгөөр биш ШУГАМААР тусгаарлана —
+         саарал зурвас нь хүснэгтийг хайрцаг болгодог. */
+      className={`t-label border-b border-line-strong px-4 py-3 text-muted ${
         align === 'right' ? 'text-right' : 'text-left'
       } ${className}`}
     >
@@ -421,7 +459,7 @@ export function Td({
     <td
       colSpan={colSpan}
       data-label={label}
-      className={`border-b border-line px-4 py-2.5 align-middle ${
+      className={`border-b border-line px-4 py-3.5 align-middle ${
         align === 'right' ? 'text-right' : ''
       } ${className}`}
     >
