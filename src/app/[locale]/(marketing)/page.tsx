@@ -162,6 +162,8 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   const no = (id: string) =>
     String(chapters.findIndex((chapter) => chapter.id === id) + 1).padStart(2, '0')
 
+  const chapterCount = String(chapters.length).padStart(2, '0')
+
   return (
     <div className="flex flex-col">
       {/* ══════════════════════════════════════════════════════════════════
