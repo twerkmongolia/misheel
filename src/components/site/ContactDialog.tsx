@@ -67,7 +67,7 @@ export function ContactDialog({
     <dialog
       ref={ref}
       aria-labelledby="contact-dialog-title"
-      className="site-dialog panel-invert"
+      className="site-dialog panel"
       /* Дэвсгэр дээр дарвал хаагдана. `<dialog>` -ийн хайрцаг нь бүрхүүлээ
          ХАМРУУЛДАГ тул даралт цонхон дээр өөр дээр нь болсон эсэхийг
          байрлалаар нь шалгана — эс бөгөөс форм дотор дарахад ч хаагдана. */
