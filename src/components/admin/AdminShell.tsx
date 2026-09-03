@@ -237,24 +237,8 @@ export function AdminShell({
                 </span>
               </div>
 
-              {/* Хэн нэвтэрсэн бэ / орчны тохиргоо — хоёр өөр төрлийн зүйл
-                  тул зураасаар зааглагдана. */}
+              {/* Хэн нэвтэрсэн бэ — гарахаас зураасаар зааглагдана. */}
               <span aria-hidden="true" className="mx-1 h-5 w-px bg-line" />
-
-              {/* Дүрс нь ОДОО харагдаж буй горимыг заана (нар = гэрэлтэй).
-                  Хоёулаа зурагдаад аль нэг нь CSS-ээр нуугддаг — сервер нь
-                  системийн тохиргоог мэдэхгүй тул JS-ээр сонговол эхний
-                  зурагт буруу дүрс анивчина (§ globals.css `.theme-sun`). */}
-              <button
-                type="button"
-                onClick={flipTheme}
-                aria-label="Гэрэлтэй / харанхуй горим солих"
-                title="Гэрэлтэй / харанхуй горим солих"
-                className="grid h-9 w-9 place-items-center rounded-lg text-muted transition-colors hover:bg-surface-2 hover:text-foreground"
-              >
-                <AdminIcon name="sun" className="theme-sun h-4 w-4" />
-                <AdminIcon name="moon" className="theme-moon h-4 w-4" />
-              </button>
 
               {/* Гарах нь хэнийхээ хажууд зогсоно: «энэ бол ТА, эндээс
                   гарна». Утсан дээр зөвхөн дүрс — нэр, эрх аль хэдийн
