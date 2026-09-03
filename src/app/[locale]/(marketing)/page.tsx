@@ -330,6 +330,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       <Chapter
         id="schedule"
         index={no('schedule')}
+        count={chapterCount}
         title={t.home.upcoming}
         note={t.home.scheduleNote}
         action={<More href={`/${locale}/schedule`}>{t.home.upcomingAll}</More>}
@@ -352,6 +353,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         <Chapter
           id="classes"
           index={no('classes')}
+          count={chapterCount}
           title={t.home.classesTitle}
           note={t.home.classesNote}
           action={<More href={`/${locale}/classes`}>{t.common.all}</More>}
@@ -413,6 +415,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         <Chapter
           id="instructors"
           index={no('instructors')}
+          count={chapterCount}
           title={t.home.instructorsTitle}
           note={t.home.instructorsNote}
           action={<More href={`/${locale}/instructors`}>{t.common.all}</More>}
@@ -463,6 +466,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         <Chapter
           id="videos"
           index={no('videos')}
+          count={chapterCount}
           title={t.home.videosTitle}
           note={t.home.videosNote}
         >
@@ -499,6 +503,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         <Chapter
           id="shop"
           index={no('shop')}
+          count={chapterCount}
           title={t.home.shopTitle}
           note={t.home.shopNote}
           action={<More href={`/${locale}/shop`}>{t.nav.shop}</More>}
