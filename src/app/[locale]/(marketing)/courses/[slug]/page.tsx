@@ -4,7 +4,7 @@ import { Alert, Badge, ButtonLink, Eyebrow, Field, Input, Textarea } from '@/com
 import { Media } from '@/components/site/media'
 import { getDictionary, loc, isLocale, type Locale } from '@/lib/i18n'
 import { formatMnt, formatDate, formatDateTime } from '@/lib/format'
-import { getCourseBySlug, getMyEnrollment, getCourseAccess, type CourseView } from '@/lib/data'
+import { getCourseBySlug, getMyEnrollment, getCourseTelegramUrl, type CourseView } from '@/lib/data'
 import { getUser, getProfile } from '@/lib/auth/dal'
 import { enrollCourse } from '@/actions/courses'
 import type { CourseEnrollment } from '@/lib/supabase/database.types'
@@ -44,11 +44,12 @@ export default async function CoursePage({
   const t = getDictionary(locale)
   const enrollment = await getMyEnrollment(course.id, user?.id ?? null)
 
-  /* Telegram холбоосыг зөвхөн ХЭРЭГТЭЙ үед л асууна. Идэвхгүй элсэлттэй
-     хүнд RLS нь хоосон буцаах ч дэмий нэг дуудлага л болно. */
-  const access =
-    course.mode === 'online' && enrollment?.status === 'active'
-      ? await getCourseAccess(course.id)
+  /* Telegram холбоосыг зөвхөн ХЭРЭГТЭЙ үед л асууна — танхимын ангид
+     дэмий нэг дуудлага л болно. Элсэлтийн төлвийн шалгалт нь функцийн
+     дотор байгаа тул энд давхардуулахгүй (§ lib/data.ts). */
+  const telegramUrl =
+    course.mode === 'online'
+      ? await getCourseTelegramUrl(course.id, enrollment?.status)
       : null
 
   const errorCode = (search.error ?? '') as EnrollErrorCode
@@ -127,7 +128,7 @@ export default async function CoursePage({
             locale={locale}
             signedIn={Boolean(user)}
             enrollment={enrollment}
-            telegramUrl={access?.telegram_url ?? null}
+            telegramUrl={telegramUrl}
             defaultName={profile?.full_name ?? ''}
             defaultPhone={profile?.phone ?? ''}
           />
