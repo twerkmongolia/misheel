@@ -4,7 +4,6 @@ import { getProfile } from '@/lib/auth/dal'
 import { cartCount } from '@/lib/cart'
 import { logout } from '@/actions/auth'
 import { LocaleSwitch } from './LocaleSwitch'
-import { ThemeToggle } from './ThemeToggle'
 import { NavLink } from './NavLink'
 import { HeaderShell } from './HeaderShell'
 import { MobileMenu } from './MobileMenu'
@@ -113,7 +112,6 @@ export async function Header({ locale }: { locale: Locale }) {
               Зураасгүй бол зургаан жижиг элемент нэг урт эгнээ болж, аль нь
               алинтайгаа холбоотойг нүд ялгаж чадахгүй. */}
           <div className="ml-auto hidden items-center gap-1 lg:ml-0 lg:flex">
-            <ThemeToggle label={t.nav.theme} />
             <LocaleSwitch current={locale} label={t.nav.language} />
 
             <span aria-hidden className="mx-3 h-5 w-px bg-line" />
@@ -213,13 +211,10 @@ export async function Header({ locale }: { locale: Locale }) {
                   </>
                 )}
 
-                {/* Хэл, горим хоёр нь ХОЁУЛАА орчны тохиргоо — цэсний
-                    ёроолд зэрэгцэнэ. Утсан дээр горимын товч толгой мөрөнд
-                    багтахгүй (тэнд зөвхөн сагс) тул цорын ганц хүрэх цэг
-                    нь энэ. */}
+                {/* Хэл — цэсний ёроолд. Утсан дээр толгой мөрөнд зөвхөн
+                    сагс байдаг тул хэл солих цорын ганц хүрэх цэг нь энэ. */}
                 <div className="flex items-center justify-center gap-2 pt-2">
                   <LocaleSwitch current={locale} label={t.nav.language} placement="up" />
-                  <ThemeToggle label={t.nav.theme} className="h-11 w-11" />
                 </div>
               </>
             }
