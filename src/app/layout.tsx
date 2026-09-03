@@ -56,8 +56,14 @@ export const metadata: Metadata = {
  * дэлгэцийн ирмэг хүртэл үргэлжилсэн мэт мэдрэгдэнэ.
  */
 export const viewport: Viewport = {
-  colorScheme: 'dark',
-  themeColor: '#0D0D0D',
+  /* Хоёулаа дэмжигдэнэ — CSS нь эрэмбийг шийднэ (§ globals.css). */
+  colorScheme: 'light dark',
+  /* Гар утасны хөтчийн хаягийн мөр горим тус бүрд өөр — эс тэгвэл
+     гэрэлтэй хуудасны дээр хар зурвас үлдэнэ. */
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#FFFFFF' },
+    { media: '(prefers-color-scheme: dark)', color: '#0D0D0D' },
+  ],
 }
 
 /**
