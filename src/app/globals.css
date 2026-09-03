@@ -344,22 +344,6 @@ body:has(.admin-shell) {
   font-weight: 600;
 }
 
-/* Горимын товчны дүрс — хоёулаа зурагдаж, аль нэг нь CSS-ээр нуугдана.
-   JS-ээр сонговол хуудас ачаалагдах агшинд буруу дүрс анивчина (сервер нь
-   үйлдлийн системийн тохиргоог МЭДЭХГҮЙ). */
-.admin-shell .theme-sun { display: none; }
-.admin-shell .theme-moon { display: block; }
-
-@media (prefers-color-scheme: light) {
-  .admin-shell:not([data-theme='dark']) .theme-sun { display: block; }
-  .admin-shell:not([data-theme='dark']) .theme-moon { display: none; }
-}
-
-.admin-shell[data-theme='light'] .theme-sun { display: block; }
-.admin-shell[data-theme='light'] .theme-moon { display: none; }
-.admin-shell[data-theme='dark'] .theme-sun { display: none; }
-.admin-shell[data-theme='dark'] .theme-moon { display: block; }
-
 /* Тоо БҮР баганадаа эгнэнэ — хүснэгт, үзүүлэлт, үнэ.
    Эгнэхгүй тоо бол харьцуулж болохгүй тоо. */
 .admin-shell :is(table, .tnum, input[type='number']) {
