@@ -2060,6 +2060,13 @@ html.rv-on [data-rv='mask'] .mask-line:nth-child(4) > span { transition-delay: c
    Гэрэлтэй дээр эргүүлбэл цагаан болж алга болно. */
 .logo-invert { filter: invert(1); }
 
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme='dark']) .logo-invert { filter: none; }
+}
+
+:root[data-theme='light'] .logo-invert { filter: none; }
+:root[data-theme='dark'] .logo-invert { filter: invert(1); }
+
 /* ═══════════════════════════════════════════════════════════════════════════
    8 · ХӨДӨЛГӨӨН БАГАСГАХ
 
