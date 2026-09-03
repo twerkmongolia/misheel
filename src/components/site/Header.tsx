@@ -219,6 +219,7 @@ export async function Header({ locale }: { locale: Locale }) {
                     нь энэ. */}
                 <div className="flex items-center justify-center gap-2 pt-2">
                   <LocaleSwitch current={locale} label={t.nav.language} placement="up" />
+                  <ThemeToggle label={t.nav.theme} className="h-11 w-11" />
                 </div>
               </>
             }
