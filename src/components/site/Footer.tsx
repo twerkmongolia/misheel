@@ -201,14 +201,15 @@ export async function Footer({ locale }: { locale: Locale }) {
                 className="group flex items-center gap-2 text-muted transition-colors duration-200 hover:text-foreground"
               >
                 <span className="t-meta">powered by</span>
-                {/* Лого нь ХАР зурлагатай, дэвсгэргүй. Хөл цагаан болсон
-                    тул эргүүлэх шаардлагагүй — `logo-invert` хасагдав. */}
+                {/* Лого нь ХАР зурлагатай, дэвсгэргүй PNG. Хөл харанхуй
+                    болсон тул зурлага нь дэвсгэртэйгээ нийлж алга болно —
+                    `logo-invert` эргүүлж цагаан болгоно (§ globals.css). */}
                 <Image
                   src="/media/tsstark-logo.png"
                   alt=""
                   width={264}
                   height={264}
-                  className="h-5 w-5 opacity-60 transition-opacity duration-200 group-hover:opacity-100"
+                  className="logo-invert h-5 w-5 opacity-60 transition-opacity duration-200 group-hover:opacity-100"
                 />
                 <span className="t-meta font-semibold">TS Stark</span>
               </a>
