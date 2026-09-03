@@ -146,9 +146,9 @@
 
   /* Зураггүй орлуулагч. `seed` нь өнцөг, гэрлийн байрлалыг л сольж,
      ӨНГИЙГ огт хөнддөггүй. */
-  --media-base: #1C1C1C;
-  --media-hatch: rgba(255, 255, 255, 0.05);
-  --media-sheen: rgba(255, 255, 255, 0.075);
+  --media-base: light-dark(#F0F0F0, #1C1C1C);
+  --media-hatch: light-dark(rgba(0, 0, 0, 0.05), rgba(255, 255, 255, 0.05));
+  --media-sheen: light-dark(rgba(0, 0, 0, 0.06), rgba(255, 255, 255, 0.075));
 
   /* Нийтийн сайтад «өргөлт» гэж тусдаа өнгө БАЙХГҮЙ — монохром хэвээр */
   --brand: var(--foreground);
