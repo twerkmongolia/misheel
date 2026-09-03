@@ -10,6 +10,7 @@ import type {
   CourseAccess,
   CourseEnrollment,
   CourseMode,
+  EnrollmentStatus,
   FaqItem,
   GalleryItem,
   Instructor,
@@ -462,6 +463,38 @@ export async function getCourseAccess(courseId: string): Promise<CourseAccess | 
     .maybeSingle()
 
   return data ?? null
+}
+
+/**
+ * Онлайн ангийн Telegram холбоос — ЭЛСЭЛТЭЭ БАТАЛГААЖУУЛСАН хүнд.
+ *
+ * ── Хоёр эх сурвалж, тодорхой эрэмбэ ───────────────────────────────────
+ *   1. `course_access.telegram_url` — тухайн АНГИЙН өөрийн суваг. Админаас
+ *      оруулсан бол энэ ялна: анги бүр өөрийн бүлэгтэй байж болно.
+ *   2. `TELEGRAM_CHANNEL_URL` орчны хувьсагч — БҮХ онлайн ангийн нийтлэг
+ *      суваг. Ганц суваг дээр бүх хичээлээ тавьдаг студид энэ л хангалттай:
+ *      холбоосоо `.env` -д бичихэд өгөгдлийн сан хөндөхгүйгээр шууд
+ *      ажиллана.
+ *
+ * ── Яагаад энд хаалт тавьсан бэ ────────────────────────────────────────
+ * `course_access` мөрийг RLS хамгаалдаг — идэвхтэй элсэгч биш хүн уншиж
+ * чадахгүй. Харин орчны хувьсагчийг ХЭН Ч уншиж чадна: түүнийг хамгаалах
+ * зүйл кодоос өөр байхгүй. Тиймээс шалгалт нь функцийн ДОТОР байна,
+ * дуудагчид биш — шинэ дуудлагын газар нэмэгдэхэд хамгаалалт өөрөө дагана.
+ *
+ * `NEXT_PUBLIC_` угтваргүй нь мөн санаатай: угтвартай бол Next нь утгыг
+ * клиентийн багц руу шууд оруулах тул элсээгүй хүн ч эх кодоос уншина.
+ */
+export async function getCourseTelegramUrl(
+  courseId: string,
+  status: EnrollmentStatus | null | undefined,
+): Promise<string | null> {
+  if (status !== 'active') return null
+
+  const access = await getCourseAccess(courseId)
+  if (access?.telegram_url) return access.telegram_url
+
+  return process.env.TELEGRAM_CHANNEL_URL?.trim() || null
 }
 
 export async function getGallery(): Promise<GalleryItem[]> {
