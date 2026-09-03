@@ -1,7 +1,8 @@
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
+import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { ButtonLink, Card, Eyebrow, Section } from '@/components/ui'
+import { Arrow, ButtonLink, Card, Eyebrow, Section } from '@/components/ui'
 import { Media } from '@/components/site/media'
 import { getDictionary, loc, isLocale, type Locale } from '@/lib/i18n'
 import { getInstructors } from '@/lib/data'
@@ -252,21 +253,61 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
         </ol>
       </Section>
 
-      {/* ── Багш нар ─────────────────────────────────────────────────── */}
+      {/* ── Багш нар ───────────────────────────────────────────────────
+          Багш нарын хуудсыг дахин зохиох үед энэ блок хамт шинэчлэгдээгүй
+          үлдсэн байв. Гурван зөрүү нь харагдац эвдэж байлаа:
+
+            · `aspect-square` — хөрөг зураг 4:5 харьцаатай тул дөрвөлжинд
+              шахахад толгойг нь тайрдаг. Багшийн нүүр таних боломжгүй
+              болсон нь энэ.
+            · Бүтэн намтар карт дотор — 40 үг, 200 үг хоёр зэрэгцэхэд
+              картууд өөр өөр өндөртэй болж эгнээ эвдэрнэ.
+            · Холбоосгүй — багшийн нэр дарагдахгүй тул дэлгэрэнгүй хуудас
+              руу орох зам нь энэ хэсгээс огт байхгүй байв.
+
+          Одоо Багш нарын хуудасны хэлээр: 4:5 хөрөг, нэр нь зураг дээрээ,
+          намтар нь hover дээр. Шатласан офсет байхгүй — тэр нь тусгай
+          хуудсын хэмнэл, хоёрдогч гарц дээр чимээ болно. */}
       {instructors.length > 0 && (
-        <Section title={t.home.instructorsTitle}>
-          <div className="grid gap-4 sm:grid-cols-3">
+        <Section
+          title={t.home.instructorsTitle}
+          action={
+            <Link href={`/${locale}/instructors`} className="btn btn-line">
+              {t.common.all}
+              <Arrow />
+            </Link>
+          }
+        >
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-5" data-stagger>
             {instructors.map((instructor, index) => (
-              <Card key={instructor.id} className="flex flex-col gap-3">
-                <Media
-                  src={instructor.photo_url}
-                  alt={instructor.name}
-                  seed={index}
-                  ratio="aspect-square"
-                />
-                <p className="font-medium">{instructor.name}</p>
-                <p className="t-small text-muted">{loc(instructor, 'bio', locale)}</p>
-              </Card>
+              <Link
+                key={instructor.id}
+                href={`/${locale}/instructors/${instructor.slug}`}
+                className="group relative block"
+                data-rv
+              >
+                <div className="media sheen aspect-[4/5] border border-line transition-colors duration-300 group-hover:border-line-strong">
+                  <Media
+                    src={instructor.photo_url}
+                    alt={instructor.name}
+                    seed={index}
+                    ratio="absolute inset-0"
+                    className="rounded-none"
+                    sizes="(max-width: 640px) 50vw, 20vw"
+                    overlay
+                  />
+                  <div className="absolute inset-x-0 bottom-0 p-4 text-white">
+                    <p className="font-display text-[1.0625rem] leading-tight font-medium tracking-[-0.02em]">
+                      {instructor.name}
+                    </p>
+                    {/* Намтар нь hover дээр ГАРЧ ирнэ — тайван үедээ зураг
+                        дангаараа ярина. */}
+                    <p className="t-meta mt-1.5 line-clamp-2 max-h-0 overflow-hidden text-white/70 opacity-0 transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:max-h-16 group-hover:opacity-100">
+                      {loc(instructor, 'bio', locale)}
+                    </p>
+                  </div>
+                </div>
+              </Link>
             ))}
           </div>
         </Section>
