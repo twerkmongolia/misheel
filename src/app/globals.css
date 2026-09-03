@@ -84,14 +84,14 @@
      хазайгаагүй. Энэ нь зориуд: хуудсан дээр цагаан том талбай (тууз,
      холбоо барих хэсэг) байгаа бөгөөд өнгөт хазайлттай саарал түүний
      хажууд бохирдсон мэт уншигддаг. */
-  --background: light-dark(#FFFFFF, #0D0D0D);
-  --surface: light-dark(#F7F7F7, #161616);    /* самбар, тууз — суурийн ДЭЭР */
-  --surface-2: light-dark(#F0F0F0, #1C1C1C);  /* карт, hover, идэвхтэй мөр */
-  --surface-3: light-dark(#E6E6E6, #242424);  /* хамгийн өндөр — цонх, дарагдсан төлөв */
+  --background: #0D0D0D;
+  --surface: #161616;    /* самбар, тууз — суурийн ДЭЭР */
+  --surface-2: #1C1C1C;  /* карт, hover, идэвхтэй мөр */
+  --surface-3: #242424;  /* хамгийн өндөр — цонх, дарагдсан төлөв */
 
   /* Шугам. 1.5px хүрээ тул өнгө нь суурьтайгаа мэдэгдэхүйц ялгарна. */
-  --line: light-dark(#E2E2E2, #2C2C2C);
-  --line-strong: light-dark(#B8B8B8, #454545);
+  --line: #2C2C2C;
+  --line-strong: #454545;
 
   /* ── Ирмэгийн гэрэл ─────────────────────────────────────────────────
      Харанхуй интерфейст ГҮНИЙГ СҮҮДЭР ҮҮСГЭДЭГГҮЙ — хар дэвсгэр дээр
@@ -100,8 +100,8 @@
      гэрэл түүн дээр тусаж байна» гэдгийг хэлнэ.
 
      Энэ бол харанхуй загварын хамгийн хямд, хамгийн хүчтэй хэрэгсэл. */
-  --edge: light-dark(rgba(0, 0, 0, 0.07), rgba(255, 255, 255, 0.055));
-  --edge-strong: light-dark(rgba(0, 0, 0, 0.14), rgba(255, 255, 255, 0.11));
+  --edge: rgba(255, 255, 255, 0.055);
+  --edge-strong: rgba(255, 255, 255, 0.11);
 
   /* ── Текстийн 4 шат ─────────────────────────────────────────────────
      Цэвэр цагаан. Oswald нь Didone шиг нимгэн зурлагагүй тул цацаралт
@@ -112,43 +112,43 @@
        soft        13.1:1  · хоёрдогч текст
        muted        7.9:1   · тайлбар, мета — AA давсан
        faint        3.7:1   · зөвхөн чимэглэл, хөлийн бичиг, орлуулагч */
-  --foreground: light-dark(#0D0D0D, #FFFFFF);
-  --foreground-soft: light-dark(#3A3A3A, #D4D4D4);
-  --muted: light-dark(#6B6B6B, #A6A6A6);
-  --faint: light-dark(#9A9A9A, #6E6E6E);
+  --foreground: #FFFFFF;
+  --foreground-soft: #D4D4D4;
+  --muted: #A6A6A6;
+  --faint: #6E6E6E;
 
   /* Үйлдэл — суурьтайгаа хамгийн хүчтэй ялгарах өнгө */
-  --button: light-dark(#0D0D0D, #FFFFFF);
-  --button-ink: light-dark(#FFFFFF, #0D0D0D);
+  --button: #FFFFFF;
+  --button-ink: #0D0D0D;
   /* Цагаан товч дарагдахад бага зэрэг бүдгэрнэ — цайвар өнгө дээр
      тунгалагшилт биш ӨНГӨ солих нь хамаагүй тодорхой. */
-  --button-hover: light-dark(#2E2E2E, #E0E0E0);
+  --button-hover: #E0E0E0;
 
   /* Монохром «өргөлт» — өнгө биш, ГЭРЭЛТҮҮЛЭЛТ */
-  --accent: light-dark(#0D0D0D, #FFFFFF);
-  --accent-ink: light-dark(#FFFFFF, #0D0D0D);
-  --accent-soft: light-dark(#F0F0F0, #1C1C1C);
+  --accent: #FFFFFF;
+  --accent-ink: #0D0D0D;
+  --accent-soft: #1C1C1C;
 
   /* Төлөвүүд — өнгөөр биш, ХЭЛБЭР ба гэрэлтүүлэлтээр ялгарна (§ `.tag`).
      Токенууд нь монохром боловч утилит ангиуд (`text-warn` гэх мэт)
      ажилласаар байхын тулд үлдэнэ. */
-  --good: light-dark(#0D0D0D, #FFFFFF);
-  --good-soft: light-dark(#F0F0F0, #1C1C1C);
-  --warn: light-dark(#3A3A3A, #D4D4D4);
-  --warn-soft: light-dark(#F0F0F0, #1C1C1C);
-  --danger: light-dark(#0D0D0D, #FFFFFF);
-  --danger-soft: light-dark(#E6E6E6, #242424);
-  --info: light-dark(#3A3A3A, #D4D4D4);
-  --info-soft: light-dark(#F0F0F0, #1C1C1C);
+  --good: #FFFFFF;
+  --good-soft: #1C1C1C;
+  --warn: #D4D4D4;
+  --warn-soft: #1C1C1C;
+  --danger: #FFFFFF;
+  --danger-soft: #242424;
+  --info: #D4D4D4;
+  --info-soft: #1C1C1C;
 
   /* Бүрхүүл — гар утасны цэсний ард */
-  --scrim: light-dark(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.74));
+  --scrim: rgba(0, 0, 0, 0.74);
 
   /* Зураггүй орлуулагч. `seed` нь өнцөг, гэрлийн байрлалыг л сольж,
      ӨНГИЙГ огт хөнддөггүй. */
-  --media-base: light-dark(#F0F0F0, #1C1C1C);
-  --media-hatch: light-dark(rgba(0, 0, 0, 0.05), rgba(255, 255, 255, 0.05));
-  --media-sheen: light-dark(rgba(0, 0, 0, 0.06), rgba(255, 255, 255, 0.075));
+  --media-base: #1C1C1C;
+  --media-hatch: rgba(255, 255, 255, 0.05);
+  --media-sheen: rgba(255, 255, 255, 0.075);
 
   /* Нийтийн сайтад «өргөлт» гэж тусдаа өнгө БАЙХГҮЙ — монохром хэвээр */
   --brand: var(--foreground);
