@@ -738,6 +738,101 @@ export async function updateOrderStatus(formData: FormData): Promise<void> {
   redirect(`${safe}${safe.includes('?') ? '&' : '?'}ok=1`)
 }
 
+/* ── Галерей ───────────────────────────────────────────────────────────── */
+
+/**
+ * Галерейд зураг нэмнэ — олноор.
+ *
+ * Урьд нь галерей нь `public/media/gallery/` хавтас руу гараар файл хийж
+ * удирдагддаг байсан (§ marketing/gallery/page.tsx). Тэр нь програмистад
+ * хурдан ч, ажилтанд боломжгүй: серверийн файлын систем рүү хүрэх эрх
+ * хэрэггүй байх ёстой. Одоо Storage руу байршуулж, мөр үүсгэнэ — өгөгдлийн
+ * санд мөр гарсан даруйд хавтас нь ажиллахаа болино.
+ */
+export async function addGalleryImages(formData: FormData): Promise<void> {
+  await requireStaff()
+
+  const files = pickFiles(formData)
+  const altMn = String(formData.get('alt_mn') ?? '').trim()
+  const altEn = String(formData.get('alt_en') ?? '').trim()
+
+  if (files.length === 0) redirect('/admin/gallery?error=Зураг сонгоогүй байна')
+
+  const supabase = await createClient()
+  const { data: last } = await supabase
+    .from('gallery_items')
+    .select('sort_order')
+    .order('sort_order', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  let order = last?.sort_order ?? 0
+
+  for (const file of files) {
+    /* Мөр нь зурагнаас ӨМНӨ үүсэх боломжгүй (замд id нь хэрэгтэй), зураг нь
+       мөрөөс өмнө үүсэх ёсгүй (өнчин файл үлдэнэ). Тиймээс эхлээд түр
+       санамсаргүй нэрээр байршуулж, дараа нь мөр үүсгэнэ. */
+    const uploaded = await uploadImage(supabase, 'gallery', 'items', file)
+    if ('error' in uploaded) {
+      redirect(`/admin/gallery?error=${encodeURIComponent(uploaded.error)}`)
+    }
+
+    order += 1
+    const { error } = await supabase.from('gallery_items').insert({
+      url: uploaded.url,
+      alt_mn: altMn,
+      alt_en: altEn,
+      sort_order: order,
+    })
+    if (error) redirect(`/admin/gallery?error=${encodeURIComponent(error.message)}`)
+  }
+
+  await audit('gallery.add', 'gallery_items', null, { count: files.length })
+  revalidatePath('/admin/gallery')
+  revalidatePath('/', 'layout')
+  redirect('/admin/gallery?ok=1')
+}
+
+export async function updateGalleryItem(formData: FormData): Promise<void> {
+  await requireStaff()
+
+  const id = uuid.safeParse(formData.get('id'))
+  if (!id.success) redirect('/admin/gallery?error=Зураг олдсонгүй')
+
+  const supabase = await createClient()
+  const { error } = await supabase
+    .from('gallery_items')
+    .update({
+      alt_mn: String(formData.get('alt_mn') ?? '').trim(),
+      alt_en: String(formData.get('alt_en') ?? '').trim(),
+      sort_order: Number(formData.get('sort_order') ?? 0) || 0,
+    })
+    .eq('id', id.data)
+
+  if (error) redirect(`/admin/gallery?error=${encodeURIComponent(error.message)}`)
+
+  await audit('gallery.update', 'gallery_items', id.data, {})
+  revalidatePath('/admin/gallery')
+  revalidatePath('/', 'layout')
+  redirect('/admin/gallery?ok=1')
+}
+
+export async function deleteGalleryItem(formData: FormData): Promise<void> {
+  await requireStaff()
+
+  const id = uuid.safeParse(formData.get('id'))
+  if (id.success) {
+    const supabase = await createClient()
+    const { error } = await supabase.from('gallery_items').delete().eq('id', id.data)
+    if (error) redirect(`/admin/gallery?error=${encodeURIComponent(error.message)}`)
+    await audit('gallery.delete', 'gallery_items', id.data, {})
+  }
+
+  revalidatePath('/admin/gallery')
+  revalidatePath('/', 'layout')
+  redirect('/admin/gallery?ok=1')
+}
+
 /* ── Түгээмэл асуулт ───────────────────────────────────────────────────── */
 
 const faqSchema = z.object({
