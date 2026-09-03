@@ -187,9 +187,10 @@ export async function Footer({ locale }: { locale: Locale }) {
 
           {/* ── Доод мөр ───────────────────────────────────────────────
               Картын дотор, өөрийн шугамаар зааглагдсан. Дэвсгэрийг нэг шат
-              бүдгэрүүлснээр «энэ бол агуулга биш, гарын үсэг» гэдгийг
-              хэлнэ. */}
-          <div className="border-t border-line bg-surface px-6 py-5 sm:px-10 lg:px-14">
+              ӨӨРЧИЛСНӨӨР «энэ бол агуулга биш, гарын үсэг» гэдгийг хэлнэ.
+              Самбар өөрөө `--surface` тул энэ нь түүнээс нэг шат ДЭЭШ
+              гарна — харанхуйд гүн нь гэрлээр хэмжигдэнэ. */}
+          <div className="border-t border-line bg-surface-2 px-6 py-5 sm:px-10 lg:px-14">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <p className="t-meta text-muted">© {new Date().getFullYear()} Twerk Mongolia</p>
 
