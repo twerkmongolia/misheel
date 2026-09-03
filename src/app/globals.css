@@ -1277,12 +1277,16 @@ body:has(dialog[open]) { overflow: hidden; }
     .site-dialog[open] { opacity: 0; translate: 0 1.5rem; }
   }
 
+  /* Дээрхтэй ижил шалтгаанаар энд ч токен биш ШУУД утга: `::backdrop` руу
+     хувьсагч хүрэх нь хөтчөөс хамаарна. Хүрэхгүй бол `transition` бүхэлдээ
+     хүчингүй болж, бүрхүүл нь мэлмэрэлгүй ОГЦОМ гарч ирнэ. Утга нь
+     `--t-2` (320ms) ба `--ease` -тэй яг ижил. */
   .site-dialog::backdrop {
     opacity: 0;
     transition:
-      opacity var(--t-2) var(--ease),
-      overlay var(--t-2) allow-discrete,
-      display var(--t-2) allow-discrete;
+      opacity 320ms cubic-bezier(0.22, 1, 0.36, 1),
+      overlay 320ms allow-discrete,
+      display 320ms allow-discrete;
   }
 
   .site-dialog[open]::backdrop { opacity: 1; }
