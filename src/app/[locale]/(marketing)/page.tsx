@@ -39,6 +39,7 @@ const FALLBACK_VIDEO_IDS = ['u261YyMWm0g', 'ju-HSfPFFxE', 'U7GUiQBVIs0']
 function Chapter({
   id,
   index,
+  count,
   title,
   note,
   action,
@@ -46,6 +47,8 @@ function Chapter({
 }: {
   id: string
   index: string
+  /** Нийт бүлгийн тоо — эйброу дээрх «01 / 05» тоолуурын хоёр дахь тал. */
+  count: string
   title: ReactNode
   note?: ReactNode
   action?: ReactNode
@@ -55,12 +58,23 @@ function Chapter({
     <section id={id} className="shell scroll-mt-28 pt-[var(--bay)]">
       <div className="g12 items-end gap-y-7">
         <div className="col-span-12 flex flex-col gap-5 lg:col-span-7" data-rv>
+          {/* ── Эйброу нь ТООЛУУР, гарчгийн давталт БИШ ────────────────────
+              Өмнө нь энд «01 / Ойрын хичээлүүд» гэж бичигдээд яг доор нь
+              «Ойрын хичээлүүд» гэсэн H2 дахин гардаг байв. Нэг гарчиг
+              хоёр удаа: нүд түүнийг хоёр өөр зүйл гэж уншиж эхлээд
+              ижил болохыг нь мэдээд буцдаг, дэлгэц уншигч бүр нь бүлэг
+              бүрийг хоёр удаа зарлана.
+
+              Дугаар нь ганцаараа бол ямар ч мэдээлэлгүй: «01» гэдэг нь
+              хэдээс нэг вэ? Тиймээс хоёр дахь тал нь ГАРЧИГ биш НИЙТ
+              ТОО болно — «01 / 05». Зураас нь хэвээр, хэмнэл нь хэвээр,
+              харин одоо тэр нь уншигчид хуудсан дахь байрлалаа хэлнэ. */}
           <Eyebrow>
             {index}
             <span aria-hidden className="mx-2 text-faint">
               /
             </span>
-            {title}
+            {count}
           </Eyebrow>
           <h2 className="t-h2">{title}</h2>
         </div>
