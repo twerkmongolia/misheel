@@ -118,8 +118,8 @@
   --faint: light-dark(#9A9A9A, #6E6E6E);
 
   /* Үйлдэл — суурьтайгаа хамгийн хүчтэй ялгарах өнгө */
-  --button: #FFFFFF;
-  --button-ink: #0D0D0D;
+  --button: light-dark(#0D0D0D, #FFFFFF);
+  --button-ink: light-dark(#FFFFFF, #0D0D0D);
   /* Цагаан товч дарагдахад бага зэрэг бүдгэрнэ — цайвар өнгө дээр
      тунгалагшилт биш ӨНГӨ солих нь хамаагүй тодорхой. */
   --button-hover: #E0E0E0;
