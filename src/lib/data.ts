@@ -464,6 +464,14 @@ export async function getCourseAccess(courseId: string): Promise<CourseAccess | 
   return data ?? null
 }
 
+export async function getGallery(): Promise<GalleryItem[]> {
+  if (!isSupabaseConfigured()) return []
+
+  const supabase = await createClient()
+  const { data } = await supabase.from('gallery_items').select('*').order('sort_order')
+  return data ?? []
+}
+
 export async function getFaq(): Promise<FaqItem[]> {
   if (!isSupabaseConfigured()) return []
 
