@@ -125,9 +125,9 @@
   --button-hover: light-dark(#2E2E2E, #E0E0E0);
 
   /* Монохром «өргөлт» — өнгө биш, ГЭРЭЛТҮҮЛЭЛТ */
-  --accent: #FFFFFF;
-  --accent-ink: #0D0D0D;
-  --accent-soft: #1C1C1C;
+  --accent: light-dark(#0D0D0D, #FFFFFF);
+  --accent-ink: light-dark(#FFFFFF, #0D0D0D);
+  --accent-soft: light-dark(#F0F0F0, #1C1C1C);
 
   /* Төлөвүүд — өнгөөр биш, ХЭЛБЭР ба гэрэлтүүлэлтээр ялгарна (§ `.tag`).
      Токенууд нь монохром боловч утилит ангиуд (`text-warn` гэх мэт)
