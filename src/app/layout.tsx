@@ -97,8 +97,8 @@ function InlineScript({ html }: { html: string }) {
 
 export default function RootLayout({ children }: LayoutProps<'/'>) {
   return (
-    // Скрипт `<html>` -ийн ангийг гараар өөрчилдөг тул hydration-ы
-    // сануулгыг дарна — энэ бол зориудын зөрүү.
+    // Скрипт `<html>` -ийн ангид `rv-on` нэмдэг тул hydration-ы сануулгыг
+    // дарна — энэ бол зориудын зөрүү.
     <html
       lang="mn"
       suppressHydrationWarning
