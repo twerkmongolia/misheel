@@ -1,6 +1,5 @@
-import { cookies } from 'next/headers'
 import { requireStaff } from '@/lib/auth/dal'
-import { AdminShell, type AdminTheme, type NavGroup } from '@/components/admin/AdminShell'
+import { AdminShell, type NavGroup } from '@/components/admin/AdminShell'
 
 /**
  * Цэсийг бүлэглэв — холбоосууд нэг урт багана болвол нүд алдана.
@@ -72,14 +71,7 @@ export const dynamic = 'force-dynamic'
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   // Урьдчилсан шалгалт proxy дээр байгаа ч жинхэнэ шалгалт энд.
-  const [profile, store] = await Promise.all([requireStaff(), cookies()])
-
-  /* Горимын сонголтыг СЕРВЕР дээр уншина — эс бөгөөс хуудас эхлээд нэг
-     горимоор зурагдаад дараа нь нөгөө рүү үсэрнэ. Сонголт байхгүй бол
-     `undefined` үлдэж, CSS нь үйлдлийн системийн тохиргоог дагана
-     (§ globals.css `.admin-shell`). */
-  const saved = store.get('tm_admin_theme')?.value
-  const theme: AdminTheme = saved === 'light' || saved === 'dark' ? saved : undefined
+  const profile = await requireStaff()
 
   // Цэсийг эрхээр нь шүүнэ. Хуудас өөрөө ч `requireAdmin()` -тэй тул энэ нь
   // зөвхөн харагдац — хамгаалалт биш.
@@ -89,7 +81,6 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     <AdminShell
       groups={nav}
       profile={{ name: profile.full_name ?? 'Админ', role: profile.role }}
-      defaultTheme={theme}
     >
       {children}
     </AdminShell>
