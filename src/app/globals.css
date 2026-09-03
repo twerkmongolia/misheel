@@ -2041,7 +2041,23 @@ html.rv-on [data-rv='mask'] .mask-line:nth-child(4) > span { transition-delay: c
    анивчина — hydration зөрөх, эсвэл товч нүд ирмэхийн зуур солигдох.
    ═══════════════════════════════════════════════════════════════════════════ */
 
-/* Хар зурлагатай, дэвсгэргүй лого — харанхуй дээр харагдахгүй тул эргүүлнэ */
+/* Анхдагч нь ХАРАНХУЙ: сар нуугдаж, нар харагдана (нар = «гэрэлтэй рүү
+   шилжих»). Дүрс нь ОДОО байгаа горимыг биш, ДАРАХАД болох горимыг заана. */
+.theme-sun { display: block; }
+.theme-moon { display: none; }
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme='dark']) .theme-sun { display: none; }
+  :root:not([data-theme='dark']) .theme-moon { display: block; }
+}
+
+:root[data-theme='light'] .theme-sun { display: none; }
+:root[data-theme='light'] .theme-moon { display: block; }
+:root[data-theme='dark'] .theme-sun { display: block; }
+:root[data-theme='dark'] .theme-moon { display: none; }
+
+/* Хар зурлагатай, дэвсгэргүй лого — ХАРАНХУЙ дээр харагдахгүй тул эргүүлнэ.
+   Гэрэлтэй дээр эргүүлбэл цагаан болж алга болно. */
 .logo-invert { filter: invert(1); }
 
 /* ═══════════════════════════════════════════════════════════════════════════
