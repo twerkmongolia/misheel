@@ -302,7 +302,7 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
                     </p>
                     {/* Намтар нь hover дээр ГАРЧ ирнэ — тайван үедээ зураг
                         дангаараа ярина. */}
-                    <p className="t-meta mt-1.5 line-clamp-2 max-h-0 overflow-hidden text-white/70 opacity-0 transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:max-h-16 group-hover:opacity-100">
+                    <p className="t-meta bio-reveal mt-1.5 line-clamp-2 text-white/70">
                       {loc(instructor, 'bio', locale)}
                     </p>
                   </div>
