@@ -79,7 +79,20 @@ export const viewport: Viewport = {
  * бүхэлдээ хасагдав — зурагдахаас өмнө ажилладаг код богиносох бүр эхний
  * пикселийн хугацаа шууд хожно.
  */
-const bootScript = `try{if(!matchMedia('(prefers-reduced-motion: reduce)').matches)document.documentElement.classList.add('rv-on')}catch(e){}`
+/**
+ * Зурагдахаас ӨМНӨ ажиллах мөрийн скрипт.
+ *
+ * Хоёр ажил хийнэ:
+ *
+ *   1. Хадгалсан горимыг `<html data-theme>` дээр тавина. React ачаалагдахыг
+ *      хүлээвэл хуудас эхлээд харанхуйгаар зурагдаад дараа нь гэрэлтэй рүү
+ *      үсэрнэ — сонголт хийсэн хүн хуудас нээх бүрд тэр анивчааныг харна.
+ *
+ *   2. Гүйлтийн хөдөлгөөнийг ЗЭВСЭГЛЭНЭ (`rv-on`). Загварын хуудсанд
+ *      элементүүд анхдагчаар ХАРАГДАНА — JS ажиллаагүй үед юу ч алга
+ *      болохгүй.
+ */
+const bootScript = `try{var d=document.documentElement;var t=localStorage.getItem('theme');if(t==='light'||t==='dark')d.dataset.theme=t;if(!matchMedia('(prefers-reduced-motion: reduce)').matches)d.classList.add('rv-on')}catch(e){}`
 
 /**
  * Серверт `text/javascript`, клиентэд `text/plain`.
