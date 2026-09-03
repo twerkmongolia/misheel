@@ -112,10 +112,10 @@
        soft        13.1:1  · хоёрдогч текст
        muted        7.9:1   · тайлбар, мета — AA давсан
        faint        3.7:1   · зөвхөн чимэглэл, хөлийн бичиг, орлуулагч */
-  --foreground: #FFFFFF;
-  --foreground-soft: #D4D4D4;
-  --muted: #A6A6A6;
-  --faint: #6E6E6E;
+  --foreground: light-dark(#0D0D0D, #FFFFFF);
+  --foreground-soft: light-dark(#3A3A3A, #D4D4D4);
+  --muted: light-dark(#6B6B6B, #A6A6A6);
+  --faint: light-dark(#9A9A9A, #6E6E6E);
 
   /* Үйлдэл — суурьтайгаа хамгийн хүчтэй ялгарах өнгө */
   --button: #FFFFFF;
