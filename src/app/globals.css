@@ -2031,7 +2031,7 @@ html.rv-on [data-rv='mask'] .mask-line:nth-child(4) > span { transition-delay: c
 .rail::-webkit-scrollbar { display: none; }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   7 · ЛОГО
+   7 · ГОРИМЫН ТОВЧ, ЛОГО
 
    Өмнө нь энэ хэсэгт горимын товчны дүрс сольдог зургаан дүрэм байв
    (`.when-light` / `.when-dark`, гурван `prefers-color-scheme` асуулга).
