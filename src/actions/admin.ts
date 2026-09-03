@@ -579,7 +579,7 @@ const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/avi
  */
 async function uploadImage(
   supabase: Awaited<ReturnType<typeof createClient>>,
-  folder: 'products' | 'instructors' | 'courses',
+  folder: 'products' | 'instructors' | 'courses' | 'gallery',
   ownerId: string,
   file: File,
 ): Promise<{ url: string } | { error: string }> {
