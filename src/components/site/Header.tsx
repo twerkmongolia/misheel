@@ -67,7 +67,10 @@ export async function Header({ locale }: { locale: Locale }) {
     { href: `/${locale}/instructors`, label: t.nav.instructors },
   ]
 
-  const menuSecondary = [{ href: `/${locale}/faq`, label: t.nav.faq }]
+  const menuSecondary = [
+    { href: `/${locale}/gallery`, label: t.nav.gallery },
+    { href: `/${locale}/faq`, label: t.nav.faq },
+  ]
 
   return (
     <>
