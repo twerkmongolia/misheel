@@ -213,7 +213,11 @@ export async function Header({ locale }: { locale: Locale }) {
                   </>
                 )}
 
-                <div className="flex justify-center pt-2">
+                {/* Хэл, горим хоёр нь ХОЁУЛАА орчны тохиргоо — цэсний
+                    ёроолд зэрэгцэнэ. Утсан дээр горимын товч толгой мөрөнд
+                    багтахгүй (тэнд зөвхөн сагс) тул цорын ганц хүрэх цэг
+                    нь энэ. */}
+                <div className="flex items-center justify-center gap-2 pt-2">
                   <LocaleSwitch current={locale} label={t.nav.language} placement="up" />
                 </div>
               </>
