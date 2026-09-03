@@ -17,15 +17,6 @@ export type NavItem = {
 }
 export type NavGroup = { label?: string; items: NavItem[] }
 
-/** `undefined` = сонголт хийгээгүй → үйлдлийн системийг дагана. */
-export type AdminTheme = 'light' | 'dark' | undefined
-
-const THEME_COOKIE = 'tm_admin_theme'
-
-function remember(name: string, value: string) {
-  document.cookie = `${name}=${value}; path=/; max-age=${60 * 60 * 24 * 365}; samesite=lax`
-}
-
 /**
  * Удирдлагын бүрхүүл — зүүн тал дүрсний зурвас, дээр толгой мөр.
  *
@@ -51,38 +42,14 @@ function remember(name: string, value: string) {
 export function AdminShell({
   groups,
   profile,
-  defaultTheme,
   children,
 }: {
   groups: NavGroup[]
   profile: { name: string; role: string }
-  /** Cookie-оос уншсан сонголт. Байхгүй бол системийн тохиргоо ажиллана. */
-  defaultTheme: AdminTheme
   children: React.ReactNode
 }) {
   const [expanded, setExpanded] = useState(false)
   const collapsed = !expanded
-
-  const [theme, setTheme] = useState<AdminTheme>(defaultTheme)
-
-  /**
-   * Горим солих.
-   *
-   * Сервер нь үйлдлийн системийн тохиргоог МЭДЭХГҮЙ тул `theme` нь
-   * `undefined` байх боломжтой — тэр үед одоо ЯМАР горим зурагдаж байгааг
-   * хөтчөөс асууна. Ингэснээр товч үргэлж «одоогийнхны эсрэг» рүү үсэрнэ:
-   * гэрэлтэй харагдаж байвал харанхуй болно, эсрэгээр нь ч мөн адил.
-   *
-   * Уншилт нь ЗӨВХӨН дарсан агшинд болно — render дотор биш. Тиймээс
-   * сервер ба хөтчийн эхний зураг зөрөхгүй (hydration).
-   */
-  const flipTheme = () => {
-    const shown =
-      theme ?? (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark')
-    const next = shown === 'light' ? 'dark' : 'light'
-    setTheme(next)
-    remember(THEME_COOKIE, next)
-  }
   // Самбарыг НЭЭСЭН үеийн зам. Хуудас солигдонгуут өөрөө хаагдана —
   // effect-гүйгээр, шинэ хуудасны дээр өлгөөтэй үлдэхгүй.
   const [sheetPath, setSheetPath] = useState<string | null>(null)
@@ -123,10 +90,7 @@ export function AdminShell({
   const restActive = current !== undefined && !current.tab
 
   return (
-    <div
-      data-theme={theme}
-      className="admin-shell flex min-h-screen flex-1 bg-background text-foreground"
-    >
+    <div className="admin-shell flex min-h-screen flex-1 bg-background text-foreground">
       {/* ── Зүүн зурвас ────────────────────────────────────────────────── */}
       {/* Гадна бүрхүүл нь зохиомжид ҮРГЭЛЖ 5rem эзэлнэ — дотоод самбар нь
           үүнээс өргөсөхдөө агуулгын дээгүүр гарна, хуудсыг түлхэхгүй.
