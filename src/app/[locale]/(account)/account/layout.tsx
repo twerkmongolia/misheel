@@ -16,6 +16,7 @@ export default async function AccountLayout({
   const tabs = [
     // Профайл нь эцэг зам тул `exact`: дэд хуудсууд дээр идэвхтэй болохгүй.
     { href: `/${locale}/account`, label: t.auth.profile, exact: true },
+    { href: `/${locale}/account/courses`, label: t.courses.mine, exact: false },
     { href: `/${locale}/account/bookings`, label: t.booking.myBookings, exact: false },
     { href: `/${locale}/account/orders`, label: t.shop.myOrders, exact: false },
   ]

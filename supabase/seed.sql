@@ -221,3 +221,55 @@ insert into faq_items (question_mn, question_en, answer_mn, answer_en, sort_orde
  'Болно. Twerk Mongolia корпоратив арга хэмжээ, тоглолт, бичлэгт тогтмол оролцдог. Огноо, байршил, хэдэн бүжигчин хэрэгтэйгээ холбоо барих хуудсаар бичиж илгээгээрэй — ажлын өдрүүдэд 24 цагийн дотор хариулна.',
  'Yes. Twerk Mongolia performs regularly at corporate events, shows and shoots. Send us the date, the venue and how many dancers you need through the contact page and we will reply within 24 hours on weekdays.', 12)
 on conflict do nothing;
+
+-- ── Анги, курс ─────────────────────────────────────────────────────────────
+-- Танхимын элсэлт нэг, онлайн анги нэг. `starts_on` нь ХАРЬЦАНГУЙ огноо:
+-- тогтмол огноо бичвэл үрийн өгөгдөл хэдэн сарын дараа «аль хэдийн эхэлсэн»
+-- болж, элсэлтийн урсгалыг туршиж үзэх боломжгүй болно.
+insert into courses (
+  id, slug, mode, name_mn, name_en, summary_mn, summary_en, desc_mn, desc_en,
+  level, instructor_id, location_id, cover_url, price, lesson_count,
+  starts_on, ends_on, schedule_mn, schedule_en, capacity, sort_order
+) values
+('55555555-5555-4555-8555-111111111111', 'twerk-4-week', 'studio',
+ 'Шинэчлэгчдийн 4 долоо хоног', 'Beginner 4-Week Course',
+ 'Огт бүжиглэж үзээгүй хүнд зориулсан бүтэн хөтөлбөр — эхний алхмаас бүтэн бүжиг хүртэл.',
+ 'A full programme for people who have never danced — from the first step to a whole routine.',
+ 'Дөрвөн долоо хоног, найман хичээл. Эхний долоо хоногт биеэ хэрхэн авч явах, хэмнэлээ олох; хоёрдугаарт үндсэн хөдөлгөөнүүд; гуравдугаарт тэдгээрийг холбох; дөрөвдүгээрт бүтэн бүжиг сурч, хүсвэл бичлэг хийнэ.
+
+Хувцас, гутлын тухай: хөнгөн, суналттай өмд, хөл нүцгэн эсвэл гутлаа авчирч болно. Бусад бүхнийг заалнаас олно.',
+ 'Four weeks, eight classes. Week one is about carrying yourself and finding the rhythm; week two the core movements; week three linking them; week four a full routine, with an optional filmed take.
+
+On clothes: light stretchy trousers, barefoot or bring your trainers. Everything else is at the studio.',
+ 'beginner',
+ '22222222-2222-4222-8222-111111111111',
+ '11111111-1111-4111-8111-111111111111',
+ '/media/studio-4.svg', 240000, 8,
+ (current_date + 14), (current_date + 42),
+ 'Мягмар, Пүрэв · 19:00–20:15', 'Tuesdays and Thursdays · 19:00–20:15',
+ 12, 1),
+('55555555-5555-4555-8555-222222222222', 'online-basics', 'online',
+ 'Онлайн үндэс', 'Online Basics',
+ 'Гэрээсээ, өөрийн хэмнэлээр. Хичээлүүд Telegram бүлэгт байршина.',
+ 'From home, at your own pace. The lessons live in a Telegram group.',
+ 'Арван хичээл, тус бүр 15-25 минут. Бүгд бичлэгээр тул хэдэн ч удаа буцааж үзнэ.
+
+Элссэн даруйдаа Telegram бүлгийн урилга нээгдэнэ. Тэндээс хичээл бүрийн бичлэг, дасгалын жагсаалт, асуулт хариултын хэсэг олдоно. Багш долоо хоног бүр асуултад хариулна.',
+ 'Ten lessons, 15-25 minutes each. Everything is recorded, so you can go back as often as you like.
+
+The Telegram invite unlocks the moment you enrol. Inside you will find every lesson, the drill list and a questions thread. The instructor answers questions weekly.',
+ 'beginner',
+ '22222222-2222-4222-8222-222222222222',
+ null,
+ '/media/studio-5.svg', 120000, 10,
+ null, null,
+ 'Өөрийн хэмнэлээр', 'At your own pace',
+ null, 2)
+on conflict (id) do nothing;
+
+-- Telegram холбоос ТУСДАА хүснэгтэд — төлбөрөө төлсөн элсэгч л уншина.
+insert into course_access (course_id, telegram_url, note_mn, note_en) values
+('55555555-5555-4555-8555-222222222222', 'https://t.me/+twerkmongolia_demo',
+ 'Бүлэгт орсны дараа өөрийгөө танилцуулаарай — багш танд эхлэх хичээлээ хэлж өгнө.',
+ 'Introduce yourself once you are in — the instructor will point you to the right first lesson.')
+on conflict (course_id) do nothing;

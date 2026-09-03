@@ -66,7 +66,10 @@ function ProductCard({ product }: { product: ProductView }) {
         )}
 
         {!product.is_active && (
-          <span className="absolute top-2 left-2 rounded-md bg-surface/90 px-2 py-1 text-[11px] font-medium text-muted backdrop-blur">
+          /* Дэвсгэр нь `background` — картын `surface` БИШ. Энэ шошго нь
+             ГЭРЭЛ ЗУРГИЙН дээр суудаг тул картын дэвсгэртэй ижил өнгө нь
+             зурагтай нийлж уншигдахаа болино. */
+          <span className="absolute top-2 left-2 rounded-md bg-background/90 px-2 py-1 text-[11px] font-medium text-muted backdrop-blur">
             Идэвхгүй
           </span>
         )}

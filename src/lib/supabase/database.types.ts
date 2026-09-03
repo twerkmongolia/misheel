@@ -24,6 +24,8 @@ export type OrderStatus =
   | 'refunded'
 export type PaymentStatus = 'pending' | 'paid' | 'failed' | 'refunded'
 export type PaymentTarget = 'order' | 'booking'
+export type CourseMode = 'studio' | 'online'
+export type EnrollmentStatus = 'pending_payment' | 'active' | 'cancelled' | 'completed'
 
 export type Profile = {
   id: string
@@ -191,10 +193,69 @@ export type OrderItem = {
   id: string
   order_id: string
   variant_id: string | null
+  /** Курсын мөр. `variant_id` -тэй хоёулаа дүүрэн байхгүй — аль нэг нь. */
+  course_id: string | null
   name_snapshot: string
   variant_snapshot: string
   unit_price: number
   qty: number
+}
+
+export type Course = {
+  id: string
+  slug: string
+  mode: CourseMode
+  name_mn: string
+  name_en: string
+  summary_mn: string
+  summary_en: string
+  desc_mn: string
+  desc_en: string
+  level: ClassLevel
+  instructor_id: string | null
+  cover_url: string | null
+  price: number
+  lesson_count: number
+  location_id: string | null
+  starts_on: string | null
+  ends_on: string | null
+  schedule_mn: string
+  schedule_en: string
+  /** `null` = хязгааргүй. Онлайн анги суудал тоолохгүй. */
+  capacity: number | null
+  enrolled_count: number
+  enroll_opens_at: string | null
+  enroll_closes_at: string | null
+  sort_order: number
+  is_active: boolean
+  created_at: string
+}
+
+/**
+ * Онлайн ангийн НУУЦ хэсэг — тусдаа хүснэгт.
+ *
+ * RLS нь мөрийг хамгаалдаг, багана биш. Telegram холбоос `courses` дээр
+ * байвал төлөөгүй хүн ч API-аар шууд уншина (§ migration).
+ */
+export type CourseAccess = {
+  course_id: string
+  telegram_url: string
+  note_mn: string
+  note_en: string
+  updated_at: string
+}
+
+export type CourseEnrollment = {
+  id: string
+  course_id: string
+  user_id: string
+  order_id: string | null
+  status: EnrollmentStatus
+  price_paid: number
+  note: string | null
+  created_at: string
+  activated_at: string | null
+  cancelled_at: string | null
 }
 
 export type Payment = {
@@ -256,6 +317,9 @@ export type Database = {
       product_images: Table<ProductImage>
       orders: Table<Order>
       order_items: Table<OrderItem>
+      courses: Table<Course>
+      course_access: Table<CourseAccess>
+      course_enrollments: Table<CourseEnrollment>
       payments: Table<Payment>
       contact_messages: Table<ContactMessage>
       audit_log: Table<AuditEntry>
@@ -279,6 +343,15 @@ export type Database = {
         Returns: string
       }
       cancel_order: { Args: { p_order_id: string }; Returns: void }
+      enroll_course: {
+        Args: { p_course_id: string; p_name: string; p_phone: string; p_note?: string | null }
+        Returns: string
+      }
+      cancel_enrollment: { Args: { p_enrollment_id: string }; Returns: void }
+      set_enrollment_status: {
+        Args: { p_enrollment_id: string; p_status: EnrollmentStatus }
+        Returns: void
+      }
       set_order_status: { Args: { p_order_id: string; p_status: OrderStatus }; Returns: void }
       create_session_series: {
         Args: {
@@ -302,6 +375,8 @@ export type Database = {
       order_status: OrderStatus
       payment_status: PaymentStatus
       payment_target: PaymentTarget
+      course_mode: CourseMode
+      enrollment_status: EnrollmentStatus
     }
     CompositeTypes: Record<never, never>
   }

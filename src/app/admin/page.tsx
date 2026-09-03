@@ -219,24 +219,28 @@ export default async function AdminDashboard() {
                   Math.floor((now.getTime() - new Date(order.created_at).getTime()) / 86_400_000),
                 )
                 return (
-                  <li
-                    key={order.id}
-                    className="flex items-center justify-between gap-3 border-b border-line px-5 py-3 text-sm last:border-b-0"
-                  >
+                  /* БҮТЭН мөр дарагдана — өмнө нь зөвхөн нэр нь холбоос
+                     байсан бөгөөд дүнгийн дээр дарсан хүн юу ч болохгүйд
+                     эргэлздэг байв. Мөр нь `admin-row` тул hover дээр
+                     дэвсгэрээ сольж, хаана байгаагаа хэлнэ. */
+                  <li key={order.id} className="border-b border-line last:border-b-0">
                     <Link
                       href="/admin/orders?status=pending_payment"
-                      className="min-w-0 flex-1 truncate font-medium transition-colors hover:text-foreground"
+                      className="admin-row flex items-center justify-between gap-3 px-5 py-3 text-sm"
                     >
-                      {order.ship_name}
-                      {/* Хэдэн хоног хүлээснийг ХЭЛНЭ. Хамгийн удаан хүлээснийг
-                          нь эхэнд гаргадаг тул жагсаалт өөрөө дараалал болно. */}
-                      <span
-                        className={`ml-2 text-xs tnum ${days >= 2 ? 'font-medium text-warn' : 'text-muted'}`}
-                      >
-                        {days === 0 ? 'өнөөдөр' : `${days} хоног`}
+                      <span className="min-w-0 flex-1 truncate font-medium">
+                        {order.ship_name}
+                        {/* Хэдэн хоног хүлээснийг ХЭЛНЭ. Хамгийн удаан
+                            хүлээснийг эхэнд гаргадаг тул жагсаалт өөрөө
+                            дараалал болно. */}
+                        <span
+                          className={`ml-2 text-xs tnum ${days >= 2 ? 'font-medium text-warn' : 'text-muted'}`}
+                        >
+                          {days === 0 ? 'өнөөдөр' : `${days} хоног`}
+                        </span>
                       </span>
+                      <span className="shrink-0 font-medium tnum">{formatMnt(order.total)}</span>
                     </Link>
-                    <span className="shrink-0 font-medium tnum">{formatMnt(order.total)}</span>
                   </li>
                 )
               })}
@@ -262,28 +266,28 @@ export default async function AdminDashboard() {
           ) : (
             <ul>
               {lowStock.map((variant) => (
-                <li
-                  key={variant.id}
-                  className="flex items-center justify-between gap-3 border-b border-line px-5 py-3 text-sm last:border-b-0"
-                >
+                <li key={variant.id} className="border-b border-line last:border-b-0">
                   <Link
                     href="/admin/products"
-                    className="min-w-0 flex-1 truncate transition-colors hover:text-foreground"
+                    className="admin-row flex items-center justify-between gap-3 px-5 py-3 text-sm"
                   >
-                    <span className="font-medium">
-                      {productName.get(variant.product_id)?.name_mn ?? 'Тодорхойгүй бараа'}
-                    </span>
-                    {/* Хэмжээ, өнгө нь ЯМАР хувилбар дууссаныг хэлнэ. SKU нь
-                        ажилтанд утгагүй код — шаардвал Бараа хуудсанд бий. */}
-                    {(variant.size || variant.color) && (
-                      <span className="ml-2 text-xs text-muted">
-                        {[variant.size, variant.color].filter(Boolean).join(' · ')}
+                    <span className="min-w-0 flex-1 truncate">
+                      <span className="font-medium">
+                        {productName.get(variant.product_id)?.name_mn ?? 'Тодорхойгүй бараа'}
                       </span>
-                    )}
+                      {/* Хэмжээ, өнгө нь ЯМАР хувилбар дууссаныг хэлнэ. SKU
+                          нь ажилтанд утгагүй код — шаардвал Бараа хуудсанд
+                          бий. */}
+                      {(variant.size || variant.color) && (
+                        <span className="ml-2 text-xs text-muted">
+                          {[variant.size, variant.color].filter(Boolean).join(' · ')}
+                        </span>
+                      )}
+                    </span>
+                    <Badge tone={variant.stock_qty === 0 ? 'danger' : 'warn'}>
+                      {variant.stock_qty === 0 ? 'Дууссан' : `${variant.stock_qty} ширхэг`}
+                    </Badge>
                   </Link>
-                  <Badge tone={variant.stock_qty === 0 ? 'danger' : 'warn'}>
-                    {variant.stock_qty === 0 ? 'Дууссан' : `${variant.stock_qty} ширхэг`}
-                  </Badge>
                 </li>
               ))}
             </ul>

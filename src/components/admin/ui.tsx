@@ -126,9 +126,22 @@ export function Panel({
   className?: string
 }) {
   return (
-    <section className={`flex flex-col ${className}`}>
+    /* ── Яагаад одоо КАРТ болов ──────────────────────────────────────────
+       Өмнө нь самбар нь зөвхөн дээд гарчиг + доод зураастай, дэвсгэргүй
+       блок байв. Тэр нь editorial хуудсанд зөв — нэг баганат текстэд
+       хайрцаг хэрэггүй. Харин удирдлагад нэг дэлгэц дээр 3-5 самбар
+       зэрэгцэн суудаг бөгөөд заримд нь хүснэгт, заримд нь форм байдаг:
+       зураас дангаараа «энэ хаана дуусаж, дараагийнх хаанаас эхэлж
+       байна» гэдгийг хэлж чадахаа болино.
+
+       Карт нь ХИЛ өгнө. Гадарга нь дэвсгэрээс нэг шат ялгарч, доторх
+       бүх зүйл нэг биетийн эд анги болж уншигдана.
+
+       `overflow-hidden` нь ЗААВАЛ: доторх хүснэгт, жагсаалт ирмэг хүртэл
+       дүүрдэг тул тэдгээрийн булан картын радиусаар тайрагдах ёстой. */
+    <section className={`admin-card flex flex-col overflow-hidden ${className}`}>
       {(title || actions) && (
-        <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2 border-b border-line pb-3.5">
+        <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2 border-b border-line px-5 py-4">
           <div className="min-w-0">
             {/* Хуудсанд ГУРВАН түвшний эрэмбэ байх ёстой:
                   хуудасны нэр  → `t-h2`, serif, 28-44px
@@ -143,7 +156,7 @@ export function Panel({
           {actions && <div className="flex shrink-0 items-center gap-3">{actions}</div>}
         </div>
       )}
-      <div className={flush ? '' : 'pt-5'}>{children}</div>
+      <div className={flush ? '' : 'p-5'}>{children}</div>
     </section>
   )
 }
@@ -202,8 +215,15 @@ export function StatCard({
   href?: string
 }) {
   /* Тоо нь serif — нийтийн сайтын «том тоо» -той нэг дуу хоолой (§ `.t-num`).
-     Хайрцаг байхгүй: дээд шугам нь үзүүлэлтүүдийг тусгаарлана. Дөрвөн
-     сүүдэртэй карт зэрэгцэхээс илүү тайван, өгөгдөл нь илүү тод. */
+
+     Өмнө нь эдгээр нь хайрцаггүй, зөвхөн босоо зураасаар тусгаарлагдсан
+     НЭГ зурвас байв. Тэр нь тайван ч нэг сул талтай: зурваст холбоос
+     байгааг нүд олж хардаггүй. Дөрвөөс хоёр нь дарагдаж хуудас нээдэг
+     атлаа гуравдугаарынхтайгаа яг ижил харагддаг байлаа.
+
+     Одоо тус бүр өөрийн карттай. Дарагддаг нь `admin-card-link` авна —
+     тайван үедээ ялгарахгүй ч хулгана хүрмэгц өргөгдөж, «энэ хаа нэгтээ
+     хөтөлнө» гэдгээ хэлнэ (§ globals.css). */
   const body = (
     <>
       <span className="t-label flex items-center gap-2 text-muted">
@@ -211,18 +231,16 @@ export function StatCard({
         {label}
       </span>
       <span className="t-num mt-3 block text-[2rem] sm:text-[2.5rem]">{value}</span>
+      {/* Тогтмол өндөр: тайлбаргүй карт хажуугийнхаасаа намхан болвол
+          дөрвөн тоо нэг шугам дээр эгнэхээ болино. */}
       <span className="t-meta mt-2 block h-4 text-muted">{hint}</span>
     </>
   )
 
-  /* Дөрвөн блок ЗЭРЭГЦЭХ тул тус бүрдээ дээд зураастай байвал дөрвөн
-     тасархай зураас болж, эвдэрсэн шугам мэт харагдана. Оронд нь блокууд
-     нь хоорондоо БОСОО зураасаар тусгаарлагдаж, гадна талаараа нэг бүтэн
-     зурвас үүсгэнэ (§ `StatRow` доор). */
-  const shell = 'group block px-4 py-4 transition-colors sm:px-5 sm:py-5'
+  const shell = 'admin-card px-4 py-4 sm:px-5 sm:py-5'
 
   return href ? (
-    <Link href={href} className={`${shell} hover:bg-surface`}>
+    <Link href={href} className={`${shell} admin-card-link group`}>
       {body}
     </Link>
   ) : (
@@ -231,30 +249,15 @@ export function StatCard({
 }
 
 /**
- * Үзүүлэлтийн зурвас — `StatCard` -уудыг багтаана.
+ * Үзүүлэлтийн тор — `StatCard` -уудыг багтаана.
  *
- * Хуваарийн хуудасны долоо хоногийн зурваст ашигласан хэв: гадна талаараа
- * дээд, доод шугам, дотроо босоо тусгаарлагч. Дөрвөн тусдаа карт биш НЭГ
- * хэрэгсэл мэт уншигдана.
+ * Урьд нь эдгээр нь хоорондоо зураасаар наалдсан НЭГ зурвас байв. Карт
+ * болсны дараа наалдуулах нь утгагүй: хоёр хөрш картын хүрээ зэрэгцвэл
+ * 2px зузаан давхар зураас үүсдэг. Тиймээс зай нь тэднийг тусгаарлана —
+ * `gap` бол хамгийн цэвэр тусгаарлагч.
  */
 export function StatRow({ children }: { children: ReactNode }) {
-  return (
-    /* `divide-y` -г ХЭРЭГЛЭЖ БОЛОХГҮЙ: тэр нь DOM дараалалд тулгуурлан
-       ЭХНИЙХЭЭС бусад бүх хүүхдэд дээд хүрээ нэмдэг. Хоёр баганат торонд
-       хоёр дахь нүд нь мөрийн БАРУУН талд суудаг ч дээрээ зураастай болж,
-       эхний нүдтэйгээ зөрнө. Тиймээс хүрээг байрлалаар нь өгнө:
-
-         утас  (1 багана)  — эхнийхээс бусад бүгд дээрээ зураастай
-         sm    (2 багана)  — 3 дахиас хойш дээрээ, тэгш нүд зүүн талдаа
-         lg    (4 багана)  — хэвтээ зураас алга, эхнийхээс бусад зүүн талдаа */
-    <div
-      className="grid border-y border-line [&>*+*]:border-t [&>*+*]:border-line
-                 sm:grid-cols-2 sm:[&>*+*]:border-t-0 sm:[&>*:nth-child(2n)]:border-l sm:[&>*:nth-child(n+3)]:border-t
-                 lg:grid-cols-4 lg:[&>*+*]:border-l lg:[&>*:nth-child(n+3)]:border-t-0"
-    >
-      {children}
-    </div>
-  )
+  return <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{children}</div>
 }
 
 /* ── Төлөв ─────────────────────────────────────────────────────────────── */
@@ -309,7 +312,11 @@ export function Alert({ tone = 'neutral', children }: { tone?: Tone; children: R
 
 export function EmptyState({ icon, title, hint }: { icon: NavIcon; title: ReactNode; hint?: ReactNode }) {
   return (
-    <div className="flex flex-col items-center gap-4 border border-dashed border-line px-5 py-14 text-center">
+    /* Гадна хүрээгүй. Хоосон төлөв нь ҮРГЭЛЖ картын дотор суудаг (§ `Panel`)
+       тул тасархай тэгш өнцөгт нь картын хатуу хүрээний дэргэд наалдаж,
+       хоёр давхар хайрцаг үүсгэж байв. «Хоосон» гэдэг дохиог дүрсийг
+       тойрсон тасархай тойрог аль хэдийн хэлж байгаа. */
+    <div className="flex flex-col items-center gap-4 px-5 py-14 text-center">
       <span className="grid h-11 w-11 place-items-center rounded-full border border-dashed border-line-strong text-muted">
         <AdminIcon name={icon} className="h-[18px] w-[18px]" />
       </span>
@@ -362,9 +369,34 @@ export function Textarea({ className = '', ...props }: ComponentProps<'textarea'
 export { FileInput } from './FileInput'
 
 /** Формын доод мөр — үндсэн үйлдэл баруун талд, тусгаарлах зураастай. */
-export function FormActions({ children }: { children: ReactNode }) {
+/**
+ * Формын үйлдлийн мөр.
+ *
+ * `sticky` нь УРТ формд: талбар нь дэлгэцэнд багтахгүй үед хадгалах товч
+ * доод ирмэгт наалдаж, ажилтан бөглөж дуусаад доош гүйлгэх шаардлагагүй
+ * болно. «Бөглөчихсөн атлаа хадгалах товч хаана байна» гэдэг нь урт
+ * формын хамгийн түгээмэл гацаа.
+ *
+ * Сөрөг зах (`-mx-6`) нь цонхны их биеийн ДОТООД зайг (§ `DialogFrame`
+ * `p-6`) буцаан татаж, мөрийг ирмэгээс ирмэг хүртэл дүүргэнэ — эс бөгөөс
+ * хажуугийн 24px зайгаар доорх агуулга гүйж харагдана. Тиймээс энэ нь
+ * ЦОНХНЫ дотор л зөв: самбар доторх формд асуухгүй.
+ */
+export function FormActions({
+  children,
+  sticky = false,
+}: {
+  children: ReactNode
+  sticky?: boolean
+}) {
   return (
-    <div className="mt-2 flex flex-wrap items-center justify-end gap-3 border-t border-line pt-5">
+    <div
+      className={`mt-2 flex flex-wrap items-center justify-end gap-3 border-t border-line pt-5 ${
+        sticky
+          ? 'sticky bottom-0 z-10 -mx-6 -mb-6 bg-surface/95 px-6 pt-4 pb-6 backdrop-blur-sm'
+          : ''
+      }`}
+    >
       {children}
     </div>
   )
@@ -490,6 +522,12 @@ export function Pager({
 /**
  * Мөр дээгүүр гүйлгэхэд тодрох (hover) нь урт мөрийг нүдээр дагахад тусална.
  * Сүүлийн мөрийн доод зураасыг авна — картын хүрээтэй давхацдаг.
+ *
+ * Тодрох өнгө нь `surface-2` — `surface` БИШ. Хүснэгт нь одоо картын дотор
+ * (§ `Panel`) суудаг бөгөөд картын дэвсгэр өөрөө `surface` тул тэр нь
+ * харагдахгүй болно: hover байгаа ч мэдрэгдэхгүй байх нь hover огт
+ * байхгүйгээс ДОР — ажилтан мөр дагаж чадахгүй атлаа систем эвдэрсэн эсэхийг
+ * мэдэхгүй.
  */
 export function Table({ children, minWidth = 640 }: { children: ReactNode; minWidth?: number }) {
   return (
@@ -497,7 +535,7 @@ export function Table({ children, minWidth = 640 }: { children: ReactNode; minWi
       <table
         // `admin-table` нь жижиг дэлгэц дээр мөрийг карт болгож задална
         // (§ globals.css «Утасны төрх»). `--tbl-min` нь зөвхөн md-ээс дээш.
-        className="admin-table t-small [&_tbody_tr:hover]:bg-surface [&_tbody_tr:last-child>td]:border-b-0"
+        className="admin-table t-small [&_tbody_tr]:transition-colors [&_tbody_tr]:duration-150 [&_tbody_tr:hover]:bg-surface-2 [&_tbody_tr:last-child>td]:border-b-0"
         style={{ '--tbl-min': `${minWidth}px` } as React.CSSProperties}
       >
         {children}

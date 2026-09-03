@@ -40,6 +40,12 @@ export default async function OrderPage({
     getSiteContent(['shop']),
   ])
 
+  /* Курсын захиалгад хаяг байхгүй (§ enroll_course) — тэр баримт нь доорх
+     хайрцгийн гарчиг, мөрийн аль алиныг нь шийднэ. */
+  const address = [order.ship_district, order.ship_khoroo, order.ship_address]
+    .filter(Boolean)
+    .join(', ')
+
   const bank = content(site.get('shop'), locale).bank
 
   return (
@@ -87,11 +93,16 @@ export default async function OrderPage({
               <Td className="tabular-nums">{formatMnt(item.unit_price * item.qty)}</Td>
             </tr>
           ))}
-          <tr>
-            <Td className="text-muted">{t.shop.shipping}</Td>
-            <Td />
-            <Td className="tabular-nums">{formatMnt(order.shipping_fee)}</Td>
-          </tr>
+          {/* Хүргэлтийн мөр нь ХҮРГЭДЭГ захиалгад л утгатай. Курсын
+              захиалгад «Хүргэлт 0₮» гэж бичих нь худал зөвлөгөө өгнө:
+              хүн хүргэлт хүлээх юм болов уу гэж бодно. */}
+          {order.shipping_fee > 0 && (
+            <tr>
+              <Td className="text-muted">{t.shop.shipping}</Td>
+              <Td />
+              <Td className="tabular-nums">{formatMnt(order.shipping_fee)}</Td>
+            </tr>
+          )}
           <tr>
             <Td className="font-semibold">{t.common.total}</Td>
             <Td />
@@ -101,12 +112,15 @@ export default async function OrderPage({
       </TableWrap>
 
       <Card className="flex flex-col gap-1 text-sm">
-        <h2 className="mb-1 font-semibold">{t.shop.shippingInfo}</h2>
+        {/* Курсын захиалгад хаяг байхгүй — гарчиг нь тэр үнэнийг дагана.
+            «Хүргэлтийн мэдээлэл» гэж бичээд доор нь зөвхөн нэр, утас
+            харуулах нь дутуу бөглөсөн маягт мэт харагдана. */}
+        <h2 className="mb-1 font-semibold">
+          {address ? t.shop.shippingInfo : t.shop.contactInfo}
+        </h2>
         <p>{order.ship_name}</p>
         <p className="text-muted">{order.ship_phone}</p>
-        <p className="text-muted">
-          {[order.ship_district, order.ship_khoroo, order.ship_address].filter(Boolean).join(', ')}
-        </p>
+        {address && <p className="text-muted">{address}</p>}
         {order.note && <Alert tone="neutral">{order.note}</Alert>}
       </Card>
 

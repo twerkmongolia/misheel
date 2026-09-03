@@ -82,7 +82,7 @@ function slugify(name: string): string {
 /** Нэрнээс slug гаргаад, давхцвал ард нь дугаар залгана (`saraa`, `saraa-2`). */
 async function uniqueSlug(
   supabase: Awaited<ReturnType<typeof createClient>>,
-  table: 'class_types' | 'products' | 'instructors',
+  table: 'class_types' | 'products' | 'instructors' | 'courses',
   name: string,
 ): Promise<string> {
   const base = slugify(name)
@@ -579,7 +579,7 @@ const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/avi
  */
 async function uploadImage(
   supabase: Awaited<ReturnType<typeof createClient>>,
-  folder: 'products' | 'instructors' | 'gallery',
+  folder: 'products' | 'instructors' | 'courses',
   ownerId: string,
   file: File,
 ): Promise<{ url: string } | { error: string }> {
@@ -736,101 +736,6 @@ export async function updateOrderStatus(formData: FormData): Promise<void> {
   const back = String(formData.get('back') ?? '')
   const safe = back.startsWith('/admin/orders') ? back : '/admin/orders'
   redirect(`${safe}${safe.includes('?') ? '&' : '?'}ok=1`)
-}
-
-/* ── Галерей ───────────────────────────────────────────────────────────── */
-
-/**
- * Галерейд зураг нэмнэ — олноор.
- *
- * Урьд нь галерей нь `public/media/gallery/` хавтас руу гараар файл хийж
- * удирдагддаг байсан (§ marketing/gallery/page.tsx). Тэр нь програмистад
- * хурдан ч, ажилтанд боломжгүй: серверийн файлын систем рүү хүрэх эрх
- * хэрэггүй байх ёстой. Одоо Storage руу байршуулж, мөр үүсгэнэ — өгөгдлийн
- * санд мөр гарсан даруйд хавтас нь ажиллахаа болино.
- */
-export async function addGalleryImages(formData: FormData): Promise<void> {
-  await requireStaff()
-
-  const files = pickFiles(formData)
-  const altMn = String(formData.get('alt_mn') ?? '').trim()
-  const altEn = String(formData.get('alt_en') ?? '').trim()
-
-  if (files.length === 0) redirect('/admin/gallery?error=Зураг сонгоогүй байна')
-
-  const supabase = await createClient()
-  const { data: last } = await supabase
-    .from('gallery_items')
-    .select('sort_order')
-    .order('sort_order', { ascending: false })
-    .limit(1)
-    .maybeSingle()
-
-  let order = last?.sort_order ?? 0
-
-  for (const file of files) {
-    /* Мөр нь зурагнаас ӨМНӨ үүсэх боломжгүй (замд id нь хэрэгтэй), зураг нь
-       мөрөөс өмнө үүсэх ёсгүй (өнчин файл үлдэнэ). Тиймээс эхлээд түр
-       санамсаргүй нэрээр байршуулж, дараа нь мөр үүсгэнэ. */
-    const uploaded = await uploadImage(supabase, 'gallery', 'items', file)
-    if ('error' in uploaded) {
-      redirect(`/admin/gallery?error=${encodeURIComponent(uploaded.error)}`)
-    }
-
-    order += 1
-    const { error } = await supabase.from('gallery_items').insert({
-      url: uploaded.url,
-      alt_mn: altMn,
-      alt_en: altEn,
-      sort_order: order,
-    })
-    if (error) redirect(`/admin/gallery?error=${encodeURIComponent(error.message)}`)
-  }
-
-  await audit('gallery.add', 'gallery_items', null, { count: files.length })
-  revalidatePath('/admin/gallery')
-  revalidatePath('/', 'layout')
-  redirect('/admin/gallery?ok=1')
-}
-
-export async function updateGalleryItem(formData: FormData): Promise<void> {
-  await requireStaff()
-
-  const id = uuid.safeParse(formData.get('id'))
-  if (!id.success) redirect('/admin/gallery?error=Зураг олдсонгүй')
-
-  const supabase = await createClient()
-  const { error } = await supabase
-    .from('gallery_items')
-    .update({
-      alt_mn: String(formData.get('alt_mn') ?? '').trim(),
-      alt_en: String(formData.get('alt_en') ?? '').trim(),
-      sort_order: Number(formData.get('sort_order') ?? 0) || 0,
-    })
-    .eq('id', id.data)
-
-  if (error) redirect(`/admin/gallery?error=${encodeURIComponent(error.message)}`)
-
-  await audit('gallery.update', 'gallery_items', id.data, {})
-  revalidatePath('/admin/gallery')
-  revalidatePath('/', 'layout')
-  redirect('/admin/gallery?ok=1')
-}
-
-export async function deleteGalleryItem(formData: FormData): Promise<void> {
-  await requireStaff()
-
-  const id = uuid.safeParse(formData.get('id'))
-  if (id.success) {
-    const supabase = await createClient()
-    const { error } = await supabase.from('gallery_items').delete().eq('id', id.data)
-    if (error) redirect(`/admin/gallery?error=${encodeURIComponent(error.message)}`)
-    await audit('gallery.delete', 'gallery_items', id.data, {})
-  }
-
-  revalidatePath('/admin/gallery')
-  revalidatePath('/', 'layout')
-  redirect('/admin/gallery?ok=1')
 }
 
 /* ── Түгээмэл асуулт ───────────────────────────────────────────────────── */
@@ -1021,3 +926,275 @@ export async function setUserRole(formData: FormData): Promise<void> {
   redirect(`/admin/customers?ok=1${id.success ? `&open=${id.data}` : ''}`)
 }
 
+
+/* ── Анги, курс ─────────────────────────────────────────────────────────
+   Нэг форм ХОЁР хүснэгт рүү бичнэ: `courses` ба (онлайн үед) `course_access`.
+   Ажилтны хувьд энэ нь нэг зүйл — «онлайн анги ба түүний Telegram бүлэг».
+   Хоёр тусдаа форм болговол хагас тохируулсан анги үүсэх боломж нээгдэнэ:
+   зарагдаж байгаа атлаа хаана үзэхийг нь хэлэхгүй анги. */
+
+/* `slug` энд БАЙХГҮЙ. Ажилтанд утгагүй техникийн талбар бөгөөд буруу
+   бичвэл хаяг эвдэрдэг тул нэрнээс нь өөрөө үүснэ (§ `uniqueSlug`) —
+   бараа, багш хоёртой яг ижил дүрэм. Засварлахад ч хөндөгдөхгүй: нийтийн
+   хаяг (`/mn/courses/twerk-4-week`) түүн дээр тогтдог. */
+const courseSchema = z.object({
+  mode: z.enum(['studio', 'online']),
+  name_mn: z.string().trim().min(2),
+  name_en: z.string().trim().default(''),
+  summary_mn: z.string().trim().default(''),
+  summary_en: z.string().trim().default(''),
+  desc_mn: z.string().trim().default(''),
+  desc_en: z.string().trim().default(''),
+  level: z.enum(['beginner', 'intermediate', 'advanced']),
+  price: z.coerce.number().int().min(0).default(0),
+  lesson_count: z.coerce.number().int().min(0).default(0),
+  schedule_mn: z.string().trim().default(''),
+  schedule_en: z.string().trim().default(''),
+  sort_order: z.coerce.number().int().min(0).default(0),
+})
+
+/** Хоосон мөрийг `null` болгоно — `''` нь огноо, uuid баганад хүчингүй. */
+function orNull(value: FormDataEntryValue | null): string | null {
+  const raw = String(value ?? '').trim()
+  return raw === '' ? null : raw
+}
+
+/**
+ * `datetime-local` → ISO.
+ *
+ * ⚠️ `datetime-local` нь ЦАГИЙН БҮСГҮЙ утга илгээдэг («2026-10-01T09:00»).
+ * Түүнийг шууд хадгалбал Postgres нь серверийн бүсээр (UTC) уншиж, элсэлт
+ * УБ-ын цагаар 8 цагаар эрт нээгдэнэ. Ажилтан УБ-д сууж бөглөж байгаа тул
+ * +08 гэж ТОДОРХОЙ хэлж өгнө (§ `ulaanbaatarToIso`).
+ */
+function localDateTimeOrNull(value: FormDataEntryValue | null): string | null {
+  const raw = orNull(value)
+  return raw ? ulaanbaatarToIso(raw) : null
+}
+
+/**
+ * Формоос курсын мөр угсарна.
+ *
+ * Горимоос хамааруулж талбар ЦЭВЭРЛЭНЭ: онлайн ангид байршил, суудал,
+ * эхлэх огноо утгагүй. Формд нуусан талбар нь хоосон утга илгээх боломжтой
+ * (хэрэглэгч горимоо солиод хадгалбал) тул цэвэрлэлт нь сервер дээр байх
+ * ёстой — эс бөгөөс «онлайн атлаа 12 суудалтай» гэсэн мөр үүснэ.
+ */
+function courseRow(data: z.infer<typeof courseSchema>, formData: FormData) {
+  const online = data.mode === 'online'
+
+  return {
+    ...data,
+    instructor_id: orNull(formData.get('instructor_id')),
+    location_id: online ? null : orNull(formData.get('location_id')),
+    starts_on: online ? null : orNull(formData.get('starts_on')),
+    ends_on: online ? null : orNull(formData.get('ends_on')),
+    capacity: online ? null : (Number(formData.get('capacity')) || null),
+    enroll_opens_at: localDateTimeOrNull(formData.get('enroll_opens_at')),
+    enroll_closes_at: localDateTimeOrNull(formData.get('enroll_closes_at')),
+    is_active: formData.get('is_active') === 'on',
+  }
+}
+
+/**
+ * Нүүр зураг — ФАЙЛААР, хаягаар биш.
+ *
+ * Урьд нь энд «Нүүр зургийн хаяг» гэсэн текст талбар байсан: ажилтан
+ * эхлээд Supabase Storage руу орж файлаа байршуулж, хаягийг нь хуулж
+ * авчирч буулгах ёстой байв — гурван программ, дөрвөн алхам. Багш, барааны
+ * формууд аль хэдийн файл сонгуулдаг (§ `createInstructor`); курс тэр
+ * дүрмээс хазайх шалтгаангүй.
+ *
+ * Алдааны мессежийг БУЦААНА, шидэхгүй: курс аль хэдийн үүссэн байдаг тул
+ * дуудагч тал «үүслээ, гэвч зураг ороогүй» гэж ЯГ хэлэх ёстой.
+ */
+async function saveCover(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  courseId: string,
+  formData: FormData,
+): Promise<string | null> {
+  const [file] = pickFiles(formData)
+  if (!file) return null
+
+  const uploaded = await uploadImage(supabase, 'courses', courseId, file)
+  if ('error' in uploaded) return `Анги хадгалагдлаа, гэвч зураг ороогүй — ${uploaded.error}`
+
+  await supabase.from('courses').update({ cover_url: uploaded.url }).eq('id', courseId)
+  return null
+}
+
+/** Telegram блокийг тусдаа хүснэгтэд бичнэ (§ migration `course_access`). */
+async function saveAccess(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  courseId: string,
+  mode: 'studio' | 'online',
+  formData: FormData,
+) {
+  if (mode !== 'online') return
+
+  await supabase.from('course_access').upsert(
+    {
+      course_id: courseId,
+      telegram_url: String(formData.get('telegram_url') ?? '').trim(),
+      note_mn: String(formData.get('access_note_mn') ?? '').trim(),
+      note_en: String(formData.get('access_note_en') ?? '').trim(),
+      updated_at: new Date().toISOString(),
+    },
+    { onConflict: 'course_id' },
+  )
+}
+
+/**
+ * Хадгалсны дараа буцах хаяг.
+ *
+ * Зурвас нь «Танхимын анги», «Онлайн анги» гэсэн ХОЁР цэгтэй, ялгаа нь
+ * `?mode=` (§ admin/layout.tsx). Шүүлтүүргүй буцаавал ажилтан хадгалаад
+ * бүх ангийн жагсаалтад унаж, дөнгөж засварласан ангиа дахин хайна.
+ *
+ * Горимыг ХАДГАЛСАН утгаас авна, өмнөх шүүлтүүрээс биш: танхимын ангийг
+ * онлайн болгосон бол хүн түүнийгээ дагаж очих ёстой.
+ */
+function coursesBack(mode: 'studio' | 'online', extra = ''): string {
+  return `/admin/courses?mode=${mode}${extra}`
+}
+
+export async function createCourse(formData: FormData): Promise<void> {
+  await requireStaff()
+
+  /* Алдааны хаягт ч горим үлдэнэ — цонх дахин нээгдэхэд сонголт нь
+     ажилтны сонгосон хэвээр байна (§ `CourseForm` `defaultMode`). */
+  const mode = formData.get('mode') === 'online' ? 'online' : 'studio'
+
+  const parsed = courseSchema.safeParse(Object.fromEntries(formData))
+  if (!parsed.success) {
+    redirect(
+      coursesBack(mode, `&error=${encodeURIComponent(parsed.error.issues[0]?.message ?? 'invalid')}`),
+    )
+  }
+
+  const supabase = await createClient()
+  const slug = await uniqueSlug(supabase, 'courses', parsed.data.name_mn)
+
+  const { data: course, error } = await supabase
+    .from('courses')
+    .insert({ ...courseRow(parsed.data, formData), slug })
+    .select('id')
+    .single()
+
+  if (error || !course) {
+    redirect(coursesBack(mode, `&error=${encodeURIComponent(error?.message ?? 'Үүсгэж чадсангүй')}`))
+  }
+
+  await saveAccess(supabase, course.id, parsed.data.mode, formData)
+  await audit('course.create', 'courses', course.id, { slug })
+
+  /* Зураг нь курс үүссэний ДАРАА: файлын зам түүний id-аас угсрагддаг.
+     Алдаа гарвал бүхэлд нь бүтэлгүйтсэн мэт хэлэхгүй — курс аль хэдийн
+     үүссэн бөгөөд ажилтан зургаа дараа нь ч оруулж чадна. */
+  const cover = await saveCover(supabase, course.id, formData)
+  if (cover) redirect(coursesBack(parsed.data.mode, `&error=${encodeURIComponent(cover)}`))
+
+  revalidatePath('/admin/courses')
+  revalidatePath('/', 'layout')
+  redirect(coursesBack(parsed.data.mode, '&ok=1'))
+}
+
+export async function updateCourse(formData: FormData): Promise<void> {
+  await requireStaff()
+
+  const mode = formData.get('mode') === 'online' ? 'online' : 'studio'
+  const id = uuid.safeParse(formData.get('id'))
+  const parsed = courseSchema.safeParse(Object.fromEntries(formData))
+
+  if (!id.success || !parsed.success) {
+    redirect(
+      coursesBack(
+        mode,
+        `&error=${encodeURIComponent(
+          parsed.success ? 'Анги олдсонгүй' : (parsed.error.issues[0]?.message ?? 'invalid'),
+        )}`,
+      ),
+    )
+  }
+
+  const supabase = await createClient()
+  const { error } = await supabase
+    .from('courses')
+    .update(courseRow(parsed.data, formData))
+    .eq('id', id.data)
+
+  if (error) redirect(coursesBack(mode, `&error=${encodeURIComponent(error.message)}`))
+
+  await saveAccess(supabase, id.data, parsed.data.mode, formData)
+  await audit('course.update', 'courses', id.data, {})
+
+  // Шинэ файл ирвэл л солино — эс тэгвэл хуучин зураг үлдэнэ.
+  const cover = await saveCover(supabase, id.data, formData)
+  if (cover) redirect(coursesBack(parsed.data.mode, `&error=${encodeURIComponent(cover)}`))
+
+  revalidatePath('/admin/courses')
+  revalidatePath('/', 'layout')
+  redirect(coursesBack(parsed.data.mode, `&ok=1&open=${id.data}`))
+}
+
+/**
+ * Ангийг УСТГАНА.
+ *
+ * Элсэгчтэй анги устахгүй — `course_enrollments.course_id` нь
+ * `on delete restrict` (§ migration). Энэ бол зориудын хамгаалалт:
+ * элсэгчийн түүх алга болвол «би юунд төлсөн юм бэ» гэсэн асуултад хариулах
+ * зүйл үлдэхгүй. Тэр тохиолдолд ажилтан ангиа ИДЭВХГҮЙ болгоно.
+ */
+export async function deleteCourse(formData: FormData): Promise<void> {
+  await requireStaff()
+
+  const mode = formData.get('mode') === 'online' ? 'online' : 'studio'
+  const id = uuid.safeParse(formData.get('id'))
+  if (!id.success) redirect(coursesBack(mode, '&error=Анги олдсонгүй'))
+
+  const supabase = await createClient()
+  const { error } = await supabase.from('courses').delete().eq('id', id.data)
+
+  if (error) {
+    redirect(
+      coursesBack(
+        mode,
+        '&error=' +
+          encodeURIComponent(
+            'Элсэгчтэй ангийг устгах боломжгүй. Оронд нь «Идэвхтэй» тэмдэглэгээг авна уу.',
+          ),
+      ),
+    )
+  }
+
+  await audit('course.delete', 'courses', id.data, {})
+  revalidatePath('/admin/courses')
+  revalidatePath('/', 'layout')
+  redirect(coursesBack(mode, '&ok=1'))
+}
+
+/** Элсэлтийн төлөв — багтаамжийн тоолуур триггерээр өөрөө шинэчлэгдэнэ. */
+export async function updateEnrollmentStatus(formData: FormData): Promise<void> {
+  await requireStaff()
+
+  const id = uuid.safeParse(formData.get('enrollment_id'))
+  const status = z
+    .enum(['pending_payment', 'active', 'cancelled', 'completed'])
+    .safeParse(formData.get('status'))
+
+  if (!id.success || !status.success) redirect('/admin/courses?error=Элсэлт олдсонгүй')
+
+  const supabase = await createClient()
+  const { error } = await supabase.rpc('set_enrollment_status', {
+    p_enrollment_id: id.data,
+    p_status: status.data,
+  })
+
+  if (error) redirect(`/admin/courses?error=${encodeURIComponent(error.message)}`)
+
+  revalidatePath('/admin/courses')
+  revalidatePath('/', 'layout')
+
+  const back = String(formData.get('back') ?? '')
+  redirect(back.startsWith('/admin/courses') ? `${back}` : '/admin/courses?ok=1')
+}

@@ -10,7 +10,6 @@
 | `about.jpg`        | Бидний тухай        | `/mn/about`         |
 | `classes.jpg`      | Хичээлүүд           | `/mn/classes`       |
 | `instructors.jpg`  | Багш нар            | `/mn/instructors`   |
-| `gallery.jpg`      | Галерей             | `/mn/gallery`       |
 | `faq.jpg`          | Түгээмэл асуулт     | `/mn/faq`           |
 | `contact.jpg`      | Холбоо барих        | `/mn/contact`       |
 
@@ -60,7 +59,6 @@ cp ~/Downloads/<файл>.jpg public/media/banners/shop.jpg
 | ------------------ | --------------------------------- | ------------------------------ |
 | `about.jpg`        | Facetune_16-12-2025               | тайз, таван бүжигчин, өд       |
 | `instructors.jpg`  | Facetune_10-11-2025               | гурван царай, ягаан дэвсгэр    |
-| `gallery.jpg`      | 2D8E4239                          | тойргийн нуман эгнээ           |
 | `classes.jpg`      | Facetune_19-09-2024               | шалан дээрх бүлэг              |
 | `shop.jpg`         | Facetune_11-09-2024               | студи, эгнээ — хувцас, гутал   |
 | `contact.jpg`      | Facetune_26-04-2026               | тайз, TWERK MONGOLIA LED       |

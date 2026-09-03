@@ -156,7 +156,11 @@ export default async function AdminSchedulePage({
                 {/* «Шинэ хичээл» сонгосон үед л CSS -ээр нээгдэнэ (§ globals.css) */}
                 {/* Нэмэлт талбарууд нь дүүргэлттэй хайрцаг биш, ЗҮҮН ШУГАМААР
                     тэмдэглэгдсэн блок — сайтын `Alert` -тай нэг хэл. */}
-                <div className="new-class-fields gap-4 border-l-2 border-foreground bg-surface p-5">
+                {/* `surface-2` — `surface` БИШ: энэ блок цонхны дотор суудаг
+                    бөгөөд цонхны дэвсгэр өөрөө `surface` тул ялгарахгүй
+                    байв. Нэг шат дээш гарснаар «энэ бол нэмэлт хэсэг»
+                    гэдэг нь харагдана. */}
+                <div className="new-class-fields gap-4 border-l-2 border-foreground bg-surface-2 p-5">
                   <p className="t-label text-foreground">
                     Шинэ хичээлийн мэдээлэл
                   </p>

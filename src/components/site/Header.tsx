@@ -24,10 +24,24 @@ export async function Header({ locale }: { locale: Locale }) {
   const staff = profile?.role === 'staff' || profile?.role === 'admin'
 
   /* Ширээний компьютерын гол цэс — таван зүйл. «Холбоо барих» энд БАЙХГҮЙ:
-     тэр нь хуудас нээдэггүй, цонх нээдэг тул холбоос биш товч (доор). */
+     тэр нь хуудас нээдэггүй, цонх нээдэг тул холбоос биш товч (доор).
+
+     ── Яагаад ХОЁР ангийн цэг вэ ──────────────────────────────────────
+     Студи хоёр л зүйл зардаг: заалдаа ирж сурах, эсвэл гэрээсээ сурах.
+     Хүн сайт нээхдээ аль хэдийн аль нэгийг нь шийдсэн байдаг — «Анги,
+     курс» гэсэн нэг цэг нь тэр шийдвэрийг хүлээн авахын оронд дахин нэг
+     хуудас, дахин нэг шүүлтүүр дамжуулна.
+
+     Хоёр цэг нь мөн САНАЛ БОЛГОЖ байгаа зүйлээ навбар дээрээ бичнэ:
+     онлайн анги байдгийг мэдэхгүй хүн түүнийг хайхгүй.
+
+     Хуваарь (нэг удаагийн хичээл) энд БАЙХГҮЙ: тэр нь аль хэдийн ирж
+     байгаа хүний хэрэгсэл, шинэ хүний сонголт биш. Гар утасны доод тааз,
+     хөл, нүүр хуудсанд хэвээр. */
   const primary = [
     { href: `/${locale}`, label: t.nav.home },
-    { href: `/${locale}/schedule`, label: t.nav.booking },
+    { href: `/${locale}/courses?mode=studio`, label: t.nav.studioCourses },
+    { href: `/${locale}/courses?mode=online`, label: t.nav.onlineCourses },
     { href: `/${locale}/shop`, label: t.nav.shop },
     { href: `/${locale}/about`, label: t.nav.about },
   ]
@@ -46,14 +60,13 @@ export async function Header({ locale }: { locale: Locale }) {
   // Цэс нь табанд БАЙХГҮЙ зүйлсийг агуулна — давхардуулбал хэрэглэгч
   // «энэ хоёр өөр газар өөр өөр юм уу?» гэж эргэлзэнэ.
   const menuPrimary = [
+    { href: `/${locale}/courses?mode=studio`, label: t.nav.studioCourses },
+    { href: `/${locale}/courses?mode=online`, label: t.nav.onlineCourses },
     { href: `/${locale}/classes`, label: t.nav.classes },
     { href: `/${locale}/instructors`, label: t.nav.instructors },
   ]
 
-  const menuSecondary = [
-    { href: `/${locale}/gallery`, label: t.nav.gallery },
-    { href: `/${locale}/faq`, label: t.nav.faq },
-  ]
+  const menuSecondary = [{ href: `/${locale}/faq`, label: t.nav.faq }]
 
   return (
     <>
@@ -96,7 +109,7 @@ export async function Header({ locale }: { locale: Locale }) {
               Зураасгүй бол зургаан жижиг элемент нэг урт эгнээ болж, аль нь
               алинтайгаа холбоотойг нүд ялгаж чадахгүй. */}
           <div className="ml-auto hidden items-center gap-1 lg:ml-0 lg:flex">
-            <LocaleSwitch current={locale} />
+            <LocaleSwitch current={locale} label={t.nav.language} />
 
             <span aria-hidden className="mx-3 h-5 w-px bg-line" />
 
@@ -196,7 +209,7 @@ export async function Header({ locale }: { locale: Locale }) {
                 )}
 
                 <div className="flex justify-center pt-2">
-                  <LocaleSwitch current={locale} />
+                  <LocaleSwitch current={locale} label={t.nav.language} placement="up" />
                 </div>
               </>
             }

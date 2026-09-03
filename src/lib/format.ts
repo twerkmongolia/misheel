@@ -114,3 +114,15 @@ export function addDays(date: Date, days: number): Date {
 export function nowMs(): number {
   return new Date().getTime()
 }
+
+/**
+ * ISO → `datetime-local` оролтын утга, УБ-ын цагаар («2026-10-01T09:00»).
+ *
+ * `toISOString().slice(0,16)` нь UTC өгдөг тул удирдлагын форм нээгдэхэд
+ * цаг 8 цагаар зөрж харагдана — ажилтан юу ч өөрчлөөгүй атлаа хадгалахад
+ * утга нь гулсана. Хөрвүүлэлт ЗААВАЛ цагийн бүстэй байх ёстой.
+ */
+export function toLocalInput(iso: string | null): string {
+  if (!iso) return ''
+  return formatInTimeZone(new Date(iso), TIMEZONE, "yyyy-MM-dd'T'HH:mm")
+}

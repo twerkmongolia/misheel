@@ -43,7 +43,11 @@ export function CardDialog({
       <button
         type="button"
         onClick={() => ref.current?.showModal()}
-        className="admin-card block w-full overflow-hidden text-left transition-colors hover:border-line-strong hover:bg-surface-2/40"
+        /* Гараар бичсэн hover нь `admin-card-link` -ээр солигдов: удирдлага
+           даяар дарагддаг карт бүр ЯГ ижил хариу өгөх ёстой — бараа нь
+           үзүүлэлтийн картаас өөрөөр хөдөлбөл «эдгээр өөр төрлийн зүйл юм
+           болов уу» гэсэн худал дохио үүснэ (§ globals.css). */
+        className="admin-card admin-card-link w-full overflow-hidden text-left"
       >
         {card}
       </button>

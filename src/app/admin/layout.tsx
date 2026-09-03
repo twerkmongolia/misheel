@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers'
 import { requireStaff } from '@/lib/auth/dal'
-import { AdminShell, type NavGroup } from '@/components/admin/AdminShell'
+import { AdminShell, type AdminTheme, type NavGroup } from '@/components/admin/AdminShell'
 
 /**
  * Цэсийг бүлэглэв — холбоосууд нэг урт багана болвол нүд алдана.
@@ -19,9 +19,22 @@ const groups: NavGroup[] = [
   {
     label: 'Хичээл',
     items: [
-      // Хичээлийн төрлүүд ХУВААРИЙН дотор — тэдгээр нь тусдаа ажлын урсгал
-      // биш, хуваарь үүсгэх хэрэгсэл (§ admin/schedule/page.tsx).
-      { href: '/admin/schedule', label: 'Хуваарь', icon: 'calendar', tab: true },
+      /* «Хуваарь» энэ жагсаалтаас ХАСАГДСАН. Хуудас нь (`/admin/schedule`)
+         устаагүй — нийтийн сайт хуваарь харуулж, хүмүүс нэг удаагийн
+         хичээл захиалсаар байгаа тул код нь ажилласаар байх ёстой. Зөвхөн
+         зурвасаас алга болсон: студи одоо КУРС дээр төвлөрч, хуваарь нь
+         өдөр тутмын ажил байхаа больсон.
+
+         Зам нь бүрэн таслагдаагүй: хяналтын самбарын «Өнөөдрийн хичээл»
+         үзүүлэлт ба «Бүтэн хуваарь →» холбоос хоёул тийш хөтөлсөөр байна.
+         Өөрөөр хэлбэл хуваарь нь ӨДӨР ТУТМЫН цэснээс гарч, хэрэгтэй үедээ
+         олддог газраа үлдэв. Хичээлийн төрлүүд ч мөн тэнд, хумигдсан
+         жагсаалтад байгааг санах хэрэгтэй. */
+      // Хоёр цэг, нэг хуудас. Ажилтны хувьд танхимын элсэлт ба онлайн анги
+      // хоёр нь ӨӨР ажил: нэг нь суудал, огноо тоолдог; нөгөө нь Telegram
+      // бүлэг арчилдаг. Нэг цэг болговол дарж ороод шүүх ёстой болно.
+      { href: '/admin/courses?mode=studio', label: 'Танхимын анги', icon: 'layers' },
+      { href: '/admin/courses?mode=online', label: 'Онлайн анги', icon: 'globe' },
       { href: '/admin/instructors', label: 'Багш нар', icon: 'users' },
     ],
   },
@@ -42,7 +55,6 @@ const contentGroup: NavGroup = {
   items: [
     { href: '/admin/content', label: 'Сайтын агуулга', icon: 'file' },
     { href: '/admin/faq', label: 'Түгээмэл асуулт', icon: 'info' },
-    { href: '/admin/gallery', label: 'Галерей', icon: 'image' },
   ],
 }
 
@@ -61,8 +73,12 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   // Урьдчилсан шалгалт proxy дээр байгаа ч жинхэнэ шалгалт энд.
   const [profile, store] = await Promise.all([requireStaff(), cookies()])
 
-  // Зурвасны өргөнийг серверээс уншина — эхний зурагтаа зөв өргөнтэй гарна.
-  const collapsed = store.get('tm_admin_nav')?.value === '1'
+  /* Горимын сонголтыг СЕРВЕР дээр уншина — эс бөгөөс хуудас эхлээд нэг
+     горимоор зурагдаад дараа нь нөгөө рүү үсэрнэ. Сонголт байхгүй бол
+     `undefined` үлдэж, CSS нь үйлдлийн системийн тохиргоог дагана
+     (§ globals.css `.admin-shell`). */
+  const saved = store.get('tm_admin_theme')?.value
+  const theme: AdminTheme = saved === 'light' || saved === 'dark' ? saved : undefined
 
   // Цэсийг эрхээр нь шүүнэ. Хуудас өөрөө ч `requireAdmin()` -тэй тул энэ нь
   // зөвхөн харагдац — хамгаалалт биш.
@@ -72,7 +88,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     <AdminShell
       groups={nav}
       profile={{ name: profile.full_name ?? 'Админ', role: profile.role }}
-      defaultCollapsed={collapsed}
+      defaultTheme={theme}
     >
       {children}
     </AdminShell>

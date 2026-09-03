@@ -8,7 +8,7 @@
 
 | # | Модуль | Товч |
 |---|--------|------|
-| 1 | Танилцуулга сайт | Twerk Mongolia-гийн нүүр, бидний тухай, багш нар, хичээлийн төрлүүд, галерей, холбоо барих |
+| 1 | Танилцуулга сайт | Twerk Mongolia-гийн нүүр, бидний тухай, багш нар, хичээлийн төрлүүд, холбоо барих |
 | 2 | Хуваарь + бүртгэл | Танхимын хичээлийн цагийн хуваарь, суудал захиалга, ирц |
 | 3 | Онлайн дэлгүүр | Биет бараа (хувцас, merch) — хэмжээ/өнгө, нөөц, хүргэлт |
 | 4 | Admin dashboard | Хуваарь, бүртгэл, захиалга, бараа, төлбөр, контент удирдлага |
@@ -191,7 +191,8 @@ src/
         instructors/[slug]/
         classes/page.tsx       Хичээлийн төрөл, түвшин, үнэ
         classes/[slug]/
-        gallery/page.tsx
+        courses/page.tsx       Танхимын элсэлт + онлайн анги
+        courses/[slug]/        Дэлгэрэнгүй + элсэх
         faq/page.tsx
         contact/page.tsx       + Server Action → contact_messages
       (booking)/
@@ -230,7 +231,7 @@ Admin нь тусдаа root-д (locale-гүй, зөвхөн монголоор)
       shop/products/  shop/orders/  shop/inventory/
       payments/                Гар шилжүүлэг баталгаажуулах
       customers/
-      content/                 Hero, тухай, галерей
+      content/                 Hero, тухай, FAQ
       settings/  audit/
 ```
 
@@ -370,7 +371,7 @@ export interface PaymentProvider {
 | Бараа | Variant, нөөц, зураг байршуулах (Storage) |
 | Төлбөр | Гар шилжүүлэг баталгаажуулах, буцаалт |
 | Хэрэглэгч | Хайлт, түүх, эрх олгох (зөвхөн `admin`) |
-| Контент | Hero, тухай, галерей, FAQ — mn/en хоёулаа |
+| Контент | Hero, тухай, FAQ — mn/en хоёулаа |
 | Audit | Хэн юу өөрчилсөн |
 
 Бүх admin Server Action `requireStaff()`-ээр эхэлнэ. Эрх олгох action нь `role='admin'` шаардана.
@@ -405,7 +406,7 @@ NEXT_PUBLIC_SITE_URL
 - Migration-ууд `supabase/migrations/` дотор SQL файлаар — UI дээр гараар өөрчлөхгүй. `supabase db push` ашиглана.
 - **Vercel Cron** (`vercel.json`): хичээлийн сануулга (өдөрт 1), дуусаагүй `pending_payment` захиалга цэвэрлэх.
 - Домэйн + и-мэйл: Resend-д домэйн баталгаажуулна (SPF/DKIM), эс бөгөөс и-мэйл спам руу орно.
-- Storage bucket: `public/products`, `public/gallery` (нийтийн уншилт), `private/*` шаардлагатай бол.
+- Storage bucket: `public/products` (нийтийн уншилт), `private/*` шаардлагатай бол.
 
 ---
 

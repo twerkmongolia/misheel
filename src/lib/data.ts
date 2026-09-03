@@ -6,7 +6,10 @@ import { isSupabaseConfigured } from '@/lib/supabase/env'
 import type {
   ClassSession,
   ClassType,
-  GalleryItem,
+  Course,
+  CourseMode,
+  CourseAccess,
+  CourseEnrollment,
   FaqItem,
   Instructor,
   Location,
@@ -294,12 +297,170 @@ export async function getVariantsWithProduct(
   })
 }
 
-export async function getGallery(): Promise<GalleryItem[]> {
+/* ── Курс ───────────────────────────────────────────────────────────────── */
+
+export type CourseView = Course & {
+  instructor: Instructor | null
+  location: Location | null
+  /** `null` = хязгааргүй суудал. Онлайн ангид үргэлж `null`. */
+  seatsLeft: number | null
+  isFull: boolean
+  /** Элсэлт ЯГ ОДОО нээлттэй эсэх — цонх, багтаамж, эхлэх өдөр гурвуулаа. */
+  enrollOpen: boolean
+  /** Хаалттай бол ЯАГААД. Хуудас шалтгааныг хэлэх ёстой, зөвхөн «болохгүй» гэж биш. */
+  closedReason: 'inactive' | 'not_open' | 'closed' | 'started' | 'full' | null
+}
+
+function buildCourse(
+  course: Course,
+  instructors: Instructor[],
+  locations: Location[],
+  now: Date,
+): CourseView {
+  const seatsLeft =
+    course.capacity === null ? null : Math.max(0, course.capacity - course.enrolled_count)
+  const isFull = seatsLeft !== null && seatsLeft === 0
+
+  /* Дараалал нь ЗОРИУД: хамгийн эрт мэдэгддэг шалтгааныг эхэлж хэлнэ.
+     «Дүүрсэн» гэж хэлээд дараа нь «үнэндээ элсэлт хаагдсан» гэж залруулах
+     нь хэрэглэгчийн цаг хоёр удаа иднэ. */
+  const opensAt = course.enroll_opens_at ? new Date(course.enroll_opens_at) : null
+  const closesAt = course.enroll_closes_at ? new Date(course.enroll_closes_at) : null
+  const started =
+    course.starts_on !== null && new Date(`${course.starts_on}T23:59:59+08:00`) < now
+
+  const closedReason: CourseView['closedReason'] = !course.is_active
+    ? 'inactive'
+    : opensAt && now < opensAt
+      ? 'not_open'
+      : closesAt && now > closesAt
+        ? 'closed'
+        : started
+          ? 'started'
+          : isFull
+            ? 'full'
+            : null
+
+  return {
+    ...course,
+    instructor: instructors.find((row) => row.id === course.instructor_id) ?? null,
+    location: locations.find((row) => row.id === course.location_id) ?? null,
+    seatsLeft,
+    isFull,
+    enrollOpen: closedReason === null,
+    closedReason,
+  }
+}
+
+/**
+ * Курсын жагсаалт.
+ *
+ * Багш, байршил хоёрыг ТУСДАА татаад санах ойд холбоно — `select('*, ...')`
+ * дотор join бичвэл RLS нь дэд хүснэгт бүрд дахин үнэлэгдэж, курс бүрд нэг
+ * нэмэлт төлөвлөгөө үүсдэг. Хоёр жижиг хүснэгтийг бүтнээр татах нь хямд.
+ */
+export async function getCourses(options?: {
+  mode?: CourseMode
+  includeInactive?: boolean
+}): Promise<CourseView[]> {
   if (!isSupabaseConfigured()) return []
 
   const supabase = await createClient()
-  const { data } = await supabase.from('gallery_items').select('*').order('sort_order')
-  return data ?? []
+  let query = supabase.from('courses').select('*').order('sort_order')
+  if (options?.mode) query = query.eq('mode', options.mode)
+  if (!options?.includeInactive) query = query.eq('is_active', true)
+
+  const { data: courses } = await query
+  if (!courses || courses.length === 0) return []
+
+  const [instructors, locations] = await Promise.all([getInstructors(true), getLocations()])
+  const now = new Date()
+
+  return courses.map((course) => buildCourse(course, instructors, locations, now))
+}
+
+export async function getCourseBySlug(slug: string): Promise<CourseView | null> {
+  if (!isSupabaseConfigured()) return null
+
+  const supabase = await createClient()
+  const { data: course } = await supabase.from('courses').select('*').eq('slug', slug).maybeSingle()
+  if (!course) return null
+
+  const [instructors, locations] = await Promise.all([getInstructors(true), getLocations()])
+  return buildCourse(course, instructors, locations, new Date())
+}
+
+export type EnrollmentView = CourseEnrollment & { course: Course }
+
+/**
+ * Хэрэглэгчийн элсэлтүүд.
+ *
+ * Цуцлагдсаныг ч буцаана — «би бүртгүүлсэн байсан юм, хаашаа алга болов?»
+ * гэсэн эргэлзээ нь хамгийн хурдан итгэл алдагдуулдаг. Хуудас нь тэдгээрийг
+ * тусад нь, бүдэг бүлэгт харуулна.
+ */
+export async function getMyEnrollments(userId: string | null): Promise<EnrollmentView[]> {
+  if (!userId || !isSupabaseConfigured()) return []
+
+  const supabase = await createClient()
+  const { data: enrollments } = await supabase
+    .from('course_enrollments')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+
+  if (!enrollments || enrollments.length === 0) return []
+
+  const { data: courses } = await supabase
+    .from('courses')
+    .select('*')
+    .in('id', [...new Set(enrollments.map((row) => row.course_id))])
+
+  const byId = indexBy(courses ?? [], 'id')
+
+  return enrollments.flatMap((enrollment) => {
+    const course = byId.get(enrollment.course_id)
+    return course ? [{ ...enrollment, course }] : []
+  })
+}
+
+/** Нэг курст тухайн хүний ИДЭВХТЭЙ элсэлт (цуцлагдаагүй). */
+export async function getMyEnrollment(
+  courseId: string,
+  userId: string | null,
+): Promise<CourseEnrollment | null> {
+  if (!userId || !isSupabaseConfigured()) return null
+
+  const supabase = await createClient()
+  const { data } = await supabase
+    .from('course_enrollments')
+    .select('*')
+    .eq('course_id', courseId)
+    .eq('user_id', userId)
+    .in('status', ['pending_payment', 'active', 'completed'])
+    .maybeSingle()
+
+  return data ?? null
+}
+
+/**
+ * Онлайн ангийн Telegram холбоос.
+ *
+ * ХАМГААЛАЛТ НЬ ЭНД БИШ, RLS дээр (§ migration `course_access_read`). Энэ
+ * функц нь идэвхтэй элсэлтгүй хүнд зүгээр л `null` буцаана — сервер дээр
+ * дахин шалгах нь хоёр дахь хамгаалалт биш, зөвхөн давхардал болно.
+ */
+export async function getCourseAccess(courseId: string): Promise<CourseAccess | null> {
+  if (!isSupabaseConfigured()) return null
+
+  const supabase = await createClient()
+  const { data } = await supabase
+    .from('course_access')
+    .select('*')
+    .eq('course_id', courseId)
+    .maybeSingle()
+
+  return data ?? null
 }
 
 export async function getFaq(): Promise<FaqItem[]> {

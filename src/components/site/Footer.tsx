@@ -39,16 +39,17 @@ export async function Footer({ locale }: { locale: Locale }) {
     {
       heading: t.nav.menu,
       items: [
+        { href: `/${locale}/courses?mode=studio`, label: t.nav.studioCourses },
+        { href: `/${locale}/courses?mode=online`, label: t.nav.onlineCourses },
         { href: `/${locale}/schedule`, label: t.nav.schedule },
-        { href: `/${locale}/classes`, label: t.nav.classes },
         { href: `/${locale}/shop`, label: t.nav.shop },
       ],
     },
     {
       heading: t.nav.about,
       items: [
+        { href: `/${locale}/classes`, label: t.nav.classes },
         { href: `/${locale}/instructors`, label: t.nav.instructors },
-        { href: `/${locale}/gallery`, label: t.nav.gallery },
         { href: `/${locale}/faq`, label: t.nav.faq },
       ],
     },

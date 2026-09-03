@@ -81,7 +81,7 @@ src/
   proxy.ts                  session шинэчлэлт + хэлний redirect (Next 16-д middleware БИШ)
   app/
     [locale]/               mn | en
-      (marketing)/          нүүр, тухай, хичээлүүд, багш, галерей, FAQ, холбоо барих
+      (marketing)/          нүүр, тухай, хичээлүүд, анги/курс, багш, FAQ, холбоо барих
       (booking)/schedule/   хуваарь, суудал захиалга
       (shop)/               дэлгүүр, сагс, checkout, захиалга
       (account)/            профайл, миний хичээлүүд, миний захиалгууд
