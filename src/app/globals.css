@@ -1979,45 +1979,12 @@ html.rv-on [data-rv='mask'] .mask-line:nth-child(4) > span { transition-delay: c
 .rail { scrollbar-width: none; -ms-overflow-style: none; }
 .rail::-webkit-scrollbar { display: none; }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   7 · ГОРИМЫН ТОВЧ, ЛОГО
-
-   `light-dark()` нь зөвхөн ӨНГӨНД ажилладаг тул «аль дүрсийг харуулах»,
-   «логог эргүүлэх эсэх» хоёрыг сонгогчоор удирдана.
-
-   Хоёр дүрс ЗЭРЭГ зурагдаад аль нэг нь CSS-ээр нуугдана. JS-ээр сонгуулбал
-   сервер нь системийн тохиргоог мэдэхгүй тул эхний зурагт буруу дүрс
-   анивчина — hydration зөрөх, эсвэл товч нүд ирмэхийн зуур солигдох.
-   ═══════════════════════════════════════════════════════════════════════════ */
-
-/* Анхдагч нь ХАРАНХУЙ: сар нуугдаж, нар харагдана (нар = «гэрэлтэй рүү
-   шилжих»). Дүрс нь ОДОО байгаа горимыг биш, ДАРАХАД болох горимыг заана. */
-.theme-sun { display: block; }
-.theme-moon { display: none; }
-
-@media (prefers-color-scheme: light) {
-  :root:not([data-theme='dark']) .theme-sun { display: none; }
-  :root:not([data-theme='dark']) .theme-moon { display: block; }
-}
-
-:root[data-theme='light'] .theme-sun { display: none; }
-:root[data-theme='light'] .theme-moon { display: block; }
-:root[data-theme='dark'] .theme-sun { display: block; }
-:root[data-theme='dark'] .theme-moon { display: none; }
-
-/* Хар зурлагатай, дэвсгэргүй лого — ХАРАНХУЙ дээр харагдахгүй тул эргүүлнэ.
-   Гэрэлтэй дээр эргүүлбэл цагаан болж алга болно. */
+/* Хар зурлагатай, дэвсгэргүй лого — харанхуй дээр харагдахгүй тул эргүүлнэ.
+   Сайт ганц горимтой болсон тул нөхцөл шаардахгүй, үргэлж эргэнэ. */
 .logo-invert { filter: invert(1); }
 
-@media (prefers-color-scheme: light) {
-  :root:not([data-theme='dark']) .logo-invert { filter: none; }
-}
-
-:root[data-theme='light'] .logo-invert { filter: none; }
-:root[data-theme='dark'] .logo-invert { filter: invert(1); }
-
 /* ═══════════════════════════════════════════════════════════════════════════
-   8 · ХӨДӨЛГӨӨН БАГАСГАХ
+   7 · ХӨДӨЛГӨӨН БАГАСГАХ
 
    Хагас арга байхгүй: хугацааг богиносгох нь давталттай хөдөлгөөнийг
    зогсоодоггүй. Тиймээс бүгдийг ТАСАЛНА, агуулгыг эцсийн төлөвт нь
