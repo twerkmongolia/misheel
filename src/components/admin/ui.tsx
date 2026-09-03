@@ -270,40 +270,77 @@ export type Tone = 'neutral' | 'good' | 'warn' | 'danger' | 'info'
  * Монохром систем дээр өнгө байхгүй тул ялгааг ХЭЛБЭР үүсгэнэ — нийтийн
  * сайттай яг ижил дүрэм (§ globals.css `.tag`):
  *
- *   good    → дүүрсэн        · баталгаажсан, дууссан
- *   info    → бүдэг дүүргэлт · явцад буй
- *   warn    → тод хүрээ      · анхаарал шаардсан
- *   danger  → тасархай хүрээ · цуцлагдсан, боломжгүй
- *   neutral → бүдэг дүүргэлт · энгийн мэдээлэл
+ *   neutral → бүдэг дүүргэлт  · энгийн мэдээлэл
+ *   info    → дүүрсэн         · явцад буй, анхаарал татсан
+ *   good    → дүүрсэн + ✓     · баталгаажсан, дууссан
+ *   warn    → тод хүрээ       · анхаарал шаардсан
+ *   danger  → тасархай + ✕    · цуцлагдсан, боломжгүй
+ *
+ * ── Яагаад хоёр өөрчлөлт орсон бэ ──────────────────────────────────────
+ * Өмнө нь `neutral` ба `info` ХОЁУЛАА `tag-mute` байсан — өөрөөр хэлбэл
+ * захиалгын «Бэлтгэж буй» ба энгийн мэдээлэл яг ижил харагдана. Таван
+ * төлөвт дөрвөн хэлбэр хүрэхгүй байв.
+ *
+ * Одоо `info` нь дүүрсэн (анхаарал татна), `good` нь дүүрсэн дээр ✓
+ * нэмнэ. Тэмдэг нь `::before` -ээр зурагдах тул хандах модонд ордоггүй,
+ * утга нь шошгын текстэд аль хэдийн бий (§ globals.css `.tag-mark`).
  *
  * Өнгө дангаараа мэдээлэл дамжуулж БОЛОХГҮЙ (WCAG 1.4.1) — энд өнгө огт
  * байхгүй тул текст ба хэлбэр хоёулаа ажиллана.
  */
 const badgeTones: Record<Tone, string> = {
   neutral: 'tag-mute',
-  good: 'tag-fill',
+  info: 'tag-fill',
+  good: 'tag-fill tag-mark',
   warn: 'tag-line',
-  danger: 'tag-dash',
-  info: 'tag-mute',
+  danger: 'tag-dash tag-mark',
 }
+
+const badgeMarks: Partial<Record<Tone, string>> = { good: '\u2713', danger: '\u2715' }
 
 export function Badge({ tone = 'neutral', children }: { tone?: Tone; children: ReactNode }) {
-  return <span className={`tag ${badgeTones[tone]}`}>{children}</span>
+  return (
+    <span className={`tag ${badgeTones[tone]}`} data-mark={badgeMarks[tone]}>
+      {children}
+    </span>
+  )
 }
 
-/** Ялгаа нь зүүн ирмэгийн ХЭВ болон текстийн жинд — өнгөнд биш. */
+/**
+ * Мэдэгдэл. Ялгаа нь зүүн ирмэгийн ХЭВ, ДЭВСГЭР ба ДҮРС дээр — өнгөнд биш.
+ *
+ * Өмнө нь `good` нь 2px тод шугам, `danger` нь 3px тод шугам байв. Нэг
+ * пикселийн зөрүү бол ялгаа биш: «Хадгалагдлаа» ба «Алдаа гарлаа» хоёрыг
+ * хажуу хажууд нь тавихгүйгээр ялгах боломжгүй. Мөн `neutral` ба `info`
+ * хоёр яг ижил байв.
+ *
+ * Одоо гурван зэрэгцээ дохио: ирмэгийн ЗУЗААН (2 → 4px), ДЭВСГЭР
+ * (`surface` → `surface-3`), ДҮРС. Гурвуулаа нэг чиглэлд заана.
+ *
+ * `role`: `status` нь эелдэг — дэлгэц уншигч одоогийн уншилтаа дуусгаад
+ * хэлнэ. Алдаа тэр болтол хүлээж болохгүй тул `danger` нь `alert`.
+ */
 const alertTones: Record<Tone, { box: string; icon: NavIcon }> = {
-  neutral: { box: 'border-line text-foreground-soft', icon: 'info' },
-  good: { box: 'border-foreground text-foreground', icon: 'success' },
-  warn: { box: 'border-line-strong border-dashed text-foreground-soft', icon: 'alert' },
-  danger: { box: 'border-foreground border-l-[3px] font-medium text-foreground', icon: 'alert' },
-  info: { box: 'border-line text-foreground-soft', icon: 'info' },
+  neutral: { box: 'border-l-2 border-line bg-surface text-foreground-soft', icon: 'info' },
+  info: { box: 'border-l-2 border-line-strong bg-surface text-foreground-soft', icon: 'info' },
+  good: { box: 'border-l-2 border-foreground bg-surface text-foreground', icon: 'success' },
+  warn: {
+    box: 'border-l-2 border-dashed border-line-strong bg-surface text-foreground-soft',
+    icon: 'alert',
+  },
+  danger: {
+    box: 'border-l-4 border-foreground bg-surface-3 font-medium text-foreground',
+    icon: 'alert',
+  },
 }
 
 export function Alert({ tone = 'neutral', children }: { tone?: Tone; children: ReactNode }) {
   const { box, icon } = alertTones[tone]
   return (
-    <div className={`t-small flex items-start gap-3 border-l-2 bg-surface px-5 py-4 ${box}`} role="status">
+    <div
+      className={`t-small flex items-start gap-3 px-5 py-4 ${box}`}
+      role={tone === 'danger' ? 'alert' : 'status'}
+    >
       <AdminIcon name={icon} className="mt-0.5 h-4 w-4 shrink-0" />
       <span className="min-w-0">{children}</span>
     </div>
