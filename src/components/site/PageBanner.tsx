@@ -1,6 +1,6 @@
 import { PageHeader } from '@/components/ui'
 import { Media, mediaExists } from './media'
-import type { ReactNode } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 
 /**
  * Хуудасны ТУУЗ — гарчиг зураг дээрээ суусан толгой хэсэг.
@@ -111,18 +111,33 @@ export function PageBanner({
         Тиймээс гарчиг зургийн ДООР үлдэж, зураг ачаалж дуустал л
         харагдаад дараа нь бүрэн далдлагдаж байв.
       */}
-      <div className="shell relative z-10 col-start-1 row-start-1 flex min-h-[clamp(15rem,34vw,26rem)] flex-col justify-end gap-4 pt-20 pb-8 sm:pb-11">
+      <div
+        className="shell relative z-10 col-start-1 row-start-1 flex min-h-[clamp(15rem,34vw,26rem)] flex-col justify-end gap-4 pt-20 pb-8 sm:pb-11"
+      >
+        {/*
+          Тууз нь ҮРГЭЛЖ дэлгэц нээгдмэгц харагдана — тиймээс гүйлтийн
+          ажиглагчид (`data-rv`) уях нь утгагүй: ажиглагч ачаалж амжаагүй,
+          эсвэл элементийг алдвал хуудасны гарчиг ҮҮРД хоосон үлдэнэ.
+          Баатрын хэсэгтэй ижилхэн ЦАГААР ажилладаг цэвэр CSS хөдөлгөөн
+          (§ globals.css `.enter`): JS огт оролцохгүй.
+        */}
         {eyebrow && (
-          <span className="flex items-center gap-3 text-white/70" data-rv>
+          <span className="enter flex items-center gap-3 text-white/70">
             <span aria-hidden className="h-px w-6 shrink-0 bg-white/40" />
             <span className="t-label">{eyebrow}</span>
           </span>
         )}
-        <h1 className="t-h1 max-w-[18ch] text-white" data-rv>
+        <h1
+          className="t-h1 enter max-w-[18ch] text-white"
+          style={{ '--d': '80ms' } as CSSProperties}
+        >
           {title}
         </h1>
         {lead && (
-          <p className="t-lead max-w-[46ch] text-white/80" data-rv>
+          <p
+            className="t-lead enter max-w-[46ch] text-white/80"
+            style={{ '--d': '180ms' } as CSSProperties}
+          >
             {lead}
           </p>
         )}
