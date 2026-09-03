@@ -40,7 +40,20 @@ NEXT_PUBLIC_SUPABASE_URL=https://xxxx.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
 SUPABASE_SERVICE_ROLE_KEY=eyJ...        # server-only, хэзээ ч NEXT_PUBLIC_ болгохгүй
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
+
+TELEGRAM_CHANNEL_URL=https://t.me/+xxxx   # онлайн ангийн суваг, server-only
 ```
+
+`TELEGRAM_CHANNEL_URL` — онлайн ангид элсэлтээ баталгаажуулсан хүнд харагдах
+«Telegram нээх» товчны хаяг. Энэ ганц мөрийг бичихэд онлайн ангиуд шууд
+ажиллана; өгөгдлийн сан хөндөх шаардлагагүй. Анги тус бүр өөрийн сувагтай
+байх бол админ → **Хандалт** хэсэгт тухайн ангийнхыг бичнэ — мөрийн утга нь
+энэ хувьсагчийг дарна.
+
+> Холбоосыг зөвхөн `status = 'active'` элсэлттэй хүнд буцаана
+> (§ `lib/data.ts` `getCourseTelegramUrl`). `NEXT_PUBLIC_` угтвар ЗОРИУДААР
+> байхгүй: угтвартай бол Next нь утгыг клиентийн багцад оруулах тул
+> элсээгүй хүн ч эх кодоос уншина.
 
 ### 3. Ажиллуулах
 
