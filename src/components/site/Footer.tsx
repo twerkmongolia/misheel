@@ -50,6 +50,7 @@ export async function Footer({ locale }: { locale: Locale }) {
       items: [
         { href: `/${locale}/classes`, label: t.nav.classes },
         { href: `/${locale}/instructors`, label: t.nav.instructors },
+        { href: `/${locale}/gallery`, label: t.nav.gallery },
         { href: `/${locale}/faq`, label: t.nav.faq },
       ],
     },
