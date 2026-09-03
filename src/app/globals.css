@@ -894,10 +894,14 @@ h3, h4 {
   /* Багананы ирмэгээс ДЭЛГЭЦИЙН ирмэг хүртэлх зай = савны гадуурх зай +
      савны дотоод зай. Зөвхөн `--shell-pad` -ийг хасвал 88rem -ээс өргөн
      дэлгэц дээр багана голлон суух тул хажуу талд цоорхой үлдэнэ. */
-  :root { --edge: calc((100vw - min(100vw, var(--shell))) / 2 + var(--shell-pad)); }
+  /* ⚠️ `--edge` БИШ — тэр нь ӨНГӨ (ирмэгийн гэрэл). Уртыг тэр нэрээр
+     дарж бичвэл `.card { box-shadow: inset 0 1px 0 var(--edge) }` нь
+     «0 1px <урт>» болж хувирч, өнгө нь `currentColor` руу унана —
+     1024px-ээс өргөн дэлгэц дээр бүх карт ЦАГААН болно. */
+  :root { --bleed-edge: calc((100vw - min(100vw, var(--shell))) / 2 + var(--shell-pad)); }
 
-  .bleed-r { margin-right: calc(var(--edge) * -1); }
-  .bleed-l { margin-left: calc(var(--edge) * -1); }
+  .bleed-r { margin-right: calc(var(--bleed-edge) * -1); }
+  .bleed-l { margin-left: calc(var(--bleed-edge) * -1); }
 }
 
 /* 12 багана. Хэсэг бүр өөр өөр мужийг эзэлснээр хуудас нэг хэвийн
