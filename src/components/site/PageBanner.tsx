@@ -101,7 +101,17 @@ export function PageBanner({
 
       {/* `pt-20` — гарчиг ургахдаа дээшээ ургана. Наалдмал навбарын доогуур
           орохоос сэргийлж дээрээ зай үлдээнэ. */}
-      <div className="shell col-start-1 row-start-1 flex min-h-[clamp(15rem,34vw,26rem)] flex-col justify-end gap-4 pt-20 pb-8 sm:pb-11">
+      {/*
+        ⚠️ `relative z-10` нь ЧИМЭГ БИШ — ЗААВАЛ байх ёстой.
+
+        Хоёр нүд НЭГ грид нүдэнд сууна. Зургийн сав нь `relative`, энэ нь
+        байрлуулаагүй байсан: CSS -ийн зурах дараалалд байрлуулсан элемент
+        нь байрлуулаагүй ах дүүгээсээ ДЭЭР зурагддаг (грид доторх зүйл нь
+        `z-index` -гүй бол мөрийн блок мэт, өөрөөр хэлбэл ӨМНӨ зурагдана).
+        Тиймээс гарчиг зургийн ДООР үлдэж, зураг ачаалж дуустал л
+        харагдаад дараа нь бүрэн далдлагдаж байв.
+      */}
+      <div className="shell relative z-10 col-start-1 row-start-1 flex min-h-[clamp(15rem,34vw,26rem)] flex-col justify-end gap-4 pt-20 pb-8 sm:pb-11">
         {eyebrow && (
           <span className="flex items-center gap-3 text-white/70" data-rv>
             <span aria-hidden className="h-px w-6 shrink-0 bg-white/40" />
