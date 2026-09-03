@@ -26,7 +26,6 @@ const mn = {
     cart: 'Сагс',
     menu: 'Цэс',
     language: 'Хэл',
-    theme: 'Өнгөний горим',
   },
   today: {
     label: 'Өнөөдөр',
@@ -425,7 +424,6 @@ const en: Dictionary = {
     cart: 'Cart',
     menu: 'Menu',
     language: 'Language',
-    theme: 'Colour mode',
   },
   today: {
     label: 'Today',
