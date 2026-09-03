@@ -113,6 +113,7 @@ export async function Header({ locale }: { locale: Locale }) {
               Зураасгүй бол зургаан жижиг элемент нэг урт эгнээ болж, аль нь
               алинтайгаа холбоотойг нүд ялгаж чадахгүй. */}
           <div className="ml-auto hidden items-center gap-1 lg:ml-0 lg:flex">
+            <ThemeToggle label={t.nav.theme} />
             <LocaleSwitch current={locale} label={t.nav.language} />
 
             <span aria-hidden className="mx-3 h-5 w-px bg-line" />
