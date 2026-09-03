@@ -58,7 +58,23 @@ export function PageBanner({
   }
 
   return (
-    <header className="relative isolate">
+    /*
+      ── Зураг ба текст нь ДАВХАРГА биш ХОЁУЛАА агуулга ────────────────────
+      Өмнө нь зураг тогтмол өндөртэй байж, текст нь `absolute bottom-0`
+      -оор түүн дээр ХӨВДӨГ байв. Тэр нь хоёр төрлийн эвдрэл өгдөг:
+
+        · Урт гарчиг эсвэл `lead` нь 15rem -ээс өндөр болвол текст зургаас
+          ДЭЭШ халиж, наалдмал навбар руу орно (гар утсанд «Хичээл, курсын
+          дэлгэрэнгүй танилцуулга» гэсэн хоёр мөр гарчиг ХАНГАЛТТАЙ).
+        · Зураг өөрөө текстээс хамаарахгүй тул халилтыг зохиомж өөрөө
+          «мэддэггүй» — засах цорын ганц арга нь өндрийг гараар тааруулах.
+
+      Одоо хоёулаа НЭГ grid нүдэнд сууна. Мөрийн өндрийг хамгийн өндөр
+      элемент тогтооно: текст богино бол `min-height` (хуучин clamp) хүчээ
+      барина, урт бол мөр өөрөө ургаж, зураг нь `stretch` -ээр дагаж
+      сунана. Халих боломж бүтцээрээ хаагдана.
+    */
+    <header className="relative isolate grid">
       {/* Өндөр нь ХАРЬЦААГААР биш ХЭМЖЭЭГЭЭР тогтоно. 21:9 харьцаа нь өргөн
           дэлгэцэд зөв ч утсан дээр 3см өндөр зурвас болж хувирдаг —
           зураг биш зураас. `clamp` нь хоёр туйлыг хоёуланг нь барина. */}
@@ -69,7 +85,7 @@ export function PageBanner({
 
           Тууз нь зөвхөн ЭНД хөдөлнө — хуудсан дээрх бүх зураг өөр өөр
           хурдтай хөдөлбөл гүйлт нь сэлгэцэж, унших боломжгүй болно. */}
-      <div className="relative h-[clamp(15rem,34vw,26rem)] overflow-hidden">
+      <div className="relative col-start-1 row-start-1 overflow-hidden">
         <div className="drift absolute inset-0 -top-[6%] h-[112%]">
           <Media
             src={src!}
@@ -83,7 +99,9 @@ export function PageBanner({
         </div>
       </div>
 
-      <div className="shell absolute inset-x-0 bottom-0 flex flex-col gap-4 pb-8 sm:pb-11">
+      {/* `pt-20` — гарчиг ургахдаа дээшээ ургана. Наалдмал навбарын доогуур
+          орохоос сэргийлж дээрээ зай үлдээнэ. */}
+      <div className="shell col-start-1 row-start-1 flex min-h-[clamp(15rem,34vw,26rem)] flex-col justify-end gap-4 pt-20 pb-8 sm:pb-11">
         {eyebrow && (
           <span className="flex items-center gap-3 text-white/70" data-rv>
             <span aria-hidden className="h-px w-6 shrink-0 bg-white/40" />
