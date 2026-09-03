@@ -205,7 +205,17 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
               <h1 className="t-display enter-mask" style={{ '--d': '80ms' } as CSSProperties}>
                 {heroWords.map((word, index) => (
                   <span key={word + index} className="mask-line">
-                    <span className={index === heroWords.length - 1 ? 't-it' : undefined}>
+                    {/* Сүүлийн үг нь бүдгэрч, гарчгийг хоёр өнгөлөг болгоно —
+                        гэхдээ ЗӨВХӨН бусад үг байгаа үед. Админаас гарчгийг
+                        нэг үгээр («Twerk») бичихэд «сүүлийн» үг нь цорын ганц
+                        үг болж, баатрын гарчиг БҮХЭЛДЭЭ саарал болно. */}
+                    <span
+                      className={
+                        heroWords.length > 1 && index === heroWords.length - 1
+                          ? 't-it'
+                          : undefined
+                      }
+                    >
                       {word}
                     </span>
                   </span>
