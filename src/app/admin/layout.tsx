@@ -55,6 +55,7 @@ const contentGroup: NavGroup = {
   items: [
     { href: '/admin/content', label: 'Сайтын агуулга', icon: 'file' },
     { href: '/admin/faq', label: 'Түгээмэл асуулт', icon: 'info' },
+    { href: '/admin/gallery', label: 'Галерей', icon: 'image' },
   ],
 }
 
