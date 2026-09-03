@@ -24,13 +24,26 @@ export default async function AccountLayout({
   return (
     <div className="shell flex flex-col gap-12 pt-12 sm:pt-16">
       {/* Табууд — дүүрсэн товч биш, доогуур зураастай текст. Сайтын дээд
-          навигацитай ЯГ нэг дүрэм (§ globals.css `.nav-item`). */}
-      <nav className="flex gap-7 border-b border-line">
-        {tabs.map((tab) => (
-          <NavLink key={tab.href} href={tab.href} exact={tab.exact} className="nav-item t-small">
-            {tab.label}
-          </NavLink>
-        ))}
+          навигацитай ЯГ нэг дүрэм (§ globals.css `.nav-item`).
+
+          ⚠️ Нарийн дэлгэцэд ХЭВТЭЭ гүйнэ, дараагийн мөр рүү УНАХГҮЙ. Дөрвөн
+          таб 360px дээр багтахгүй бөгөөд унасан таб нь навигаци биш
+          «жагсаалт» мэт харагддаг: идэвхтэй зураас нь хоёр мөрийн аль
+          нэгэнд нуугдаж, хэрэглэгч хаана байгаагаа алддаг. Гүйлтийн зурвас
+          нуугдана — доорх зураас өөрөө «үргэлжилж байна» гэж хэлнэ. */}
+      <nav className="-mx-[var(--shell-pad)] overflow-x-auto px-[var(--shell-pad)] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div className="flex min-w-max gap-7 border-b border-line">
+          {tabs.map((tab) => (
+            <NavLink
+              key={tab.href}
+              href={tab.href}
+              exact={tab.exact}
+              className="nav-item t-small whitespace-nowrap"
+            >
+              {tab.label}
+            </NavLink>
+          ))}
+        </div>
       </nav>
       {children}
     </div>
