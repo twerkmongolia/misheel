@@ -27,8 +27,6 @@ export type NavIcon =
   | 'close'
   | 'shield'
   | 'logout'
-  | 'sun'
-  | 'moon'
 
 const paths: Record<NavIcon, React.ReactNode> = {
   dashboard: (
@@ -184,13 +182,6 @@ const paths: Record<NavIcon, React.ReactNode> = {
       <path d="M12 3.4c-4.2 4.6-4.2 12.6 0 17.2 4.2-4.6 4.2-12.6 0-17.2Z" />
     </>
   ),
-  sun: (
-    <>
-      <circle cx="12" cy="12" r="4.2" />
-      <path d="M12 2.6v2.2M12 19.2v2.2M4.2 12H2M22 12h-2.2M6.5 6.5 4.9 4.9M19.1 19.1l-1.6-1.6M17.5 6.5l1.6-1.6M4.9 19.1l1.6-1.6" />
-    </>
-  ),
-  moon: <path d="M20.4 13.6A8.6 8.6 0 0 1 10.4 3.6a8.6 8.6 0 1 0 10 10Z" />,
   /* Хаалга + гарах сум. Сум нь ГАДАГШАА заана — «энэ товч чамайг гаргана»
      гэдгийг үг уншихаас өмнө хэлбэр нь хэлнэ. */
   logout: (
