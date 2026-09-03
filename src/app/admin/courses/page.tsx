@@ -198,7 +198,7 @@ export default async function AdminCoursesPage({
         ) : (
           <Table minWidth={900}>
             <thead>
-              <tr className="bg-black">
+              <tr>
                 <Th>Анги</Th>
                 {/* Шүүсэн үед энэ багана мөр бүрд ижил утга давтана —
                     мэдээлэл биш, зүгээр л өргөн. */}
@@ -209,7 +209,7 @@ export default async function AdminCoursesPage({
                 <Th align="right" />
               </tr>
             </thead>
-            <tbody className="bg-black">
+            <tbody>
               {courses.map((course) => {
                 const rows = rowsByCourse.get(course.id) ?? [];
                 const liveCount = rows.filter((row) => live(row.status)).length;
