@@ -342,14 +342,24 @@ export function Alert({
   children: ReactNode
 }) {
   const tones = {
-    neutral: 'border-line text-foreground-soft',
-    good: 'border-foreground text-foreground',
-    warn: 'border-line-strong border-dashed text-foreground-soft',
-    danger: 'border-foreground border-l-[3px] font-medium text-foreground',
+    neutral: 'border-l-2 border-line bg-surface text-foreground-soft',
+    good: 'border-l-2 border-foreground bg-surface text-foreground',
+    warn: 'border-l-2 border-dashed border-line-strong bg-surface text-foreground-soft',
+    danger: 'border-l-4 border-foreground bg-surface-3 font-medium text-foreground',
   }
+  const marks = { neutral: null, good: '\u2713', warn: null, danger: '!' } as const
+
   return (
-    <div className={`t-small border-l-2 bg-surface px-5 py-4 ${tones[tone]}`} role="status">
-      {children}
+    <div
+      className={`t-small flex items-start gap-2.5 px-5 py-4 ${tones[tone]}`}
+      role={tone === 'danger' ? 'alert' : 'status'}
+    >
+      {marks[tone] && (
+        <span aria-hidden className="shrink-0 font-bold">
+          {marks[tone]}
+        </span>
+      )}
+      <span className="min-w-0">{children}</span>
     </div>
   )
 }
