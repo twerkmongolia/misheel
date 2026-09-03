@@ -4,7 +4,7 @@ import { Alert, Badge, ButtonLink, Empty, PageHeader, Section } from '@/componen
 import { Media } from '@/components/site/media'
 import { getDictionary, loc, isLocale, type Locale } from '@/lib/i18n'
 import { formatMnt, formatDate } from '@/lib/format'
-import { getMyEnrollments, getCourseAccess, type EnrollmentView } from '@/lib/data'
+import { getMyEnrollments, getCourseTelegramUrl, type EnrollmentView } from '@/lib/data'
 import { requireUser } from '@/lib/auth/dal'
 import { cancelEnrollment } from '@/actions/courses'
 
@@ -42,8 +42,8 @@ export default async function MyCoursesPage({
   const links = new Map<string, string>()
   await Promise.all(
     onlineActive.map(async (row) => {
-      const access = await getCourseAccess(row.course_id)
-      if (access?.telegram_url) links.set(row.course_id, access.telegram_url)
+      const url = await getCourseTelegramUrl(row.course_id, row.status)
+      if (url) links.set(row.course_id, url)
     }),
   )
 
