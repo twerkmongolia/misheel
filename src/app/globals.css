@@ -1588,20 +1588,34 @@ body:has(dialog[open]) { overflow: hidden; }
 
 .ctl:hover { border-color: var(--line-strong); }
 
+/* Цагираг нь `--line` дээр байсан — тэр нь дэвсгэртэйгээ 1.2:1 ялгаралттай
+   тул бодит байдалд ХАРАГДАХГҮЙ байв. Глобал `:focus-visible` хүрээг энд
+   зориуд унтраасан тул фокусын цорын ганц дохио нь хүрээний өнгө болж
+   үлдсэн — өнгө ганцаараа хүрэхгүй гэсэн өөрсдийн дүрмээ зөрчиж байлаа.
+
+   Одоо цагираг нь цагаан сарнил — дэвсгэрээсээ мэдэгдэхүйц. Хүрээ +
+   цагираг = хоёр дохио, эхнийхээ амлалт биелнэ. */
 .ctl:focus {
   border-color: var(--foreground);
-  box-shadow: 0 0 0 3px var(--line);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.26);
   outline: 0;
 }
 
+/* Хулганаар дарсан ч, товчлуураар ирсэн ч ижил цагираг — `.ctl` нь
+   ЗӨВХӨН фокуслахад л энэ төрхтэй болдог тул хоёрыг ялгах шалтгаангүй.
+   Глобал хүрээг давхарлуулбал хоёр цагираг зэрэг гарна. */
 .ctl:focus-visible { outline: 0; }
 
 /* `select` -ийн сумыг өөрсдөө зурна — хөтөч бүр өөр өөр зурдаг */
+/* ── `select` -ийн сум ────────────────────────────────────────────────────
+   Хөтөч бүр өөр өөр зурдаг тул өөрсдөө зурна. Өнгө нь `--muted` -ийн утга
+   боловч токен биш ШУУД бичигдэнэ: сум нь ЗУРАГ бөгөөд `url()` дотор
+   хувьсагч тайлагддаггүй.
+*/
 select.ctl {
   appearance: none;
   padding-right: 2.5rem;
-  background-image:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6' fill='none' stroke='%23A6A6A6' stroke-width='1.6'%3E%3Cpath d='M1 1l4 4 4-4'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6' fill='none' stroke='%23A6A6A6' stroke-width='1.6'%3E%3Cpath d='M1 1l4 4 4-4'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 1rem center;
   background-size: 10px 6px;
