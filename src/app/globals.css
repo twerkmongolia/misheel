@@ -562,9 +562,6 @@ form:has(select[name='class_type_id'] option[value='new']:checked) .new-class-fi
   --color-faint: var(--faint);
   --color-line: var(--line);
   --color-line-strong: var(--line-strong);
-  --color-accent: var(--accent);
-  --color-accent-ink: var(--accent-ink);
-  --color-accent-soft: var(--accent-soft);
   --color-button: var(--button);
   --color-button-ink: var(--button-ink);
   --color-good: var(--good);
@@ -573,12 +570,7 @@ form:has(select[name='class_type_id'] option[value='new']:checked) .new-class-fi
   --color-warn-soft: var(--warn-soft);
   --color-danger: var(--danger);
   --color-danger-soft: var(--danger-soft);
-  --color-info: var(--info);
-  --color-info-soft: var(--info-soft);
   --color-scrim: var(--scrim);
-  --color-brand: var(--brand);
-  --color-brand-ink: var(--brand-ink);
-  --color-brand-soft: var(--brand-soft);
 
   --color-button-hover: var(--button-hover);
 
