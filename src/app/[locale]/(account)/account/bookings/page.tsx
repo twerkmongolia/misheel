@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { Alert, Button, Empty, PageHeader, Section } from '@/components/ui'
+import { Alert, Button, Empty, Section } from '@/components/ui'
 import { cancelBooking } from '@/actions/bookings'
 import { bookingErrorMessage } from '@/lib/errors'
 import { getDictionary, loc, isLocale } from '@/lib/i18n'
@@ -10,6 +10,7 @@ import { requireUser } from '@/lib/auth/dal'
 import { createClient } from '@/lib/supabase/server'
 import { isSupabaseConfigured } from '@/lib/supabase/env'
 import type { BookingStatus, ClassSession } from '@/lib/supabase/database.types'
+import { Legend } from '../Legend'
 
 /**
  * Төлөвийн гэрэлтүүлэлт — ХҮРЭЭ БИШ.
@@ -52,7 +53,7 @@ export default async function MyBookingsPage({
   if (!isSupabaseConfigured()) {
     return (
       <div className="flex flex-col gap-10">
-        <PageHeader title={t.booking.myBookings} />
+        <Legend as="h1" title={t.booking.myBookings} />
         <Empty>{t.booking.noBookings}</Empty>
       </div>
     )
@@ -207,7 +208,7 @@ export default async function MyBookingsPage({
 
   return (
     <div className="flex flex-col gap-10">
-      <PageHeader title={t.booking.myBookings} />
+      <Legend as="h1" title={t.booking.myBookings} />
 
       {search.cancelled && <Alert tone="neutral">{t.booking.cancelled}</Alert>}
       {search.error && <Alert tone="danger">{bookingErrorMessage(t, search.error)}</Alert>}
