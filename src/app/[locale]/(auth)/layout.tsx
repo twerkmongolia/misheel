@@ -1,3 +1,9 @@
+import type { Metadata } from 'next'
+/* Нэвтрэх, бүртгүүлэх, нууц үг сэргээх — индексэд орох агуулга биш. */
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+}
+
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="shell pt-16 sm:pt-24">
