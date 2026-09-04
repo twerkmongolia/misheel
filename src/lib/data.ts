@@ -90,7 +90,15 @@ export async function getSiteContent(keys: string[]): Promise<Map<string, SiteCo
   )
 }
 
-export async function getClassTypes(includeInactive = false): Promise<ClassType[]> {
+/**
+ * ⚠️ `cache()` -д ороосон нь ЗАЙЛШГҮЙ, чимэг биш.
+ *
+ * Эдгээрийг нэг хүсэлтийн туршид хэд хэдэн газраас дууддаг: `page.tsx`,
+ * `generateMetadata`, түүнчлэн `getCourseBySlug` гэх мэт бусад туслах.
+ * Ороохгүй бол нэг хуудас нээхэд ижил асуулга 2-3 удаа явна — тэдгээр нь
+ * бие биенээ хүлээж, эхний байт хойшилно.
+ */
+export const getClassTypes = cache(async (includeInactive = false): Promise<ClassType[]> => {
   if (!isSupabaseConfigured()) return []
 
   const supabase = await createClient()
@@ -99,9 +107,9 @@ export async function getClassTypes(includeInactive = false): Promise<ClassType[
 
   const { data } = await query
   return data ?? []
-}
+})
 
-export async function getInstructors(includeInactive = false): Promise<Instructor[]> {
+export const getInstructors = cache(async (includeInactive = false): Promise<Instructor[]> => {
   if (!isSupabaseConfigured()) return []
 
   const supabase = await createClient()
@@ -110,15 +118,15 @@ export async function getInstructors(includeInactive = false): Promise<Instructo
 
   const { data } = await query
   return data ?? []
-}
+})
 
-export async function getLocations(): Promise<Location[]> {
+export const getLocations = cache(async (): Promise<Location[]> => {
   if (!isSupabaseConfigured()) return []
 
   const supabase = await createClient()
   const { data } = await supabase.from('locations').select('*').order('name')
   return data ?? []
-}
+})
 
 /** Хуваарийн хуудсанд: тухайн хугацаанд багтах бүх хичээл. */
 export async function getSessionsBetween(from: Date, to: Date): Promise<SessionView[]> {
@@ -256,7 +264,7 @@ export async function getProducts(includeInactive = false): Promise<ProductView[
   return buildProducts(products, images ?? [], variants ?? [])
 }
 
-export async function getProductBySlug(slug: string): Promise<ProductView | null> {
+export const getProductBySlug = cache(async (slug: string): Promise<ProductView | null> => {
   if (!isSupabaseConfigured()) return null
 
   const supabase = await createClient()
@@ -269,7 +277,7 @@ export async function getProductBySlug(slug: string): Promise<ProductView | null
   ])
 
   return buildProducts([product], images ?? [], variants ?? [])[0] ?? null
-}
+})
 
 /** Сагсанд байгаа хувилбаруудын бүрэн мэдээлэл — үнийг ҮРГЭЛЖ эндээс авна. */
 export async function getVariantsWithProduct(
@@ -381,7 +389,7 @@ export async function getCourses(options?: {
   return courses.map((course) => buildCourse(course, instructors, locations, now))
 }
 
-export async function getCourseBySlug(slug: string): Promise<CourseView | null> {
+export const getCourseBySlug = cache(async (slug: string): Promise<CourseView | null> => {
   if (!isSupabaseConfigured()) return null
 
   const supabase = await createClient()
@@ -390,7 +398,7 @@ export async function getCourseBySlug(slug: string): Promise<CourseView | null> 
 
   const [instructors, locations] = await Promise.all([getInstructors(true), getLocations()])
   return buildCourse(course, instructors, locations, new Date())
-}
+})
 
 export type EnrollmentView = CourseEnrollment & { course: Course }
 
