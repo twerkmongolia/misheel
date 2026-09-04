@@ -1951,6 +1951,14 @@ html.rv-on [data-rv='line']:not(.is-in) { opacity: 1; transform: scaleX(0); }
   animation-delay: var(--d, 0ms);
 }
 
+/* Шугам — зүүнээс баруун тийш татагдана. `[data-rv='line']` -ийн цагаар
+   ажилладаг ихэр (§ `PageHeader`). */
+.enter-line {
+  transform-origin: left;
+  animation: draw-x var(--t-3) var(--ease) both;
+  animation-delay: var(--d, 0ms);
+}
+
 .enter-mask .mask-line:nth-child(2) > span { animation-delay: calc(var(--d, 0ms) + 90ms); }
 .enter-mask .mask-line:nth-child(3) > span { animation-delay: calc(var(--d, 0ms) + 180ms); }
 .enter-mask .mask-line:nth-child(4) > span { animation-delay: calc(var(--d, 0ms) + 270ms); }
