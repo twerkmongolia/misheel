@@ -25,9 +25,17 @@ export default async function MyOrdersPage({ params }: { params: Promise<{ local
   const t = getDictionary(locale)
   await requireUser(locale, `/${locale}/account/orders`)
 
+  /* Хамгийн сүүлийн 100 захиалга. Хуудаслалт хийх хүртэл энэ нь хязгаар:
+     хязгааргүй жагсаалт нь мөр олшрох тусам чимээгүй удаашрах бөгөөд
+     эвдрэх мөч нь хамгийн идэвхтэй үйлчлүүлэгч дээр ирнэ. */
   const orders = isSupabaseConfigured()
-    ? ((await (await createClient()).from('orders').select('*').order('created_at', { ascending: false }))
-        .data ?? [])
+    ? ((
+        await (await createClient())
+          .from('orders')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(100)
+      ).data ?? [])
     : []
 
   return (
