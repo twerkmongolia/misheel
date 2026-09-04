@@ -1,10 +1,33 @@
+import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { Alert, Badge, Button, PageHeader } from '@/components/ui'
 import { Media } from '@/components/site/media'
 import { addToCart } from '@/actions/cart'
 import { getDictionary, loc, isLocale } from '@/lib/i18n'
+import { pageMetadata } from '@/lib/seo'
 import { formatMnt } from '@/lib/format'
 import { getProductBySlug } from '@/lib/data'
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; slug: string }>
+}): Promise<Metadata> {
+  const { locale, slug } = await params
+  if (!isLocale(locale)) return {}
+
+  const product = await getProductBySlug(slug)
+  if (!product) return {}
+
+  const t = getDictionary(locale)
+  return pageMetadata({
+    locale,
+    title: loc(product, 'name', locale),
+    description: loc(product, 'desc', locale) || t.meta.shop,
+    path: `/shop/${product.slug}`,
+    image: product.images[0]?.url ?? null,
+  })
+}
 
 export default async function ProductPage({
   params,
