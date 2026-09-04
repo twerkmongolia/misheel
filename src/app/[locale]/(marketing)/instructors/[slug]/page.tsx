@@ -1,10 +1,33 @@
+import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { Empty, PageHeader, Section } from '@/components/ui'
 import { Media } from '@/components/site/media'
 import { SessionList } from '@/components/site/SessionList'
 import { getDictionary, loc, isLocale } from '@/lib/i18n'
+import { pageMetadata } from '@/lib/seo'
 import { getInstructors, getMyBookedSessionIds, getUpcomingSessions } from '@/lib/data'
 import { getUser } from '@/lib/auth/dal'
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; slug: string }>
+}): Promise<Metadata> {
+  const { locale, slug } = await params
+  if (!isLocale(locale)) return {}
+
+  const instructor = (await getInstructors(true)).find((row) => row.slug === slug)
+  if (!instructor) return {}
+
+  const t = getDictionary(locale)
+  return pageMetadata({
+    locale,
+    title: instructor.name,
+    description: loc(instructor, 'bio', locale).slice(0, 155) || t.meta.instructors,
+    path: `/instructors/${instructor.slug}`,
+    image: instructor.photo_url,
+  })
+}
 
 export default async function InstructorPage({
   params,
