@@ -1,9 +1,11 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { Alert, Empty } from '@/components/ui'
 import { SessionList } from '@/components/site/SessionList'
 import { bookingErrorMessage } from '@/lib/errors'
 import { getDictionary, loc, isLocale } from '@/lib/i18n'
+import { pageMetadata } from '@/lib/seo'
 import { addDays, weekStart } from '@/lib/format'
 import {
   getClassTypes,
@@ -42,6 +44,23 @@ type Search = {
    өдөр хоосон, аль нь дүүрэн болохыг мэдэхийн тулд бүх хуудсыг гүйлгэх
    шаардлагатай байлаа.
    ─────────────────────────────────────────────────────────────────────── */
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>
+}): Promise<Metadata> {
+  const { locale } = await params
+  if (!isLocale(locale)) return {}
+
+  const t = getDictionary(locale)
+  return pageMetadata({
+    locale,
+    title: t.schedule.title,
+    description: t.meta.schedule,
+    path: '/schedule',
+  })
+}
 
 export default async function SchedulePage({
   params,
