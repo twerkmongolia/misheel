@@ -1,10 +1,30 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { Empty } from '@/components/ui'
 import { Media } from '@/components/site/media'
 import { getDictionary, loc, isLocale } from '@/lib/i18n'
+import { pageMetadata } from '@/lib/seo'
 import { getInstructors } from '@/lib/data'
 import { PageBanner } from '@/components/site/PageBanner'
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>
+}): Promise<Metadata> {
+  const { locale } = await params
+  if (!isLocale(locale)) return {}
+
+  const t = getDictionary(locale)
+  return pageMetadata({
+    locale,
+    title: t.nav.instructors,
+    description: t.meta.instructors,
+    path: '/instructors',
+    image: '/media/banners/instructors.jpg',
+  })
+}
 
 export default async function InstructorsPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
