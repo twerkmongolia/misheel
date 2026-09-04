@@ -1,9 +1,11 @@
+import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { readdirSync } from 'node:fs'
 import { join } from 'node:path'
 import { Empty } from '@/components/ui'
 import { Media } from '@/components/site/media'
 import { getDictionary, isLocale } from '@/lib/i18n'
+import { pageMetadata } from '@/lib/seo'
 import { getGallery } from '@/lib/data'
 import { PageBanner } from '@/components/site/PageBanner'
 import type { GalleryItem } from '@/lib/supabase/database.types'
@@ -60,6 +62,24 @@ function localGallery(): GalleryItem[] {
   } catch {
     return []
   }
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>
+}): Promise<Metadata> {
+  const { locale } = await params
+  if (!isLocale(locale)) return {}
+
+  const t = getDictionary(locale)
+  return pageMetadata({
+    locale,
+    title: t.nav.gallery,
+    description: t.meta.gallery,
+    path: '/gallery',
+    image: '/media/banners/gallery.jpg',
+  })
 }
 
 export default async function GalleryPage({ params }: { params: Promise<{ locale: string }> }) {
