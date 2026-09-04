@@ -8,6 +8,7 @@ import { getProfile, requireUser } from '@/lib/auth/dal'
 import { createClient } from '@/lib/supabase/server'
 import { isSupabaseConfigured } from '@/lib/supabase/env'
 import type { UserRole } from '@/lib/supabase/database.types'
+import { Legend } from './Legend'
 import { ProfileForm } from './ProfileForm'
 
 /* ───────────────────────────────────────────────────────────────────────────
@@ -132,20 +133,6 @@ export default async function AccountPage({ params }: { params: Promise<{ locale
           </div>
         </aside>
       </div>
-    </div>
-  )
-}
-
-/* ── Хэсгийн толгой ───────────────────────────────────────────────────────
-   `Section` нь `data-rv="line"` -тэй татагддаг зураас авчирдаг тул энд
-   тохирохгүй: энэ хуудас гүйлтэд БИШ цагт уягдсан (файлын толгой). Тиймээс
-   ижил хэлбэрийг хөдөлгөөнгүйгээр давтав. */
-function Legend({ title, lead }: { title: ReactNode; lead?: ReactNode }) {
-  return (
-    <div className="flex flex-col gap-3">
-      <h2 className="t-h3">{title}</h2>
-      {lead && <p className="t-small text-muted">{lead}</p>}
-      <div className="hr" />
     </div>
   )
 }
