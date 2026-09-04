@@ -171,8 +171,14 @@ export const config = {
      *   api        — webhook нь өөрийн гарын үсгээр хамгаалагдана
      *   _next      — бүтээгдсэн файлууд
      *   media, зураг, favicon — статик агуулга
+     *
+     *   ⚠️ robots.txt, sitemap.xml, manifest.webmanifest — эдгээр нь
+     *   ХЭЛГҮЙ, үндэсэд амьдардаг файлууд. Хасахгүй бол доорх «хэлний
+     *   segment алга» дүрэм тэднийг `/mn/robots.txt` рүү 307-оор
+     *   шидэх ба хайлтын робот хоосон гараад буцна: sitemap хэзээ ч
+     *   уншигдахгүй, дүрэм хэзээ ч хүчин төгөлдөр болохгүй.
      */
-    '/((?!api|_next/static|_next/image|media|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)',
+    '/((?!api|_next/static|_next/image|media|favicon.ico|robots.txt|sitemap.xml|manifest.webmanifest|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)',
   ],
 }
 
