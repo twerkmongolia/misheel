@@ -1,12 +1,13 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { Alert, Badge, ButtonLink, Empty, PageHeader, Section } from '@/components/ui'
+import { Alert, Badge, ButtonLink, Empty, Section } from '@/components/ui'
 import { Media } from '@/components/site/media'
 import { getDictionary, loc, isLocale, type Locale } from '@/lib/i18n'
 import { formatMnt, formatDate } from '@/lib/format'
 import { getMyEnrollments, getCourseTelegramUrl, type EnrollmentView } from '@/lib/data'
 import { requireUser } from '@/lib/auth/dal'
 import { cancelEnrollment } from '@/actions/courses'
+import { Legend } from '../Legend'
 
 /* ───────────────────────────────────────────────────────────────────────────
    МИНИЙ АНГИ
@@ -55,7 +56,7 @@ export default async function MyCoursesPage({
 
   return (
     <div className="flex flex-col gap-12">
-      <PageHeader title={t.courses.mine} lead={t.courses.mineLead} />
+      <Legend as="h1" title={t.courses.mine} lead={t.courses.mineLead} />
 
       {search.ok === 'cancelled' && <Alert tone="good">{t.courses.cancelled}</Alert>}
       {search.error && <Alert tone="danger">{t.courses.errors.UNKNOWN}</Alert>}
