@@ -1,12 +1,26 @@
+import type { Metadata } from 'next'
 import { notFound, redirect } from 'next/navigation'
 import { Alert, Button, Empty, Field, Input, PageHeader, Textarea } from '@/components/ui'
 import { placeOrder } from '@/actions/orders'
 import { orderErrorMessage } from '@/lib/errors'
 import { getDictionary, isLocale, loc, content } from '@/lib/i18n'
+import { privateMetadata } from '@/lib/seo'
 import { formatMnt } from '@/lib/format'
 import { readCart } from '@/lib/cart'
 import { getSiteContent, getVariantsWithProduct } from '@/lib/data'
 import { getProfile, getUser } from '@/lib/auth/dal'
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>
+}): Promise<Metadata> {
+  const { locale } = await params
+  if (!isLocale(locale)) return {}
+
+  const t = getDictionary(locale)
+  return privateMetadata(t.shop.checkout)
+}
 
 export default async function CheckoutPage({
   params,
