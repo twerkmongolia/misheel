@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from 'next'
+import { headers } from 'next/headers'
 import { Oswald, Rubik } from 'next/font/google'
+import { defaultLocale, isLocale, LOCALE_HEADER } from '@/lib/i18n/config'
 import './globals.css'
 
 /**
@@ -95,12 +97,30 @@ function InlineScript({ html }: { html: string }) {
   )
 }
 
-export default function RootLayout({ children }: LayoutProps<'/'>) {
+/**
+ * `lang` нь ЗАМААС ирнэ, тогтмол БИШ.
+ *
+ * Энэ layout нь `[locale]` segment-ээс дээр сууна — `params` хүрэхгүй,
+ * `next/root-params` ч ажиллахгүй (тэр нь зөвхөн үндсэн layout-аас ДЭЭШ
+ * байгаа segment-д зориулагдсан). Тиймээс `proxy.ts` зам дахь хэлээ
+ * `x-locale` толгойд наагаад дамжуулна.
+ *
+ * Өмнө нь энд `lang="mn"` гэж бичээстэй байсан: `/en/...` хуудас бүр
+ * өөрийгөө монгол гэж зарладаг байв. Дэлгэц уншигч англи өгүүлбэрийг
+ * монгол дуудлагаар уншиж, хайлтын систем хэлийг буруу индекслэнэ —
+ * хоёулаа ганц атрибутаас болсон.
+ *
+ * Толгой ирээгүй бол (proxy-ийн matcher-аас гадуурх зам) анхдагч хэл.
+ */
+export default async function RootLayout({ children }: LayoutProps<'/'>) {
+  const requested = (await headers()).get(LOCALE_HEADER) ?? ''
+  const lang = isLocale(requested) ? requested : defaultLocale
+
   return (
     // Скрипт `<html>` -ийн ангид `rv-on` нэмдэг тул hydration-ы сануулгыг
     // дарна — энэ бол зориудын зөрүү.
     <html
-      lang="mn"
+      lang={lang}
       suppressHydrationWarning
       className={`${display.variable} ${body.variable} h-full`}
     >
