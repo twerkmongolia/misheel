@@ -1,6 +1,18 @@
+import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { NavLink } from '@/components/site/NavLink'
 import { getDictionary, isLocale } from '@/lib/i18n'
+
+/**
+ * Бүртгэлийн хэсэг бүхэлдээ индексээс ГАДУУР.
+ *
+ * Агуулга нь нэвтэрсэн хүн тус бүрд өөр тул хайлтын үр дүнд гарах ямар ч
+ * утга байхгүй — робот зөвхөн нэвтрэх хуудас руу чиглүүлэгдэнэ. Layout
+ * дээр нэг удаа тавьснаар дөрвөн таб бүгд өвлөнө.
+ */
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+}
 
 export default async function AccountLayout({
   children,
