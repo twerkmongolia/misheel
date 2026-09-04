@@ -1,6 +1,8 @@
+import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { Arrow, Empty, Eyebrow } from '@/components/ui'
 import { getDictionary, loc, isLocale } from '@/lib/i18n'
+import { pageMetadata } from '@/lib/seo'
 import { getFaq } from '@/lib/data'
 import { ContactTrigger } from '@/components/site/ContactDialog'
 import { PageBanner } from '@/components/site/PageBanner'
@@ -20,6 +22,24 @@ import { PageBanner } from '@/components/site/PageBanner'
         баганад гарч, гүйлтийн турш наалдаж үлдэнэ: хариултаа олоогүй хүн
         яг тэр агшинд, доош гүйлгэлгүйгээр гарц олно.
    ─────────────────────────────────────────────────────────────────────── */
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>
+}): Promise<Metadata> {
+  const { locale } = await params
+  if (!isLocale(locale)) return {}
+
+  const t = getDictionary(locale)
+  return pageMetadata({
+    locale,
+    title: t.nav.faq,
+    description: t.meta.faq,
+    path: '/faq',
+    image: '/media/banners/faq.jpg',
+  })
+}
 
 export default async function FaqPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
