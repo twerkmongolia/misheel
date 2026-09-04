@@ -216,7 +216,9 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                   <span className="ping-ring absolute inline-flex h-full w-full rounded-full bg-foreground" />
                   <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-foreground" />
                 </span>
-                <span className="t-label text-muted">Улаанбаатар</span>
+                {/* Хотын нэр толь бичгээс — англи хувилбарт «Ulaanbaatar»
+                    байх ёстой (§ i18n `about.eyebrow`). */}
+                <span className="t-label text-muted">{t.about.eyebrow}</span>
               </span>
 
               {/* Мөр бүр өөрийн цонхтой; текст доороосоо өргөгдөж орж ирнэ.
