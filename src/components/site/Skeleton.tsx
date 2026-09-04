@@ -1,3 +1,5 @@
+import type { CSSProperties } from 'react'
+
 /**
  * Ачаалалтын араг яс.
  *
@@ -48,7 +50,10 @@ export function PageSkeleton({
             <div className="sk sk-line h-[2.75rem] w-[68%]" />
             <div className="sk sk-line h-[2.75rem] w-[42%]" />
           </div>
-          <div className="col-span-12 flex flex-col gap-2 lg:col-span-4 lg:col-start-9">
+          <div
+            className="col-span-12 flex flex-col gap-2 lg:col-span-4 lg:col-start-9"
+            style={{ '--sk-d': '180ms' } as CSSProperties}
+          >
             <div className="sk sk-line w-full" />
             <div className="sk sk-line w-[70%]" />
           </div>
@@ -59,7 +64,20 @@ export function PageSkeleton({
       {/* Их бие */}
       <div aria-hidden className={media ? 'grid gap-5 sm:grid-cols-2 lg:grid-cols-3' : 'flex flex-col gap-5'}>
         {Array.from({ length: rows }, (_, index) => (
-          <div key={index} className="card flex flex-col gap-4 p-6">
+          /*
+            Шүүрдэлтийн саатал КАРТ дээр сууна, блок бүр дээр биш —
+            CSS хувьсагч удамшдаг тул доторх зураг, мөрүүд бүгд НЭГ
+            цуваанд орно. Карт бүр өмнөхөөсөө 120ms хоцорч, гэрэл
+            жагсаалтын дагуу дамжина.
+
+            Дээд хязгаар нь мөчлөгийн урт (1.5s): түүнээс цааш саатуулбал
+            зургаа дахь карт нэгдүгээртэй давхцаж, цуваа алдагдана.
+          */
+          <div
+            key={index}
+            className="card flex flex-col gap-4 p-6"
+            style={{ '--sk-d': `${(index * 120) % 1500}ms` } as CSSProperties}
+          >
             {media && <div className="sk aspect-[4/3] w-full" />}
             <div className="sk sk-line w-[55%]" />
             <div className="sk sk-line w-[80%]" />
