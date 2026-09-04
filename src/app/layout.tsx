@@ -87,10 +87,11 @@ const bootScript = `try{var d=document.documentElement;if(!matchMedia('(prefers-
  * Бидний script-ийн ажил бол зөвхөн ЭХНИЙ HTML тул энэ ялгаа хэвийн.
  * Төрлийг сольж сануулгыг таслана (§ Next.js preventing-flash-before-hydration).
  */
-function InlineScript({ html }: { html: string }) {
+function InlineScript({ html, nonce }: { html: string; nonce?: string }) {
   return (
     <script
       type={typeof window === 'undefined' ? 'text/javascript' : 'text/plain'}
+      nonce={nonce}
       suppressHydrationWarning
       dangerouslySetInnerHTML={{ __html: html }}
     />
@@ -113,8 +114,19 @@ function InlineScript({ html }: { html: string }) {
  * Толгой ирээгүй бол (proxy-ийн matcher-аас гадуурх зам) анхдагч хэл.
  */
 export default async function RootLayout({ children }: LayoutProps<'/'>) {
-  const requested = (await headers()).get(LOCALE_HEADER) ?? ''
+  const head = await headers()
+  const requested = head.get(LOCALE_HEADER) ?? ''
   const lang = isLocale(requested) ? requested : defaultLocale
+
+  /**
+   * CSP -ийн nonce.
+   *
+   * Next нь ӨӨРИЙН скрипт бүрд үүнийг автоматаар наадаг ч энэ мөрийн
+   * скрипт нь бидний бичсэн тул гараар дамжуулна. Дутвал `script-src`
+   * түүнийг хаах ба `rv-on` анги хэзээ ч нэмэгдэхгүй — өөрөөр хэлбэл
+   * хөдөлгөөн бүхэлдээ унтарна (агуулга нь ХАРАГДСАН хэвээр, § globals.css § 6).
+   */
+  const nonce = head.get('x-nonce') ?? undefined
 
   return (
     // Скрипт `<html>` -ийн ангид `rv-on` нэмдэг тул hydration-ы сануулгыг
@@ -125,7 +137,7 @@ export default async function RootLayout({ children }: LayoutProps<'/'>) {
       className={`${display.variable} ${body.variable} h-full`}
     >
       <body className="flex min-h-full flex-col">
-        <InlineScript html={bootScript} />
+        <InlineScript html={bootScript} nonce={nonce} />
         {children}
       </body>
     </html>
