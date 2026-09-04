@@ -1,7 +1,9 @@
+import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { Alert, Badge, Button, ButtonLink, Card, PageHeader, TableWrap, Td, Th } from '@/components/ui'
 import { cancelOrder } from '@/actions/orders'
 import { content, getDictionary, isLocale } from '@/lib/i18n'
+import { privateMetadata } from '@/lib/seo'
 import { formatDateTime, formatMnt } from '@/lib/format'
 import { createClient } from '@/lib/supabase/server'
 import { getSiteContent } from '@/lib/data'
@@ -17,6 +19,18 @@ const tones: Record<OrderStatus, 'neutral' | 'good' | 'warn' | 'danger' | 'accen
   delivered: 'good',
   cancelled: 'danger',
   refunded: 'neutral',
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; orderNo: string }>
+}): Promise<Metadata> {
+  const { locale, orderNo } = await params
+  if (!isLocale(locale)) return {}
+
+  const t = getDictionary(locale)
+  return privateMetadata(`${t.shop.orderNo} ${orderNo}`)
 }
 
 export default async function OrderPage({
