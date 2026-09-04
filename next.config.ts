@@ -43,6 +43,33 @@ const nextConfig: NextConfig = {
         : []),
     ],
   },
+
+  /**
+   * Аюулгүйн толгой — ЗӨВХӨН `/api/*`.
+   *
+   * Сайтын бусад бүх зам нь `proxy.ts` -ээр дамждаг ба толгойнууд тэнд
+   * тавигдана (§ `SECURITY_HEADERS`). Шалтгаан нь CSP: түүний `nonce` нь
+   * хүсэлт бүрд шинээр үүсэх ёстой тул статик тохиргоонд бичих боломжгүй.
+   *
+   * `/api` нь proxy-ийн matcher-аас ЗОРИУДААР хасагдсан (webhook нь өөрийн
+   * гарын үсгээр хамгаалагдана) — тиймээс тэнд толгой огт очихгүй байв.
+   * Энэ блок тэр цоорхойг л нөхнө. Хоёр газарт давхардуулбал зарим толгой
+   * хоёр удаа илгээгдэж, хөтөч аль нэгийг нь үл тоомсорлоно.
+   */
+  async headers() {
+    return [
+      {
+        source: '/api/:path*',
+        headers: [
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'X-Frame-Options', value: 'DENY' },
+          { key: 'Referrer-Policy', value: 'no-referrer' },
+          // API нь хэзээ ч зурагдахгүй тул бүх эх сурвалжийг хаана.
+          { key: 'Content-Security-Policy', value: "default-src 'none'; frame-ancestors 'none'" },
+        ],
+      },
+    ]
+  },
 }
 
 export default nextConfig
