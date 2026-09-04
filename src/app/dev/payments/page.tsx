@@ -1,6 +1,13 @@
+import type { Metadata } from 'next'
 import { startMockPayment } from './actions'
 
 const mnt = new Intl.NumberFormat('mn-MN')
+
+/* Хөгжүүлэлтийн хэрэгсэл. */
+export const metadata: Metadata = {
+  title: 'Төлбөрийн тест',
+  robots: { index: false, follow: false },
+}
 
 export default async function DevPaymentsPage({
   searchParams,
