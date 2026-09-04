@@ -1,8 +1,15 @@
+import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { getInvoice } from '@/lib/payments/store'
 import { completeMockPayment } from './actions'
 
 const mnt = new Intl.NumberFormat('mn-MN')
+
+/* Mock provider-ийн дэлгэц. */
+export const metadata: Metadata = {
+  title: 'Төлбөр',
+  robots: { index: false, follow: false },
+}
 
 export default async function MockPayPage({
   params,
