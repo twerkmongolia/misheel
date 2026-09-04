@@ -1,11 +1,31 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { Badge, Empty } from '@/components/ui'
 import { Media } from '@/components/site/media'
 import { getDictionary, loc, isLocale } from '@/lib/i18n'
+import { pageMetadata } from '@/lib/seo'
 import { formatMnt } from '@/lib/format'
 import { getClassTypes } from '@/lib/data'
 import { PageBanner } from '@/components/site/PageBanner'
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>
+}): Promise<Metadata> {
+  const { locale } = await params
+  if (!isLocale(locale)) return {}
+
+  const t = getDictionary(locale)
+  return pageMetadata({
+    locale,
+    title: t.nav.classes,
+    description: t.meta.classes,
+    path: '/classes',
+    image: '/media/banners/classes.jpg',
+  })
+}
 
 export default async function ClassesPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
