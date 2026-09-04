@@ -66,6 +66,26 @@ const mn = {
     advanced: 'Ахисан шат',
   },
   /**
+   * Хайлт ба хуваалцлагын тайлбар.
+   *
+   * Хуудсан дээрх текстээс ТУСДАА: `<meta description>` нь 155 тэмдэгтэд
+   * хумигдах бөгөөд гарчиг давтахгүйгээр «энэ хуудсанд юу байна» гэдгийг
+   * хэлэх ёстой. Хуудасны `lead` -ийг дахин ашиглавал заримдаа хэт урт,
+   * заримдаа хэт яруу гарна.
+   */
+  meta: {
+    home: 'Улаанбаатар дахь twerk бүжгийн студи — анги, курс, хичээлийн хуваарь, багш нар, дэлгүүр.',
+    about: 'Twerk Mongolia хэн бэ: дөрвөн жилийн түүх, Battle Show, багшийн баг.',
+    classes: 'Хичээлийн төрлүүд — анхан шатнаас ахисан түвшин хүртэл, үргэлжлэх хугацаа, багш.',
+    courses: 'Танхимын болон онлайн ангиуд — эхлэх огноо, хуваарь, төлбөр, суудлын үлдэгдэл.',
+    schedule: 'Долоо хоногийн хичээлийн хуваарь. Суудал урьдчилан захиалснаар баталгаажна.',
+    instructors: 'Заалыг хөтөлдөг багш нар — туршлага, заадаг хичээлүүд.',
+    gallery: 'Заал, тайз, Battle Show-гийн гэрэл зургууд.',
+    shop: 'Дасгалд зориулсан хувцас, хэрэгсэл. Заалнаас эсвэл хүргэлтээр.',
+    faq: 'Хичээл, бүртгэл, төлбөрийн талаар хамгийн олон асуугддаг асуултууд.',
+    contact: 'Хаяг, утас, олон нийтийн сүлжээ — хичээл, тоглолт, хамтын ажиллагааны талаар бичээрэй.',
+  },
+  /**
    * Алдааны хуудсууд.
    *
    * Богино байх нь эелдэг: эвдэрсэн хуудсан дээр урт тайлбар уншихыг хэн ч
@@ -491,6 +511,18 @@ const en: Dictionary = {
     beginner: 'Beginner',
     intermediate: 'Intermediate',
     advanced: 'Advanced',
+  },
+  meta: {
+    home: 'Twerk dance studio in Ulaanbaatar — courses, class schedule, instructors and shop.',
+    about: 'Who Twerk Mongolia is: four years, the Battle Show, and the people who teach.',
+    classes: 'Class types from beginner to advanced — length, level and who teaches them.',
+    courses: 'Studio and online courses — start dates, schedule, price and seats left.',
+    schedule: 'This week\'s class schedule. Seats are confirmed by booking ahead.',
+    instructors: 'The people who run the room — background and the classes they teach.',
+    gallery: 'Photographs from the studio, the stage and the Battle Show.',
+    shop: 'Clothing and kit for training. Pick up at the studio or have it delivered.',
+    faq: 'The questions we hear most about classes, booking and payment.',
+    contact: 'Address, phone and socials — write to us about classes, shows or working together.',
   },
   errorPage: {
     title: 'Something broke',
