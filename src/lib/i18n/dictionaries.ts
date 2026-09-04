@@ -66,6 +66,23 @@ const mn = {
     advanced: 'Ахисан шат',
   },
   /**
+   * Алдааны хуудсууд.
+   *
+   * Богино байх нь эелдэг: эвдэрсэн хуудсан дээр урт тайлбар уншихыг хэн ч
+   * хүсэхгүй. Гурван зүйл л хэлнэ — юу болов, дараа нь юу хийх вэ, хаашаа
+   * явах вэ.
+   */
+  errorPage: {
+    title: 'Ямар нэг зүйл эвдэрлээ',
+    body: 'Энэ хуудсыг ачаалах үед алдаа гарлаа. Дахин оролдоод үзнэ үү — давтагдвал бидэнд мэдэгдээрэй.',
+    retry: 'Дахин оролдох',
+    home: 'Нүүр хуудас',
+    digest: 'Алдааны дугаар',
+    notFoundTitle: 'Хуудас олдсонгүй',
+    notFoundBody: 'Таны хайсан хуудас байхгүй, эсвэл өөр хаяг руу нүүсэн байна.',
+    notFoundCode: '404',
+  },
+  /**
    * «Бидний тухай» хуудасны текст.
    *
    * ТООНУУД энд БАЙХГҮЙ — тэдгээр нь хуудсан дээр нэг эх сурвалжтай
@@ -474,6 +491,16 @@ const en: Dictionary = {
     beginner: 'Beginner',
     intermediate: 'Intermediate',
     advanced: 'Advanced',
+  },
+  errorPage: {
+    title: 'Something broke',
+    body: 'This page failed to load. Try again — if it keeps happening, let us know.',
+    retry: 'Try again',
+    home: 'Home',
+    digest: 'Error reference',
+    notFoundTitle: 'Page not found',
+    notFoundBody: 'The page you were looking for does not exist, or it has moved.',
+    notFoundCode: '404',
   },
   about: {
     eyebrow: 'Ulaanbaatar',
