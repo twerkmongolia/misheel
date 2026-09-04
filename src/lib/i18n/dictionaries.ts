@@ -394,6 +394,7 @@ const mn = {
     emailLocked: 'И-мэйл хаяг нь таны нэвтрэх нэр тул энд өөрчлөгдөхгүй.',
     changePassword: 'Нууц үг солих',
     noName: 'Нэргүй',
+    profileMissing: 'Профайл олдсонгүй. Дахин нэвтэрч үзнэ үү.',
     role: {
       instructor: 'Багш',
       staff: 'Ажилтан',
@@ -810,6 +811,7 @@ const en: Dictionary = {
     emailLocked: 'Your email is your login, so it cannot be changed here.',
     changePassword: 'Change password',
     noName: 'No name yet',
+    profileMissing: 'We could not find your profile. Try signing in again.',
     role: {
       instructor: 'Instructor',
       staff: 'Staff',
