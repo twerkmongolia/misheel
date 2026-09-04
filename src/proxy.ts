@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
-import { defaultLocale, isLocale, LOCALE_COOKIE, locales } from '@/lib/i18n/config'
+import { defaultLocale, isLocale, LOCALE_COOKIE, LOCALE_HEADER, locales } from '@/lib/i18n/config'
 
 /**
  * Next 16-д Middleware нь Proxy болж нэрлэгдсэн — файл нь `src/proxy.ts`.
@@ -27,7 +27,36 @@ const NON_LOCALIZED = ['auth', 'admin', 'mock-pay', 'dev']
 export async function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl
 
-  let response = NextResponse.next({ request })
+  const [, first, ...rest] = pathname.split('/')
+
+  /**
+   * Хэлийг ҮНДСЭН layout руу дамжуулна.
+   *
+   * `<html lang>` нь `app/layout.tsx` дээр амьдардаг ба тэр нь `[locale]`
+   * segment-ээс ДЭЭР байрладаг тул хэлээ мэдэх ямар ч арга байхгүй:
+   * `params` хүрэхгүй, `next/root-params` нь зөвхөн үндсэн layout-аас
+   * ДЭЭШ байгаа segment-д ажиллана (§ next/root-params). Тиймээс өмнө нь
+   * `lang="mn"` гэж хатуу бичсэн байсан — англи хуудас бүр өөрийгөө
+   * монгол гэж зарлаж, дэлгэц уншигч англи текстийг монгол дуудлагаар
+   * уншиж, хайлтын систем буруу индекслэж байлаа.
+   *
+   * Хамгийн богино зам: замаас нь уншаад хүсэлтийн толгойд наана. Proxy
+   * нь хуудасны хүсэлт БҮРД ажилладаг тул layout үүнд найдаж болно;
+   * толгой ирээгүй тохиолдолд (matcher-аас гадуур) монгол руу унана.
+   *
+   * ⚠️ Толгойг `request.headers` -ээс ЯГ ТЭР МӨЧИД шинээр хуулна —
+   * `request.cookies.set()` нь cookie толгойг дотор нь өөрчилдөг тул
+   * эрт хийсэн хуулбар нь session шинэчлэлтийг залгичина.
+   */
+  const localeHeader = first && isLocale(first) ? first : defaultLocale
+
+  const forward = () => {
+    const headers = new Headers(request.headers)
+    headers.set(LOCALE_HEADER, localeHeader)
+    return NextResponse.next({ request: { headers } })
+  }
+
+  let response = forward()
 
   // ── 1. Session шинэчлэх ──────────────────────────────────────────────────
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -45,7 +74,7 @@ export async function proxy(request: NextRequest) {
           for (const { name, value } of cookiesToSet) {
             request.cookies.set(name, value)
           }
-          response = NextResponse.next({ request })
+          response = forward()
           for (const { name, value, options } of cookiesToSet) {
             response.cookies.set(name, value, options)
           }
@@ -97,8 +126,6 @@ export async function proxy(request: NextRequest) {
   }
 
   // ── 3. Хэлний segment ────────────────────────────────────────────────────
-  const [, first, ...rest] = pathname.split('/')
-
   if (first && NON_LOCALIZED.includes(first)) {
     return response
   }
