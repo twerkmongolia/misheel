@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import type { ComponentProps, ReactNode } from 'react'
+import type { ComponentProps, CSSProperties, ReactNode } from 'react'
 
 /* ═══════════════════════════════════════════════════════════════════════════
    БҮРДЭЛ
@@ -224,6 +224,15 @@ export function Section({
  * Тайлбар нь гарчгийн ДООР биш, ХАЖУУД сууна — уншигч гарчгийг уншаад
  * шууд доош үргэлжлүүлэх бус, хажуу тийш нүдээ шилжүүлнэ. Ингэснээр
  * толгой хэсэг хуудсыг битүүлэхгүй, зөвхөн нээнэ.
+ *
+ * ── Яагаад `.enter`, `data-rv` БИШ вэ ──────────────────────────────────
+ * Хуудасны толгой нь ТОДОРХОЙЛОЛТООРОО дэлгэц нээгдмэгц харагдана. Түүнийг
+ * гүйлтийн ажиглагчид уях нь: «энэ сайтын 26 хуудасны гол гарчиг нь
+ * IntersectionObserver ачаалж чадсан эсэхээс хамаарна» гэсэн үг. Ажиглагч
+ * алдвал `opacity: 0` -д үүрд гацна — тэр яг л туузан дээр тохиолдсон
+ * (§ site/PageBanner.tsx). globals.css § 6 өөрөө энэ дүрмийг бичсэн:
+ * дээд хэсэг ЦАГААР, доод хэсэг ГҮЙЛТЭЭР. `Section` нь гүйлтэд үлдэнэ —
+ * тэр нь тодорхойлолтоороо доор байдаг.
  */
 export function PageHeader({
   title,
@@ -237,21 +246,27 @@ export function PageHeader({
   return (
     <header className="flex flex-col gap-7 pb-4">
       {eyebrow && (
-        <div data-rv>
+        <div className="enter">
           <Eyebrow>{eyebrow}</Eyebrow>
         </div>
       )}
       <div className="g12 items-end gap-y-6">
-        <h1 className="t-h1 col-span-12 lg:col-span-7" data-rv>
+        <h1
+          className="t-h1 enter col-span-12 lg:col-span-7"
+          style={{ '--d': '60ms' } as CSSProperties}
+        >
           {title}
         </h1>
         {lead && (
-          <p className="t-lead col-span-12 text-foreground-soft lg:col-span-4 lg:col-start-9" data-rv>
+          <p
+            className="t-lead enter col-span-12 text-foreground-soft lg:col-span-4 lg:col-start-9"
+            style={{ '--d': '140ms' } as CSSProperties}
+          >
             {lead}
           </p>
         )}
       </div>
-      <div className="hr hr-draw" data-rv="line" />
+      <div className="hr enter-line" style={{ '--d': '200ms' } as CSSProperties} />
     </header>
   )
 }
