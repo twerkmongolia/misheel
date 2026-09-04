@@ -12,6 +12,17 @@ export const defaultLocale: Locale = 'mn'
 /** Хэрэглэгч хэлээ сольсон бол тэр сонголтыг эндээс санана. */
 export const LOCALE_COOKIE = 'locale'
 
+/**
+ * Proxy → үндсэн layout руу хэл дамжуулах хүсэлтийн толгой.
+ *
+ * `<html lang>` нь `[locale]` segment-ээс ДЭЭР зурагддаг тул зам дахь
+ * хэлийг өөрөө харж чадахгүй (§ proxy.ts). Cookie БИШ толгой ашигласан
+ * шалтгаан: cookie нь ӨМНӨХ сонголтыг санадаг бол толгой нь ЯГ ЭНЭ
+ * хүсэлтийн замыг хэлнэ. `/en/...` рүү шууд орж ирсэн хүн монгол cookie-
+ * тэй байж болно; тэр хүнд `lang="en"` л зөв.
+ */
+export const LOCALE_HEADER = 'x-locale'
+
 export function isLocale(value: string): value is Locale {
   return (locales as readonly string[]).includes(value)
 }
