@@ -105,7 +105,7 @@ export default async function AccountPage({ params }: { params: Promise<{ locale
           {profile ? (
             <ProfileForm t={t} profile={profile} />
           ) : (
-            <Alert tone="warn">Профайл олдсонгүй.</Alert>
+            <Alert tone="warn">{t.auth.profileMissing}</Alert>
           )}
         </section>
 
