@@ -59,10 +59,26 @@ export default async function MyBookingsPage({
   }
 
   const supabase = await createClient()
+
+  /**
+   * ⚠️ `limit` нь ЗААВАЛ.
+   *
+   * Урьд нь энэ асуулга хэрэглэгчийн БҮХ бүртгэлийг татдаг байв — дараа нь
+   * доор `past.slice(0, 20)` -оор зөвхөн ХАРУУЛАХАД нь хязгаарладаг.
+   * Өөрөөр хэлбэл гурван жил хичээллэсэн хүний 400 мөрийг татаж, JSON
+   * болгож, дамжуулаад 380-ыг нь хаядаг. Тэр бүх мөрийн `session_id` нь
+   * дараагийн `class_sessions` асуулгад ч ордог тул зардал хоёр дахин.
+   *
+   * «Ирэх» ба «өнгөрсөн» -ийг ялгах хугацаа нь `class_sessions` дээр
+   * байдаг тул серверийн шүүлт хийх боломжгүй. Тиймээс сүүлийн 200 мөрийг
+   * авна: харуулах дээд хэмжээнээс (ирэх бүгд + өнгөрсөн 20) хамаагүй
+   * илүү, гэхдээ хязгаартай.
+   */
   const { data: bookings } = await supabase
     .from('bookings')
     .select('*')
     .order('created_at', { ascending: false })
+    .limit(200)
 
   const sessionIds = [...new Set((bookings ?? []).map((booking) => booking.session_id))]
   const { data: sessions } = sessionIds.length
