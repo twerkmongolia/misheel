@@ -1,12 +1,13 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { Badge, Empty, PageHeader, TableWrap, Td, Th } from '@/components/ui'
+import { Badge, Empty, TableWrap, Td, Th } from '@/components/ui'
 import { getDictionary, isLocale } from '@/lib/i18n'
 import { formatDate, formatMnt } from '@/lib/format'
 import { requireUser } from '@/lib/auth/dal'
 import { createClient } from '@/lib/supabase/server'
 import { isSupabaseConfigured } from '@/lib/supabase/env'
 import type { OrderStatus } from '@/lib/supabase/database.types'
+import { Legend } from '../Legend'
 
 const tones: Record<OrderStatus, 'neutral' | 'good' | 'warn' | 'danger' | 'accent'> = {
   pending_payment: 'warn',
@@ -40,7 +41,7 @@ export default async function MyOrdersPage({ params }: { params: Promise<{ local
 
   return (
     <div className="flex flex-col gap-10">
-      <PageHeader title={t.shop.myOrders} />
+      <Legend as="h1" title={t.shop.myOrders} />
 
       {orders.length === 0 ? (
         <Empty>{t.shop.noOrders}</Empty>
