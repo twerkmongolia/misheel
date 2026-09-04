@@ -1,9 +1,11 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { Badge, Empty } from '@/components/ui'
 import { Media } from '@/components/site/media'
 import { PageBanner } from '@/components/site/PageBanner'
 import { getDictionary, loc, isLocale, type Locale } from '@/lib/i18n'
+import { pageMetadata } from '@/lib/seo'
 import { formatMnt, formatDate } from '@/lib/format'
 import { getCourses, type CourseView } from '@/lib/data'
 import type { CourseMode } from '@/lib/supabase/database.types'
@@ -16,6 +18,24 @@ import type { CourseMode } from '@/lib/supabase/database.types'
    эсвэл гэрээсээ үзэх үү». Шүүлтүүр нь хоёр төрлийг ЗЭРЭГЦҮҮЛЖ байгаад,
    хүсвэл л нарийсгана.
    ─────────────────────────────────────────────────────────────────────── */
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>
+}): Promise<Metadata> {
+  const { locale } = await params
+  if (!isLocale(locale)) return {}
+
+  const t = getDictionary(locale)
+  return pageMetadata({
+    locale,
+    title: t.courses.title,
+    description: t.meta.courses,
+    path: '/courses',
+    image: '/media/banners/courses.jpg',
+  })
+}
 
 export default async function CoursesPage({
   params,
