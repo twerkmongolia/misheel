@@ -1,12 +1,35 @@
+import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { Badge, ButtonLink, Empty, PageHeader, Section } from '@/components/ui'
 import { Media } from '@/components/site/media'
 import { SessionList } from '@/components/site/SessionList'
 import { getDictionary, loc, isLocale } from '@/lib/i18n'
+import { pageMetadata } from '@/lib/seo'
 import { formatMnt } from '@/lib/format'
 import { getClassTypes, getUpcomingSessions } from '@/lib/data'
 import { getUser } from '@/lib/auth/dal'
 import { getMyBookedSessionIds } from '@/lib/data'
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; slug: string }>
+}): Promise<Metadata> {
+  const { locale, slug } = await params
+  if (!isLocale(locale)) return {}
+
+  const classType = (await getClassTypes(true)).find((row) => row.slug === slug)
+  if (!classType) return {}
+
+  const t = getDictionary(locale)
+  return pageMetadata({
+    locale,
+    title: loc(classType, 'name', locale),
+    description: loc(classType, 'desc', locale) || t.meta.classes,
+    path: `/classes/${classType.slug}`,
+    image: classType.cover_url,
+  })
+}
 
 export default async function ClassDetailPage({
   params,
