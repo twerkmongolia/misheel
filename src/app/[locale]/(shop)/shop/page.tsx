@@ -1,8 +1,10 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { Empty } from '@/components/ui'
 import { Media } from '@/components/site/media'
 import { getDictionary, loc, isLocale } from '@/lib/i18n'
+import { pageMetadata } from '@/lib/seo'
 import { formatMnt } from '@/lib/format'
 import { getProducts, type ProductView } from '@/lib/data'
 import { PageBanner } from '@/components/site/PageBanner'
@@ -62,6 +64,23 @@ function stockLeft(product: ProductView): number {
 
 const SORTS = ['featured', 'price-asc', 'price-desc'] as const
 type Sort = (typeof SORTS)[number]
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>
+}): Promise<Metadata> {
+  const { locale } = await params
+  if (!isLocale(locale)) return {}
+
+  const t = getDictionary(locale)
+  return pageMetadata({
+    locale,
+    title: t.shop.title,
+    description: t.meta.shop,
+    path: '/shop',
+  })
+}
 
 export default async function ShopPage({
   params,
