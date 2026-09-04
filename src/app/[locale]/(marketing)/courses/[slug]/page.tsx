@@ -1,8 +1,10 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { Alert, Badge, ButtonLink, Eyebrow, Field, Input, Textarea } from '@/components/ui'
 import { Media } from '@/components/site/media'
 import { getDictionary, loc, isLocale, type Locale } from '@/lib/i18n'
+import { pageMetadata } from '@/lib/seo'
 import { formatMnt, formatDate, formatDateTime } from '@/lib/format'
 import { getCourseBySlug, getMyEnrollment, getCourseTelegramUrl, type CourseView } from '@/lib/data'
 import { getUser, getProfile } from '@/lib/auth/dal'
@@ -22,6 +24,31 @@ import type { EnrollErrorCode } from '@/actions/courses'
    нэвтрэх, төлбөр хүлээж буй бол захиалга руу, идэвхтэй бол Telegram руу.
    «Боломжгүй» гэсэн мухар мессеж хаана ч байхгүй.
    ─────────────────────────────────────────────────────────────────────── */
+
+/**
+ * `getCourseBySlug` нь `cache()` -д ороосон тул энэ дуудлага ба доорх
+ * хуудасны дуудлага хоёр НЭГ асуулга хуваалцана (§ lib/data.ts).
+ */
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; slug: string }>
+}): Promise<Metadata> {
+  const { locale, slug } = await params
+  if (!isLocale(locale)) return {}
+
+  const course = await getCourseBySlug(slug)
+  if (!course) return {}
+
+  const t = getDictionary(locale)
+  return pageMetadata({
+    locale,
+    title: loc(course, 'name', locale),
+    description: loc(course, 'summary', locale) || t.meta.courses,
+    path: `/courses/${course.slug}`,
+    image: course.cover_url,
+  })
+}
 
 export default async function CoursePage({
   params,
