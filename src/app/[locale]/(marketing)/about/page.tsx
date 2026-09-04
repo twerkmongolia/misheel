@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 import Link from 'next/link'
@@ -5,6 +6,7 @@ import { notFound } from 'next/navigation'
 import { Arrow, ButtonLink, Card, Eyebrow, Section } from '@/components/ui'
 import { Media } from '@/components/site/media'
 import { getDictionary, loc, isLocale, type Locale } from '@/lib/i18n'
+import { pageMetadata } from '@/lib/seo'
 import { getInstructors } from '@/lib/data'
 import { ContactTrigger } from '@/components/site/ContactDialog'
 import { PageBanner } from '@/components/site/PageBanner'
@@ -66,6 +68,24 @@ const SHOWS = [
 const SCALE = Math.max(...SHOWS.map((show) => show.max ?? 0))
 
 const numberFormat: Record<Locale, string> = { mn: 'mn-MN', en: 'en-US' }
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>
+}): Promise<Metadata> {
+  const { locale } = await params
+  if (!isLocale(locale)) return {}
+
+  const t = getDictionary(locale)
+  return pageMetadata({
+    locale,
+    title: t.nav.about,
+    description: t.meta.about,
+    path: '/about',
+    image: '/media/banners/about.jpg',
+  })
+}
 
 export default async function AboutPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
