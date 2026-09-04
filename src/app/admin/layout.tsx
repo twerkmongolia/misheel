@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import { requireStaff } from '@/lib/auth/dal'
 import { AdminShell, type NavGroup } from '@/components/admin/AdminShell'
 
@@ -68,6 +69,13 @@ const adminGroup: NavGroup = {
  * (cacheComponents унтраалттай тул route segment config ажиллана.)
  */
 export const dynamic = 'force-dynamic'
+
+/* Удирдлага бүхэлдээ индексээс гадуур — proxy нь нэвтрээгүй хүнийг аль
+   хэдийн буцаадаг ч робот `robots` тэмдэглэгээг л уншина. */
+export const metadata: Metadata = {
+  title: { default: 'Удирдлага', template: '%s · Удирдлага' },
+  robots: { index: false, follow: false },
+}
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   // Урьдчилсан шалгалт proxy дээр байгаа ч жинхэнэ шалгалт энд.
