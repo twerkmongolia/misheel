@@ -1,8 +1,10 @@
+import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { Arrow, ButtonLink, Eyebrow } from '@/components/ui'
 import { ChannelList } from '@/components/site/ChannelList'
 import { contactChannels, type Channel } from '@/lib/contact'
 import { content, getDictionary, isLocale } from '@/lib/i18n'
+import { pageMetadata } from '@/lib/seo'
 import { getSiteContent } from '@/lib/data'
 import { PageBanner } from '@/components/site/PageBanner'
 
@@ -37,6 +39,24 @@ import { PageBanner } from '@/components/site/PageBanner'
    Жагсаалтын бүтэц нь `lib/contact.ts` -д — хоёр газар тус тусад нь барьвал
    эрт орой хэзээ нэгэн цагт зөрнө.
    ─────────────────────────────────────────────────────────────────────── */
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>
+}): Promise<Metadata> {
+  const { locale } = await params
+  if (!isLocale(locale)) return {}
+
+  const t = getDictionary(locale)
+  return pageMetadata({
+    locale,
+    title: t.contact.title,
+    description: t.meta.contact,
+    path: '/contact',
+    image: '/media/banners/contact.jpg',
+  })
+}
 
 export default async function ContactPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
