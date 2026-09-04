@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import type { CSSProperties, ReactNode } from 'react'
@@ -8,6 +9,7 @@ import { SessionList } from '@/components/site/SessionList'
 import { VideoEmbed } from '@/components/site/VideoEmbed'
 import { Stat } from '@/components/site/Stat'
 import { content, getDictionary, loc, isLocale } from '@/lib/i18n'
+import { pageMetadata } from '@/lib/seo'
 import { formatMnt } from '@/lib/format'
 import { youtubeId } from '@/lib/youtube'
 import {
@@ -111,6 +113,24 @@ function More({ href, children }: { href: string; children: ReactNode }) {
       <Arrow />
     </Link>
   )
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>
+}): Promise<Metadata> {
+  const { locale } = await params
+  if (!isLocale(locale)) return {}
+
+  const t = getDictionary(locale)
+  return pageMetadata({
+    locale,
+    title: null,
+    description: t.meta.home,
+    path: '',
+    image: '/media/hero.jpg',
+  })
 }
 
 export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
