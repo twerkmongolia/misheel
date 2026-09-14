@@ -12,7 +12,6 @@ import type {
   CourseMode,
   EnrollmentStatus,
   FaqItem,
-  GalleryItem,
   Instructor,
   Location,
   Product,
@@ -372,6 +371,8 @@ function buildCourse(
 export async function getCourses(options?: {
   mode?: CourseMode
   includeInactive?: boolean
+  /** Нүүр хуудас бүгдийг биш эхний хэдийг л харуулна (§ (marketing)/page.tsx). */
+  limit?: number
 }): Promise<CourseView[]> {
   if (!isSupabaseConfigured()) return []
 
@@ -379,6 +380,9 @@ export async function getCourses(options?: {
   let query = supabase.from('courses').select('*').order('sort_order')
   if (options?.mode) query = query.eq('mode', options.mode)
   if (!options?.includeInactive) query = query.eq('is_active', true)
+  /* Хязгаарыг ӨГӨГДЛИЙН САНД — санах ойд тайрвал шаардлагагүй мөрүүдийг
+     татаад, тус бүрд нь багш, байршлыг холбож дараа нь хаяна. */
+  if (options?.limit) query = query.limit(options.limit)
 
   const { data: courses } = await query
   if (!courses || courses.length === 0) return []
@@ -503,14 +507,6 @@ export async function getCourseTelegramUrl(
   if (access?.telegram_url) return access.telegram_url
 
   return process.env.TELEGRAM_CHANNEL_URL?.trim() || null
-}
-
-export async function getGallery(): Promise<GalleryItem[]> {
-  if (!isSupabaseConfigured()) return []
-
-  const supabase = await createClient()
-  const { data } = await supabase.from('gallery_items').select('*').order('sort_order')
-  return data ?? []
 }
 
 export async function getFaq(): Promise<FaqItem[]> {

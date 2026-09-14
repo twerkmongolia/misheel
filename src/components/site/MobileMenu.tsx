@@ -71,7 +71,7 @@ export function MobileMenu({
   // serif: цэс бол хуудасны агуулгын жагсаалт, удирдлагын самбар биш.
   const row =
     'group flex items-center justify-between gap-3 border-b border-line py-4 ' +
-    'font-display text-[1.45rem] font-semibold uppercase tracking-[0.01em] leading-none ' +
+    'font-display text-[1.35rem] font-bold tracking-[-0.02em] leading-none ' +
     'text-foreground-soft transition-colors duration-200 ' +
     'aria-[current=page]:text-foreground active:text-foreground'
 

@@ -320,10 +320,10 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
                     <p className="font-display text-[1.0625rem] leading-tight font-medium tracking-[-0.02em]">
                       {instructor.name}
                     </p>
-                    {/* Намтар нь hover дээр ГАРЧ ирнэ — тайван үедээ зураг
+                    {/* Үүрэг нь hover дээр ГАРЧ ирнэ — тайван үедээ зураг
                         дангаараа ярина. */}
                     <p className="t-meta bio-reveal mt-1.5 line-clamp-2 text-white/70">
-                      {loc(instructor, 'bio', locale)}
+                      {loc(instructor, 'role', locale) || loc(instructor, 'bio', locale)}
                     </p>
                   </div>
                 </div>

@@ -1,6 +1,13 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
-import { defaultLocale, isLocale, LOCALE_COOKIE, LOCALE_HEADER, locales } from '@/lib/i18n/config'
+import {
+  defaultLocale,
+  isLocale,
+  LOCALE_COOKIE,
+  LOCALE_HEADER,
+  locales,
+  PATH_HEADER,
+} from '@/lib/i18n/config'
 
 /**
  * Next 16-д Middleware нь Proxy болж нэрлэгдсэн — файл нь `src/proxy.ts`.
@@ -157,6 +164,7 @@ export async function proxy(request: NextRequest) {
   const forward = () => {
     const headers = new Headers(request.headers)
     headers.set(LOCALE_HEADER, localeHeader)
+    headers.set(PATH_HEADER, pathname)
     if (!isPrefetch) {
       // Next нь эдгээрийг уншиж, өөрийн скрипт бүрд nonce наана.
       headers.set('x-nonce', nonce)
@@ -256,9 +264,12 @@ export async function proxy(request: NextRequest) {
     return harden(NextResponse.redirect(login))
   }
 
-  // Нэвтэрсэн хүнийг login/signup хуудаснаас буцаана
+  /* Нэвтэрсэн хүнийг login/signup хуудаснаас буцаана.
+     Очих газар нь ПРОФАЙЛ биш ХИЧЭЭЛ: нэвтэрсэн хүний хайж байгаа зүйл
+     тэр (§ actions/auth.ts `login`). Proxy нь эрхийг мэдэхгүй — ажилтан
+     энд ховор ирэх ба толгой мөрөндөө «Удирдлага» холбоостой. */
   if (userId && (segment === 'login' || segment === 'signup')) {
-    return harden(NextResponse.redirect(new URL(`/${first}/account`, request.url)))
+    return harden(NextResponse.redirect(new URL(`/${first}/account/courses`, request.url)))
   }
 
   // Сонголтыг санана — дараагийн удаа `/` шууд тэр хэлээр нээгдэнэ.

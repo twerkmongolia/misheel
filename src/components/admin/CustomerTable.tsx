@@ -33,9 +33,13 @@ const tones: Record<UserRole, Tone> = {
 /**
  * Хэрэглэгчийн жагсаалт — мөр дээр дарахад дэлгэрэнгүй цонх нээгдэнэ.
  *
- * Мөр бүрд имэйл, утас, эрх засах хэсгийг шахаж багтаавал хүснэгт нарийсаж,
- * уншихад хэцүү болно. Тиймээс мөр нь ХАРАХ (нэр, утас, эрх), цонх нь бүрэн
- * мэдээлэл ба ЗАСАХ үүрэгтэй.
+ * Имэйл, бүртгэлийн дэлгэрэнгүй нь цонхонд амьдарна — мөр бүрд шахвал
+ * хүснэгт нарийсаж, уншихад хэцүү болно.
+ *
+ * ЭРХ нь харин ӨӨР: тэр нь өдөр бүр хайгддаг үйлдэл (хэн админ бэ, хэнд
+ * эрх өгөх вэ) бөгөөд цонхон дотор нуугдсан үедээ ОГТ ОЛДОХГҮЙ байв —
+ * хуудсыг хараад «энд зөвхөн жагсаалт байна» гэж уншигдана. Тиймээс эрх
+ * солих хэсэг хүснэгтэн дээрээ, шошгоны оронд шууд сууна.
  */
 export function CustomerTable({
   customers,
@@ -63,7 +67,7 @@ export function CustomerTable({
 
   return (
     <>
-      <Table minWidth={640}>
+      <Table minWidth={720}>
         <thead>
           <tr>
             <Th>Нэр</Th>
@@ -96,7 +100,11 @@ export function CustomerTable({
                 {formatDate(customer.created_at, 'mn')}
               </Td>
               <Td align="right" label="Эрх">
-                <Badge tone={tones[customer.role]}>{roles[customer.role]}</Badge>
+                {canEdit ? (
+                  <RoleCell customer={customer} />
+                ) : (
+                  <Badge tone={tones[customer.role]}>{roles[customer.role]}</Badge>
+                )}
               </Td>
             </tr>
           ))}
@@ -127,6 +135,9 @@ export function CustomerTable({
                   className="flex flex-wrap items-end justify-end gap-2 border-t border-line pt-4"
                 >
                   <input type="hidden" name="user_id" value={selected.id} />
+                  {/* Хүснэгтээс шууд заслыг цонх нээлгүй үлдээнэ
+                      (§ actions/admin.ts `setUserRole`) */}
+                  <input type="hidden" name="reopen" value="1" />
                   <label className="flex flex-1 flex-col gap-1.5 sm:flex-none">
                     <span className="text-xs font-medium text-foreground-soft">Эрх солих</span>
                     <Select name="role" defaultValue={selected.role} className="sm:w-40">
@@ -154,10 +165,54 @@ export function CustomerTable({
   )
 }
 
+/**
+ * Хүснэгт дэх эрх солих нүд.
+ *
+ * Эрх бол хамгийн ноцтой талбар тул НЭГ дарахад хадгалагдахгүй: сонголт
+ * солигдсон үед л «Хадгалах» гарч ирнэ. (Зарим хөтөч дээр `<select>` дээгүүр
+ * гүйлгэхэд утга нь солигддог — санамсаргүй админ төрөхөөс сэргийлнэ.)
+ *
+ * Мөр өөрөө дарагдахад дэлгэрэнгүй цонх нээдэг тул энэ хэсгийн үйл явдлыг
+ * дээш нь дамжуулахгүй.
+ */
+function RoleCell({ customer }: { customer: CustomerRow }) {
+  const [role, setRole] = useState<UserRole>(customer.role)
+  const dirty = role !== customer.role
+
+  return (
+    <form
+      action={setUserRole}
+      className="flex items-center justify-end gap-1.5"
+      onClick={(event) => event.stopPropagation()}
+      onKeyDown={(event) => event.stopPropagation()}
+    >
+      <input type="hidden" name="user_id" value={customer.id} />
+      <Select
+        name="role"
+        value={role}
+        onChange={(event) => setRole(event.target.value as UserRole)}
+        aria-label={`${customer.name ?? 'Хэрэглэгч'} — эрх`}
+        className="h-8 w-32 text-xs"
+      >
+        {(Object.keys(roles) as UserRole[]).map((value) => (
+          <option key={value} value={value}>
+            {roles[value]}
+          </option>
+        ))}
+      </Select>
+      {dirty && (
+        <Button type="submit" variant="primary" size="sm">
+          Хадгалах
+        </Button>
+      )}
+    </form>
+  )
+}
+
 function Row({ label, value, mono }: { label: string; value: string | null; mono?: boolean }) {
   return (
     <div className="flex items-baseline justify-between gap-4 border-b border-line py-2.5 last:border-b-0">
-      <dt className="shrink-0 text-xs font-semibold tracking-[0.06em] text-muted uppercase">
+      <dt className="shrink-0 text-xs font-semibold tracking-[0.01em] text-muted">
         {label}
       </dt>
       <dd className={`min-w-0 text-right text-sm break-all ${mono ? 'font-mono text-xs' : ''}`}>

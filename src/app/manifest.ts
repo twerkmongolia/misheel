@@ -24,6 +24,19 @@ export default function manifest(): MetadataRoute.Manifest {
     display: 'standalone',
     background_color: '#0D0D0D',
     theme_color: '#0D0D0D',
-    icons: [{ src: '/favicon.ico', sizes: 'any', type: 'image/x-icon' }],
+    /* Дүрснүүд.
+     *
+     * `favicon.ico` нь хуучин хөтчүүдэд, PNG хоёр нь «Дэлгэцэд нэмэх» үед
+     * гарна. `maskable` нь Android -д зориулагдсан: систем дүрсийг дугуй,
+     * дөрвөлжин гэх мэт өөрийн хэлбэрээр тайрдаг тул тэмдэг нь захаасаа
+     * хангалттай дотогш байх ёстой — манай «TM» нь талбайн 60 орчим хувийг
+     * голлон эзэлдэг тул ямар ч хэлбэрт бүтнээрээ үлдэнэ.
+     */
+    icons: [
+      { src: '/favicon.ico', sizes: 'any', type: 'image/x-icon' },
+      { src: '/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+      { src: '/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+      { src: '/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+    ],
   }
 }

@@ -50,11 +50,15 @@ export async function Footer({ locale }: { locale: Locale }) {
       ],
     },
     {
-      heading: t.nav.about,
+      heading: t.nav.studio,
       items: [
+        /* Багана нь «Бидний тухай» гэж нэрлэгдсэн атлаа тэр хуудас руугаа
+           холбоосгүй байв. 1280px-ээс нарийн дэлгэц дээр навбараас ч
+           хасагддаг (§ Header.tsx `wide`) тул энэ нь хуудсанд хүрэх
+           цорын ганц тогтвортой зам. */
+        { href: `/${locale}/about`, label: t.nav.about },
         { href: `/${locale}/classes`, label: t.nav.classes },
         { href: `/${locale}/instructors`, label: t.nav.instructors },
-        { href: `/${locale}/gallery`, label: t.nav.gallery },
         { href: `/${locale}/faq`, label: t.nav.faq },
       ],
     },
@@ -175,9 +179,12 @@ export async function Footer({ locale }: { locale: Locale }) {
               болно. */}
           <div aria-hidden className="overflow-hidden px-6 sm:px-10 lg:px-14">
             <p
-              className="font-display -mb-[0.1em] leading-[0.82] font-bold tracking-[0.005em] whitespace-nowrap text-transparent uppercase select-none"
+              className="font-display -mb-[0.1em] leading-[0.82] font-extrabold tracking-[-0.01em] whitespace-nowrap text-transparent uppercase select-none"
               style={{
-                fontSize: 'min(11vw, 9.5rem)',
+                /* Oswald -ийн үед 11vw байв. Manrope нарийсаагүй тул
+                   ижил утга картын өргөнөөс халина — нэр «TWERK MONGO…»
+                   гэж дундуураа тасарна. */
+                fontSize: 'min(8.2vw, 7rem)',
                 WebkitTextStroke: '1.5px var(--foreground)',
               }}
             >

@@ -150,7 +150,7 @@ export function AdminShell({
                   тул Tailwind-ийн `text-*` утилитыг дардаг бөгөөд хавтан
                   1.3rem үсгээр дүүрч халина. Энд бүх зүйл утилитээр —
                   нэг давхаргад, зөрчилгүй. */}
-              <span className="font-display grid h-8 w-8 place-items-center rounded-lg bg-foreground text-[0.8rem] leading-none font-bold tracking-[0.02em] text-background uppercase">
+              <span className="font-display grid h-8 w-8 place-items-center rounded-lg bg-foreground text-[0.78rem] leading-none font-extrabold tracking-[0.01em] text-background uppercase">
                 TM
               </span>
             </span>
@@ -159,7 +159,7 @@ export function AdminShell({
                 collapsed ? 'opacity-0' : 'opacity-100'
               }`}
             >
-              <span className="font-display block truncate text-[1.05rem] leading-none font-bold tracking-[0.02em] uppercase">
+              <span className="font-display block truncate text-[0.95rem] leading-none font-extrabold tracking-[0.005em] uppercase">
                 Twerk Mongolia
               </span>
               <span className="t-meta mt-0.5 block text-faint">Удирдлага</span>

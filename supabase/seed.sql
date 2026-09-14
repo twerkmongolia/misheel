@@ -50,20 +50,10 @@ insert into locations (id, name, address_mn, address_en, default_capacity) value
 on conflict (id) do nothing;
 
 -- ── Багш нар ───────────────────────────────────────────────────────────────
-insert into instructors (id, slug, name, bio_mn, bio_en, photo_url, instagram, sort_order) values
-('22222222-2222-4222-8222-111111111111', 'saraa', 'Сараа',
- 'Twerk Mongolia-гийн үүсгэн байгуулагч. 8 жилийн туршлагатай, анхан шатны хичээлүүдийг хөтөлдөг.',
- 'Founder of Twerk Mongolia. Eight years of experience, leads the beginner classes.',
- '/media/studio-1.svg', 'saraa.dance', 1),
-('22222222-2222-4222-8222-222222222222', 'nomin', 'Номин',
- 'Choreography болон ахисан түвшний хичээл заадаг. Олон улсын тэмцээний шагналт.',
- 'Teaches choreography and advanced classes. International competition medalist.',
- '/media/studio-2.svg', 'nomin.moves', 2),
-('22222222-2222-4222-8222-333333333333', 'tsetseg', 'Цэцэг',
- 'Stretching болон биеийн бэлтгэлийн хичээл. Дасгал зүтгэлтний мэргэжилтэн.',
- 'Stretching and conditioning classes. Certified fitness trainer.',
- '/media/studio-3.svg', 'tsetseg.flex', 3)
-on conflict (id) do nothing;
+-- ЭНД БАЙХГҮЙ. Багш нар бол жишээ өгөгдөл БИШ — бодит хүмүүс, бодит
+-- танилцуулгатай. Тэд `migrations/20260914000001_instructor_profile.sql`
+-- дотор, тогтмол `22222222-…` дугаартайгаар үүснэ. Доорх хуваарь, курс
+-- яг тэр дугаараар багшийг заана.
 
 -- ── Хичээлийн төрөл ────────────────────────────────────────────────────────
 insert into class_types (id, slug, name_mn, name_en, desc_mn, desc_en, level, duration_min, cover_url, base_price, sort_order) values
@@ -223,7 +213,7 @@ insert into faq_items (question_mn, question_en, answer_mn, answer_en, sort_orde
 on conflict do nothing;
 
 -- ── Анги, курс ─────────────────────────────────────────────────────────────
--- Танхимын элсэлт нэг, онлайн анги нэг. `starts_on` нь ХАРЬЦАНГУЙ огноо:
+-- Танхимын нэг элсэлт. `starts_on` нь ХАРЬЦАНГУЙ огноо:
 -- тогтмол огноо бичвэл үрийн өгөгдөл хэдэн сарын дараа «аль хэдийн эхэлсэн»
 -- болж, элсэлтийн урсгалыг туршиж үзэх боломжгүй болно.
 insert into courses (
@@ -247,29 +237,11 @@ On clothes: light stretchy trousers, barefoot or bring your trainers. Everything
  '/media/studio-4.svg', 240000, 8,
  (current_date + 14), (current_date + 42),
  'Мягмар, Пүрэв · 19:00–20:15', 'Tuesdays and Thursdays · 19:00–20:15',
- 12, 1),
-('55555555-5555-4555-8555-222222222222', 'online-basics', 'online',
- 'Онлайн үндэс', 'Online Basics',
- 'Гэрээсээ, өөрийн хэмнэлээр. Хичээлүүд Telegram бүлэгт байршина.',
- 'From home, at your own pace. The lessons live in a Telegram group.',
- 'Арван хичээл, тус бүр 15-25 минут. Бүгд бичлэгээр тул хэдэн ч удаа буцааж үзнэ.
-
-Элссэн даруйдаа Telegram бүлгийн урилга нээгдэнэ. Тэндээс хичээл бүрийн бичлэг, дасгалын жагсаалт, асуулт хариултын хэсэг олдоно. Багш долоо хоног бүр асуултад хариулна.',
- 'Ten lessons, 15-25 minutes each. Everything is recorded, so you can go back as often as you like.
-
-The Telegram invite unlocks the moment you enrol. Inside you will find every lesson, the drill list and a questions thread. The instructor answers questions weekly.',
- 'beginner',
- '22222222-2222-4222-8222-222222222222',
- null,
- '/media/studio-5.svg', 120000, 10,
- null, null,
- 'Өөрийн хэмнэлээр', 'At your own pace',
- null, 2)
+ 12, 1)
 on conflict (id) do nothing;
 
--- Telegram холбоос ТУСДАА хүснэгтэд — төлбөрөө төлсөн элсэгч л уншина.
-insert into course_access (course_id, telegram_url, note_mn, note_en) values
-('55555555-5555-4555-8555-222222222222', 'https://t.me/+twerkmongolia_demo',
- 'Бүлэгт орсны дараа өөрийгөө танилцуулаарай — багш танд эхлэх хичээлээ хэлж өгнө.',
- 'Introduce yourself once you are in — the instructor will point you to the right first lesson.')
-on conflict (course_id) do nothing;
+-- ── Онлайн анги ────────────────────────────────────────────────────────────
+-- ЭНД БАЙХГҮЙ. Онлайн анги нь Telegram дээр амьд ажиллаж байгаа ХОЁР бүлэг
+-- бөгөөд тэдгээр нь `migrations/20260914000002_online_courses.sql` дотор
+-- үүснэ — жинхэнэ урилгын холбоостойгоор. Энд хуурамч холбоостой жишээ
+-- анги тавих нь төлбөр төлсөн хүнийг хоосон хуудас руу хөтөлнө.

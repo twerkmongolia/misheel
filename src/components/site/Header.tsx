@@ -38,12 +38,20 @@ export async function Header({ locale }: { locale: Locale }) {
      Хуваарь (нэг удаагийн хичээл) энд БАЙХГҮЙ: тэр нь аль хэдийн ирж
      байгаа хүний хэрэгсэл, шинэ хүний сонголт биш. Гар утасны доод тааз,
      хөл, нүүр хуудсанд хэвээр. */
+  /* `wide` — зөвхөн 1280px-ээс өргөн дэлгэцэд гарна.
+
+     Монгол нэрс урт: «Танхимын анги», «Бидний тухай», «Холбоо барих» тус
+     бүр 12-13 тэмдэгт. Зургаулаа 1024px дээр нэг мөрөнд багтахгүй бөгөөд
+     багтаах гэж үсгээ жижигрүүлбэл цэс уншигдахаа болино. Тиймээс цэс
+     ШАХАГДАХЫН оронд ЦӨӨРНӨ: нарийн дэлгэц дээр худалдан авалтын дөрвөн
+     зам үлдэж, танилцах хоёр нь (тухай, холбоо барих) хөл рүү шилжинэ —
+     тэнд хоёулаа бүтнээрээ байгаа. */
   const primary = [
     { href: `/${locale}`, label: t.nav.home },
     { href: `/${locale}/courses?mode=studio`, label: t.nav.studioCourses },
     { href: `/${locale}/courses?mode=online`, label: t.nav.onlineCourses },
     { href: `/${locale}/shop`, label: t.nav.shop },
-    { href: `/${locale}/about`, label: t.nav.about },
+    { href: `/${locale}/about`, label: t.nav.about, wide: true },
   ]
 
   // Гар утасны доод самбар — хамгийн олон дардаг дөрөв + цэс.
@@ -66,10 +74,7 @@ export async function Header({ locale }: { locale: Locale }) {
     { href: `/${locale}/instructors`, label: t.nav.instructors },
   ]
 
-  const menuSecondary = [
-    { href: `/${locale}/gallery`, label: t.nav.gallery },
-    { href: `/${locale}/faq`, label: t.nav.faq },
-  ]
+  const menuSecondary = [{ href: `/${locale}/faq`, label: t.nav.faq }]
 
   return (
     <>
@@ -93,9 +98,13 @@ export async function Header({ locale }: { locale: Locale }) {
             Twerk Mongolia
           </Link>
 
-          <nav className="hidden flex-1 items-center justify-center gap-8 lg:flex xl:gap-10">
+          <nav className="nav-row hidden flex-1 items-center justify-center lg:flex">
             {primary.map((item) => (
-              <NavLink key={item.href} href={item.href} className="nav-item">
+              <NavLink
+                key={item.href}
+                href={item.href}
+                className={`nav-item ${item.wide ? 'hidden xl:inline-block' : ''}`}
+              >
                 {item.label}
               </NavLink>
             ))}
@@ -103,10 +112,11 @@ export async function Header({ locale }: { locale: Locale }) {
             {/* Бусад мөртэй ЯГ ижил төрхтэй — хэрэглэгчид «энэ бол өөр
                 төрлийн зүйл» гэсэн дохио өгөх шаардлагагүй. Ялгаа нь зөвхөн
                 дарсны дараа мэдэгдэнэ: хуудас солигдохгүй, цонх нээгдэнэ. */}
-            <ContactTrigger className="nav-item">{t.nav.contact}</ContactTrigger>
+            <ContactTrigger className="nav-item hidden xl:inline-block">
+              {t.nav.contact}
+            </ContactTrigger>
           </nav>
 
-          {/* ── Хэрэгсэл ───────────────────────────────────────────────── */}
           {/* ── Хэрэгсэл ────────────────────────────────────────────────
               Гурван бүлэг, хоёр зураасаар зааглагдана: ХЭЛ · САГС · БҮРТГЭЛ.
               Зураасгүй бол зургаан жижиг элемент нэг урт эгнээ болж, аль нь
@@ -138,7 +148,12 @@ export async function Header({ locale }: { locale: Locale }) {
                     {t.nav.admin}
                   </Link>
                 )}
-                <NavLink href={`/${locale}/account`} className="lnk t-small hover:text-foreground">
+                {/* Профайл биш ХИЧЭЭЛ рүү: нэвтэрсэн хүний нүүр тэр
+                    (§ (account)/layout.tsx). */}
+                <NavLink
+                  href={`/${locale}/account/courses`}
+                  className="lnk t-small hover:text-foreground"
+                >
                   {t.nav.account}
                 </NavLink>
                 <form action={logout}>
@@ -185,7 +200,7 @@ export async function Header({ locale }: { locale: Locale }) {
               <>
                 {profile ? (
                   <>
-                    <Link href={`/${locale}/account`} className="btn btn-solid w-full">
+                    <Link href={`/${locale}/account/courses`} className="btn btn-solid w-full">
                       {t.nav.account}
                     </Link>
                     {staff && (

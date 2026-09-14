@@ -15,6 +15,7 @@ export type NavIcon =
   | 'wallet'
   | 'clock'
   | 'plus'
+  | 'pencil'
   | 'search'
   | 'trash'
   | 'image'
@@ -121,6 +122,12 @@ const paths: Record<NavIcon, React.ReactNode> = {
     </>
   ),
   plus: <path d="M12 5v14M5 12h14" />,
+  pencil: (
+    <>
+      <path d="M4 20h4l10.5-10.5a2.1 2.1 0 0 0-3-3L5 17v3Z" />
+      <path d="M13.5 6.5l4 4" />
+    </>
+  ),
   search: (
     <>
       <circle cx="10.8" cy="10.8" r="6.3" />

@@ -68,6 +68,10 @@ export async function login(_state: State, formData: FormData): Promise<State> {
     if (profile?.role === 'staff' || profile?.role === 'admin') {
       redirect('/admin')
     }
+
+    /* Сурагчийн эхний асуулт нь «миний хичээл хаана байна» — профайл биш.
+       Профайл нь ХОЁРДОГЧ: утсаа сольхын тулд л нээдэг хуудас. */
+    redirect(`/${locale}/account/courses`)
   }
 
   redirect(safeNext(next, locale))
@@ -97,21 +101,52 @@ export async function signup(_state: State, formData: FormData): Promise<State> 
     password: parsed.data.password,
     options: {
       data: { full_name: parsed.data.full_name, phone: parsed.data.phone, locale },
-      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? ''}/auth/callback?next=/${locale}/account`,
+      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? ''}/auth/callback?next=/${locale}/account/courses`,
     },
   })
 
   if (error) {
+    /* ── Аль хэдийн бүртгэлтэй хаяг ───────────────────────────────────────
+       Хүн «Бүртгүүлэх» дараад «Та аль хэдийн бүртгэлтэй» гэсэн хана мөргөх
+       нь хамгийн ашиггүй хариу: тэр өөрийнхөө хаягаар өөрийнхөө бүртгэл рүү
+       орох гэж байгаа бөгөөд нууц үгээ ЭНЭ МАЯГТ ДЭЭР аль хэдийн бичсэн.
+       Нууц үг нь таарч байвал орох эрхтэй — тиймээс нэвтрүүлнэ.
+
+       Аюулгүй байдлын хувьд энэ нь юуг ч сулруулахгүй: `signInWithPassword`
+       нь ижил шалгалт хийнэ. Нууц үг таарахгүй бол нэвтрэх хуудсан дээрх
+       ижил алдаа руу унана — бид «энэ хаяг бүртгэлтэй» гэдгийг ил хэлэхгүй
+       (хаягийн жагсаалт цуглуулахаас сэргийлнэ). */
+    const exists =
+      'code' in error && typeof error.code === 'string'
+        ? error.code === 'user_already_exists'
+        : /already registered|already exists/i.test(error.message)
+
+    if (exists) {
+      const { data: signedIn } = await supabase.auth.signInWithPassword({
+        email: parsed.data.email,
+        password: parsed.data.password,
+      })
+
+      if (signedIn.session) {
+        revalidatePath('/', 'layout')
+        redirect(`/${locale}/account/courses`)
+      }
+
+      return { error: 'Энэ и-мэйл аль хэдийн бүртгэлтэй байна. Нууц үгээ шалгана уу.' }
+    }
+
     return { error: error.message }
   }
 
-  // И-мэйл баталгаажуулалт асаалттай бол session шууд үүсэхгүй.
+  /* Session ирээгүй гэдэг нь Supabase дээр и-мэйл баталгаажуулалт АСААЛТТАЙ
+     гэсэн үг (Authentication → Email → Confirm email). Тэр тохиргоо унтарсан
+     үед бүртгүүлсэн даруйдаа нэвтэрнэ — энэ мөр огт ажиллахгүй. */
   if (!data.session) {
     return { message: 'checkEmail' }
   }
 
   revalidatePath('/', 'layout')
-  redirect(`/${locale}/account`)
+  redirect(`/${locale}/account/courses`)
 }
 
 export async function requestPasswordReset(_state: State, formData: FormData): Promise<State> {

@@ -34,7 +34,7 @@ import { isSupabaseConfigured } from '@/lib/supabase/env'
 /** Хэсгийн жижиг гарчиг — цонх доторх блокуудыг ялгана. */
 function SubHead({ children }: { children: React.ReactNode }) {
   return (
-    <p className="text-[11px] font-semibold tracking-[0.06em] text-muted uppercase">{children}</p>
+    <p className="text-[11px] font-semibold tracking-[0.01em] text-muted">{children}</p>
   )
 }
 
@@ -151,7 +151,7 @@ export default async function AdminProductsPage({
                   </Field>
                   <Field
                     label="Зураг"
-                    hint="Заавал биш · олноор сонгож болно · JPG / PNG / WEBP, 5MB хүртэл"
+                    hint="Заавал биш · олноор сонгож болно · JPG / PNG / WEBP, тус бүр 4MB хүртэл"
                     className="sm:col-span-2"
                   >
                     <FileInput name="file" multiple accept="image/jpeg,image/png,image/webp,image/avif" />
@@ -281,7 +281,7 @@ export default async function AdminProductsPage({
                     className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-end"
                   >
                     <input type="hidden" name="product_id" value={product.id} />
-                    <Field label="Файл" hint="Олноор сонгож болно · 5MB хүртэл">
+                    <Field label="Файл" hint="Олноор сонгож болно · тус бүр 4MB хүртэл">
                       <FileInput
                         name="file"
                         multiple

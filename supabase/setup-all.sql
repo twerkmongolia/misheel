@@ -852,6 +852,180 @@ create policy media_staff_delete on storage.objects
   for delete using (bucket_id = 'media' and public.is_staff());
 
 -- ═══════════════════════════════════════════════════════════════════
+-- supabase/migrations/20260914000001_instructor_profile.sql
+-- ═══════════════════════════════════════════════════════════════════
+
+-- Twerk Mongolia — БАГШИЙН ДЭЛГЭРЭНГҮЙ ТАНИЛЦУУЛГА
+--
+-- ── Яагаад нэг хайрцаг текст хүрэхээ больсон бэ ────────────────────────────
+-- `instructors` хүснэгт эхэндээ ганц `bio_mn/bio_en` талбартай байв: «Багш
+-- хэн бэ» гэдгийг нэг догол мөрөөр хэлнэ гэсэн таамаг. Бодит танилцуулга
+-- ирэхэд тэр таамаг нурав — нэг хүний ард дөрвөн ӨӨР ТӨРЛИЙН баримт байна:
+--
+--   1. ҮҮРЭГ    — нэрийн доор сууж, «энэ хүн юу хийдэг» -ийг нэг мөрөөр.
+--   2. НАМТАР   — жагсаалт: боловсрол, мэргэжил, хэдэн жил.
+--   3. ЧИГЛЭЛ   — заадаг хичээлүүд. Богино, шошго хэлбэртэй.
+--   4. ХЭЛ      — гурав хүртэлх үг.
+--
+-- Эдгээрийг догол мөр болгож нийлүүлбэл бүгд ижил жинтэй болно — уншигч
+-- «энэ багш ЮУ ЗААДАГ вэ» гэдгээ хайж догол мөр гүйлгэх ёстой. Тусад нь
+-- талбар болгосноор хуудас нь эрэмбийг өөрөө барина.
+--
+-- ── Яагаад `text[]`, jsonb биш вэ ─────────────────────────────────────────
+-- Жагсаалтын мөр бүр нь энгийн ЭГНЭЭ — түлхүүргүй, бүтэцгүй, зөвхөн дараалал
+-- утгатай. jsonb нь байхгүй бүтцийг зөвшөөрнө (нэг багш дээр `{title,years}`,
+-- нөгөө дээр нь цулгуй мөр), улмаар уншигч код нь хоёуланг барих ёстой болно.
+-- `text[]` нь хэлбэрийг нэг утгатай байлгана.
+--
+-- ⚠️ Дахин ажиллуулахад аюулгүй. Багана нэмэх нь `if not exists`, өгөгдөл нь
+-- `on conflict (slug) do update` — өөрөөр хэлбэл энэ файл нь ТАНИЛЦУУЛГЫН
+-- ЭХ СУРВАЛЖ. Админаас гараар засчихаад энэ файлыг дахин ажиллуулбал засвар
+-- дарагдана; тиймээс засварыг энд БУЦААЖ бичнэ.
+
+-- ── Багана ────────────────────────────────────────────────────────────────
+alter table instructors add column if not exists role_mn       text   not null default '';
+alter table instructors add column if not exists role_en       text   not null default '';
+alter table instructors add column if not exists background_mn text[] not null default '{}';
+alter table instructors add column if not exists background_en text[] not null default '{}';
+alter table instructors add column if not exists expertise_mn  text[] not null default '{}';
+alter table instructors add column if not exists expertise_en  text[] not null default '{}';
+alter table instructors add column if not exists languages_mn  text[] not null default '{}';
+alter table instructors add column if not exists languages_en  text[] not null default '{}';
+
+-- Twerk Mongolia -д хэдэн жил болсныг ЗӨВХӨН мэдэж байгаа багш дээр бичнэ.
+-- `0` бол «тэг жил» гэсэн худал баримт болох тул анхдагч нь NULL.
+alter table instructors add column if not exists years int check (years is null or years > 0);
+
+-- ── Гараар үүссэн мөрийг цэгцлэх ──────────────────────────────────────────
+-- Үүсгэн байгуулагчийн мөр админаас гараар орсон тул slug нь «1» болчихсон
+-- байв — /instructors/1 гэсэн хаяг хүнд ч, хайлтын системд ч юу ч хэлэхгүй.
+-- Гадны холбоос бүрдээгүй байхад нь засах цорын ганц боломж бол ОДОО.
+update instructors set slug = 'misheel'
+ where slug = '1'
+   and not exists (select 1 from instructors i where i.slug = 'misheel');
+
+-- Instagram нь БҮТЭН ХАЯГААР орсон байв ('https://www.instagram.com/...').
+-- Код нь `https://instagram.com/{instagram}` гэж угсардаг тул холбоос нь
+-- давхарлаад эвдэрнэ. Хадгалах хэлбэр нь ганц: @-гүй хэрэглэгчийн нэр.
+update instructors
+   set instagram = regexp_replace(instagram, '^.*instagram\.com/@?([^/?#]+).*$', '\1')
+ where instagram like '%instagram.com/%';
+
+-- ── Багш нар ──────────────────────────────────────────────────────────────
+-- `id` нь ТОГТМОЛ. Жишээ өгөгдөл (§ seed.sql) нь хуваарь, курсэн дээрээ
+-- багшийг ЯГ энэ дугаараар заадаг тул санамсаргүй uuid бол холбоо тасарна.
+-- Амьд суурин дээр мөр нь аль хэдийн өөр дугаартай байж болно — тиймээс
+-- мөргөлдөөнийг `slug` -аар барина: тэр нь хаягийг ч тодорхойлдог
+-- цорын ганц утга.
+insert into instructors (
+  id, slug, name, role_mn, role_en, bio_mn, bio_en,
+  background_mn, background_en, expertise_mn, expertise_en,
+  languages_mn, languages_en, years, instagram, sort_order
+) values
+
+('22222222-2222-4222-8222-111111111111', 'misheel', 'Мишээл Баттулга',
+ 'Twerk Mongolia-г үүсгэн байгуулагч',
+ 'Founder of Twerk Mongolia',
+ 'Мэргэжлийн хувьд олон улсын харилцаа, англи хэлний орчуулгын чиглэлээр боловсрол эзэмшсэн. Бүжиг, контент, event production болон олон улсын уран бүтээлчидтэй хамтран ажиллах чиглэлээр үйл ажиллагаагаа хөгжүүлж ирсэн.',
+ 'Educated in international relations and English translation. Built a career around dance, content, event production and collaborations with international artists.',
+ array['Олон улсын харилцаа',
+       'Англи хэлний орчуулагч, хэлмэрч',
+       'Twerk бүжигчин, багш',
+       'Event болон бүтээлч продакшн',
+       'Twerk Mongolia-г үүсгэн байгуулагч'],
+ array['International Relations',
+       'English Translator & Interpreter',
+       'Twerk Dancer & Instructor',
+       'Event & Creative Production',
+       'Founder of Twerk Mongolia'],
+ array[]::text[], array[]::text[],
+ array['Монгол', 'Орос', 'Англи'],
+ array['Mongolian', 'Russian', 'English'],
+ 5, 'misheelbattulga', 1),
+
+('22222222-2222-4222-8222-222222222222', 'nomiko', 'Nomiko',
+ 'Twerk Mongolia багш · Уран бүтээлч · Makeup artist · Фитнесс тамирчин',
+ 'Twerk Mongolia Instructor · Artist · Makeup Artist · Fitness Athlete',
+ 'Урлаг, гоо сайхан, фитнесс болон бүжгийн чиглэлээр өөрийгөө хөгжүүлж ирсэн олон талт уран бүтээлч. Мэргэжлийн зураач, makeup artist бөгөөд сүүлийн 4 жилийн хугацаанд Twerk болон Booty Workout чиглэлээр хичээл зааж байна.',
+ 'A multidisciplinary artist working across art, beauty, fitness and dance. A professional painter and makeup artist who has taught Twerk and Booty Workout for the past four years.',
+ array['Мэргэжлийн зураач',
+       'Мэргэжлийн makeup artist',
+       'Twerk бүжгийн багш — 4 жил',
+       'Booty Workout багш — 4 жил',
+       'Фитнесс тамирчин',
+       'Studio 10th Block-ийн хамтран үүсгэн байгуулагч'],
+ array['Professional Artist / Painter',
+       'Professional Makeup Artist',
+       'Twerk Dance Instructor — 4 years',
+       'Booty Workout Instructor — 4 years',
+       'Fitness Athlete',
+       'Co-founder — Studio 10th Block'],
+ array['Twerk', 'Booty Workout фитнесс', 'Урлаг', 'Makeup'],
+ array['Twerk', 'Booty Workout Fitness', 'Art', 'Makeup'],
+ array['Монгол', 'Англи', 'Хятад'],
+ array['Mongolian', 'English', 'Chinese'],
+ null, 'nomiko_inshape', 2),
+
+('22222222-2222-4222-8222-333333333333', 'daarii', 'Daarii',
+ 'Twerk Mongolia багш · Stretch & Flexibility багш · Эдийн засагч',
+ 'Twerk Mongolia Instructor · Stretch & Flexibility Instructor · Economist',
+ 'Санкт-Петербург хотод эдийн засгийн чиглэлээр боловсрол эзэмшсэн, Oil & Gas салбарын эдийн засагч. Бүжгийн чиглэлээр Twerk Mongolia-д багшилж, ялангуяа stretch, flexibility болон биеийн уян хатан байдал, хөдөлгөөний хяналтыг хөгжүүлэх чиглэлээр хичээл заадаг.',
+ 'Studied economics in Saint Petersburg and works as an economist in oil and gas. Teaches at Twerk Mongolia with a focus on stretch, flexibility and body control.',
+ array['Эдийн засагч — Санкт-Петербург хотод төгссөн',
+       'Газрын тос, хийн салбарын эдийн засагч',
+       'Twerk бүжгийн багш — Twerk Mongolia',
+       'Stretch & Flexibility багш'],
+ array['Economist — graduated in Saint Petersburg, Russia',
+       'Oil & Gas Economist',
+       'Twerk Dance Instructor — Twerk Mongolia',
+       'Stretch & Flexibility Instructor'],
+ array['Stretch', 'Уян хатан байдал', 'Twerk', 'Биеийн хяналт'],
+ array['Stretch', 'Flexibility & Mobility', 'Twerk', 'Body Control'],
+ array['Монгол', 'Орос', 'Англи'],
+ array['Mongolian', 'Russian', 'English'],
+ null, 'daarii1216', 3),
+
+('22222222-2222-4222-8222-444444444444', 'itgel', 'Itgel',
+ 'Twerk Mongolia багш · Сэтгэл судлаач · Бүжигчин',
+ 'Twerk Mongolia Instructor · Psychology Graduate · Dancer',
+ 'Сэтгэл судлалын чиглэлээр боловсрол эзэмшсэн, бүжигчин болон Twerk Mongolia-ийн багшаар ажилладаг. Одоогоор Cardio Twerk чиглэлээр хичээл зааж, бүжгийн хөдөлгөөн, эрч хүч болон өөрийн биеэрээ өөрийгөө илэрхийлэх чадварыг хөгжүүлэхэд чиглэн ажиллаж байна.',
+ 'A psychology graduate, dancer and Twerk Mongolia instructor. Currently teaches Cardio Twerk, working on movement, energy and self-expression through the body.',
+ array['Сэтгэл судлалын мэргэжилтэн',
+       'Twerk бүжгийн багш — Twerk Mongolia',
+       'Cardio Twerk багш',
+       'Бүжигчин, тоглолтын уран бүтээлч'],
+ array['Psychology Graduate',
+       'Twerk Dance Instructor — Twerk Mongolia',
+       'Cardio Twerk Instructor',
+       'Dancer & Performer'],
+ array['Cardio Twerk', 'Twerk тоглолт', 'Биеийн хөдөлгөөн'],
+ array['Cardio Twerk', 'Twerk Performance', 'Body Movement'],
+ array['Англи'],
+ array['English'],
+ null, 'itgel_zh', 4)
+
+on conflict (slug) do update set
+  name          = excluded.name,
+  role_mn       = excluded.role_mn,
+  role_en       = excluded.role_en,
+  bio_mn        = excluded.bio_mn,
+  bio_en        = excluded.bio_en,
+  background_mn = excluded.background_mn,
+  background_en = excluded.background_en,
+  expertise_mn  = excluded.expertise_mn,
+  expertise_en  = excluded.expertise_en,
+  languages_mn  = excluded.languages_mn,
+  languages_en  = excluded.languages_en,
+  years         = excluded.years,
+  instagram     = excluded.instagram,
+  sort_order    = excluded.sort_order;
+  -- `photo_url` ба `is_active` нь ЗОРИУД байхгүй. Хоёулаа админаас
+  -- удирдагддаг — зургийг ажилтан байршуулж, идэвхгүй болгохыг ажилтан
+  -- шийднэ. Энэ файлыг дахин ажиллуулах нь тэр хоёр шийдвэрийг эргүүлж
+  -- болохгүй.
+
+
+-- ═══════════════════════════════════════════════════════════════════
 -- supabase/seed.sql
 -- ═══════════════════════════════════════════════════════════════════
 
@@ -907,20 +1081,10 @@ insert into locations (id, name, address_mn, address_en, default_capacity) value
 on conflict (id) do nothing;
 
 -- ── Багш нар ───────────────────────────────────────────────────────────────
-insert into instructors (id, slug, name, bio_mn, bio_en, photo_url, instagram, sort_order) values
-('22222222-2222-4222-8222-111111111111', 'saraa', 'Сараа',
- 'Twerk Mongolia-гийн үүсгэн байгуулагч. 8 жилийн туршлагатай, анхан шатны хичээлүүдийг хөтөлдөг.',
- 'Founder of Twerk Mongolia. Eight years of experience, leads the beginner classes.',
- '/media/studio-1.svg', 'saraa.dance', 1),
-('22222222-2222-4222-8222-222222222222', 'nomin', 'Номин',
- 'Choreography болон ахисан түвшний хичээл заадаг. Олон улсын тэмцээний шагналт.',
- 'Teaches choreography and advanced classes. International competition medalist.',
- '/media/studio-2.svg', 'nomin.moves', 2),
-('22222222-2222-4222-8222-333333333333', 'tsetseg', 'Цэцэг',
- 'Stretching болон биеийн бэлтгэлийн хичээл. Дасгал зүтгэлтний мэргэжилтэн.',
- 'Stretching and conditioning classes. Certified fitness trainer.',
- '/media/studio-3.svg', 'tsetseg.flex', 3)
-on conflict (id) do nothing;
+-- ЭНД БАЙХГҮЙ. Багш нар бол жишээ өгөгдөл БИШ — бодит хүмүүс, бодит
+-- танилцуулгатай. Тэд дээрх `20260914000001_instructor_profile.sql` хэсэгт
+-- тогтмол `22222222-…` дугаартайгаар үүссэн. Доорх хуваарь, курс яг тэр
+-- дугаараар багшийг заана.
 
 -- ── Хичээлийн төрөл ────────────────────────────────────────────────────────
 insert into class_types (id, slug, name_mn, name_en, desc_mn, desc_en, level, duration_min, cover_url, base_price, sort_order) values
@@ -1499,7 +1663,7 @@ create policy course_enrollments_write on course_enrollments for all
 notify pgrst, 'reload schema';
 
 -- ── Анги, курс ─────────────────────────────────────────────────────────────
--- Танхимын элсэлт нэг, онлайн анги нэг. `starts_on` нь ХАРЬЦАНГУЙ огноо:
+-- Танхимын нэг элсэлт. `starts_on` нь ХАРЬЦАНГУЙ огноо:
 -- тогтмол огноо бичвэл үрийн өгөгдөл хэдэн сарын дараа «аль хэдийн эхэлсэн»
 -- болж, элсэлтийн урсгалыг туршиж үзэх боломжгүй болно.
 insert into courses (
@@ -1523,29 +1687,129 @@ On clothes: light stretchy trousers, barefoot or bring your trainers. Everything
  '/media/studio-4.svg', 240000, 8,
  (current_date + 14), (current_date + 42),
  'Мягмар, Пүрэв · 19:00–20:15', 'Tuesdays and Thursdays · 19:00–20:15',
- 12, 1),
-('55555555-5555-4555-8555-222222222222', 'online-basics', 'online',
- 'Онлайн үндэс', 'Online Basics',
- 'Гэрээсээ, өөрийн хэмнэлээр. Хичээлүүд Telegram бүлэгт байршина.',
- 'From home, at your own pace. The lessons live in a Telegram group.',
- 'Арван хичээл, тус бүр 15-25 минут. Бүгд бичлэгээр тул хэдэн ч удаа буцааж үзнэ.
-
-Элссэн даруйдаа Telegram бүлгийн урилга нээгдэнэ. Тэндээс хичээл бүрийн бичлэг, дасгалын жагсаалт, асуулт хариултын хэсэг олдоно. Багш долоо хоног бүр асуултад хариулна.',
- 'Ten lessons, 15-25 minutes each. Everything is recorded, so you can go back as often as you like.
-
-The Telegram invite unlocks the moment you enrol. Inside you will find every lesson, the drill list and a questions thread. The instructor answers questions weekly.',
- 'beginner',
- '22222222-2222-4222-8222-222222222222',
- null,
- '/media/studio-5.svg', 120000, 10,
- null, null,
- 'Өөрийн хэмнэлээр', 'At your own pace',
- null, 2)
+ 12, 1)
 on conflict (id) do nothing;
 
--- Telegram холбоос ТУСДАА хүснэгтэд — төлбөрөө төлсөн элсэгч л уншина.
-insert into course_access (course_id, telegram_url, note_mn, note_en) values
-('55555555-5555-4555-8555-222222222222', 'https://t.me/+twerkmongolia_demo',
- 'Бүлэгт орсны дараа өөрийгөө танилцуулаарай — багш танд эхлэх хичээлээ хэлж өгнө.',
- 'Introduce yourself once you are in — the instructor will point you to the right first lesson.')
-on conflict (course_id) do nothing;
+-- ── Онлайн анги ────────────────────────────────────────────────────────────
+-- ЭНД БАЙХГҮЙ. Онлайн анги нь Telegram дээр амьд ажиллаж байгаа ХОЁР бүлэг
+-- бөгөөд тэдгээр нь доорх `20260914000002_online_courses.sql` хэсэгт үүснэ —
+-- жинхэнэ урилгын холбоостойгоор.
+
+
+-- ═══════════════════════════════════════════════════════════════════
+-- supabase/migrations/20260914000002_online_courses.sql
+-- ═══════════════════════════════════════════════════════════════════
+
+-- Twerk Mongolia — ОНЛАЙН АНГИ: жинхэнэ хоёр бүлэг
+--
+-- ── Юу өөрчлөгдөв ─────────────────────────────────────────────────────────
+-- Онлайн анги нь ЗӨВХӨН ХОЁР бөгөөд хоёулаа Telegram дээр аль хэдийн
+-- амьд ажиллаж байгаа бүлэг:
+--
+--   · Twerk онлайн сургалт
+--   · Heels + Twerk онлайн сургалт
+--
+-- Урьд нь энд «Онлайн үндэс» гэсэн ГАНЦ ЖИШЭЭ анги байв — холбоос нь
+-- `t.me/+twerkmongolia_demo`, өөрөөр хэлбэл хаашаа ч хүрэхгүй. Төлбөр
+-- төлсөн хүн үүнийг дараад хоосон хуудас харах байсан.
+--
+-- ── Яагаад хуучин мөрийг ДАХИН АШИГЛАВ ────────────────────────────────────
+-- Жишээ мөр дээр элсэлт ороогүй (`enrolled_count = 0`) тул алдах зүйл алга.
+-- Шинэ мөр үүсгээд хуучныг үлдээвэл админы жагсаалтад хуурамч анги мөнхөд
+-- хоцорно — хэн нэг нь хожим түүн рүү хуваарь холбоно.
+--
+-- ── Яагаад УСТГАХГҮЙ вэ ───────────────────────────────────────────────────
+-- Гараар нэмэгдсэн өөр онлайн анги байвал устгахгүй, ИДЭВХГҮЙ болгоно.
+-- Устгал нь `course_enrollments`, `orders` дээрх түүхийг тасалдаг бол
+-- идэвхгүй төлөв нь зөвхөн каталогоос нуух ба буцаах боломжтой.
+--
+-- ⚠️ Дахин ажиллуулахад аюулгүй.
+
+-- ── 1. Жишээ мөрийг эхний жинхэнэ анги болгоно ────────────────────────────
+update courses set slug = 'twerk-online'
+ where slug = 'online-basics'
+   and not exists (select 1 from courses c where c.slug = 'twerk-online');
+
+-- ── 2. Хоёр анги ──────────────────────────────────────────────────────────
+-- `lesson_count` нь ЗОРИУД 0: хичээлийн яг тоог мэдэхгүй. Тоо нь 0 үед
+-- карт, дэлгэрэнгүй хоёулаа тэр мөрийг огт гаргахгүй (§ courses/page.tsx)
+-- — таамагласан тоо бичихээс юу ч бичихгүй нь дээр. Админаас бөглөнө.
+insert into courses (
+  id, slug, mode, name_mn, name_en, summary_mn, summary_en, desc_mn, desc_en,
+  level, price, lesson_count, schedule_mn, schedule_en, sort_order
+) values
+
+('55555555-5555-4555-8555-222222222222', 'twerk-online', 'online',
+ 'Twerk онлайн сургалт', 'Twerk Online Course',
+ 'Гэрээсээ, өөрийн хэмнэлээр. Бүх хичээл Telegram бүлэгт бичлэгээр байршина.',
+ 'From home, at your own pace. Every lesson is recorded in the Telegram group.',
+ 'Twerk онлайн сургалтын албан ёсны бүлэг. Хичээлийн бүх бичлэг тэнд байрлах бөгөөд зөвхөн элссэн гишүүдэд нээлттэй.
+
+Элссэн даруйдаа Telegram бүлгийн урилга нээгдэнэ. Хичээлээ хэдэн ч удаа, хүссэн цагтаа буцааж үзэж болно.',
+ 'The official group for the Twerk online course. Every lesson is recorded there, and the group is open to enrolled members only.
+
+The Telegram invite unlocks the moment you enrol. You can rewatch any lesson as often as you like, whenever you like.',
+ 'beginner', 120000, 0,
+ 'Өөрийн хэмнэлээр', 'At your own pace', 1),
+
+('55555555-5555-4555-8555-333333333333', 'heels-twerk-online', 'online',
+ 'Heels + Twerk онлайн сургалт', 'Heels + Twerk Online Course',
+ 'Өсгийтэй гутлаар — үндсэн хичээл, choreography, техник.',
+ 'In heels — fundamentals, choreography and technique.',
+ 'Heels + Twerk онлайн сургалтын албан ёсны бүлэг. Үндсэн хичээлүүд, choreography болон техникийн хичээлүүд бичлэгээр байршина.
+
+Элссэн даруйдаа Telegram бүлгийн урилга нээгдэнэ. Бүлэг нь зөвхөн гишүүдэд нээлттэй.',
+ 'The official group for the Heels + Twerk online course. Fundamentals, choreography and technique, all recorded.
+
+The Telegram invite unlocks the moment you enrol. The group is open to members only.',
+ 'beginner', 120000, 0,
+ 'Өөрийн хэмнэлээр', 'At your own pace', 2)
+
+on conflict (slug) do update set
+  mode         = excluded.mode,
+  name_mn      = excluded.name_mn,
+  name_en      = excluded.name_en,
+  summary_mn   = excluded.summary_mn,
+  summary_en   = excluded.summary_en,
+  desc_mn      = excluded.desc_mn,
+  desc_en      = excluded.desc_en,
+  price        = excluded.price,
+  schedule_mn  = excluded.schedule_mn,
+  schedule_en  = excluded.schedule_en,
+  sort_order   = excluded.sort_order;
+  -- `cover_url`, `lesson_count`, `instructor_id`, `is_active` нь ЗОРИУД
+  -- байхгүй: дөрвүүлээ админаас удирдагддаг тул энэ файлыг дахин
+  -- ажиллуулах нь ажилтны оруулсан зураг, хичээлийн тоо, багш, эсвэл
+  -- «түр хаасан» шийдвэрийг арилгаж болохгүй.
+
+-- ── 3. Өөр онлайн анги үлдээхгүй ──────────────────────────────────────────
+update courses set is_active = false
+ where mode = 'online'
+   and slug not in ('twerk-online', 'heels-twerk-online');
+
+-- ── 4. Telegram холбоос ───────────────────────────────────────────────────
+-- Тусдаа хүснэгтэд: `course_access` -ийн RLS нь ИДЭВХТЭЙ элсэлттэй хүнд л
+-- уншуулна (§ 20260903000001_courses.sql). Холбоосыг `courses` дээр тавибал
+-- каталог нийтэд нээлттэй тул хэн ч уншина.
+-- Ангийг ДУГААРААР биш ХАЯГААР (slug) нь олно: дээрх `on conflict (slug)`
+-- нь хаягаар мөргөлддөг тул анги аль хэдийн өөр дугаартай байсан бол
+-- энд бичсэн дугаар түүнтэй таарахгүй байж мэднэ. Хаяг нь цорын ганц утга.
+insert into course_access (course_id, telegram_url, note_mn, note_en)
+select c.id, v.telegram_url, v.note_mn, v.note_en
+from (values
+
+('twerk-online', 'https://t.me/+UbxwAsH7YL4yMDFl',
+ 'Бүлэгт орсны дараа өөрийгөө танилцуулаарай. Хичээлийн бүх бичлэг тэнд байна.',
+ 'Introduce yourself once you are in. Every recorded lesson lives in the group.'),
+
+('heels-twerk-online', 'https://t.me/+AzE_d_ly0L01NmNl',
+ 'Бүлэгт орсны дараа өөрийгөө танилцуулаарай. Үндсэн хичээл, choreography тэнд байна.',
+ 'Introduce yourself once you are in. Fundamentals and choreography live in the group.')
+
+) as v (slug, telegram_url, note_mn, note_en)
+join courses c on c.slug = v.slug
+on conflict (course_id) do update set
+  telegram_url = excluded.telegram_url,
+  note_mn      = excluded.note_mn,
+  note_en      = excluded.note_en,
+  updated_at   = now();

@@ -309,8 +309,14 @@ export default async function AdminCoursesPage({
                           rows={rows}
                         />
 
+                        {/* `rowTrigger` — мөрийн хаана ч дарахад энэ цонх
+                            нээгдэнэ (§ admin/FormDialog.tsx). Товч нь
+                            хэвээр: гар ашиглагчид болон «энд юу дарах вэ»
+                            гэдгийг хайж буй нүдэнд хэрэгтэй. */}
                         <FormDialog
                           trigger="Засах"
+                          icon="pencil"
+                          rowTrigger
                           title={course.name_mn}
                           subtitle="Хаяг (slug) хэвээр үлдэнэ — гадны холбоос эвдрэхгүй."
                           defaultOpen={search.open === course.id}
@@ -459,7 +465,7 @@ function CourseForm({
             hint={
               course?.cover_url
                 ? "Заавал биш · шинэ файл сонгосон үед л солигдоно"
-                : "Заавал биш · хэвтээ 4:3 тохиромжтой · JPG / PNG / WEBP, 5MB хүртэл"
+                : "Заавал биш · хэвтээ 4:3 тохиромжтой · JPG / PNG / WEBP, 4MB хүртэл"
             }
           >
             <FileInput

@@ -39,7 +39,7 @@ export default async function AdminCustomersPage({
     <>
       <PageHeader
         title="Хэрэглэгчид"
-        description="Мөр дээр дарж имэйл, утас зэрэг дэлгэрэнгүйг нь харна. Сүүлд бүртгүүлсэн 200 хүн."
+        description="Эрхийг баруун талаас нь шууд солино. Мөр дээр дарж имэйл зэрэг дэлгэрэнгүйг нь харна. Сүүлд бүртгүүлсэн 200 хүн."
       />
 
       {search.ok && <Alert tone="good">Шинэчлэгдлээ.</Alert>}

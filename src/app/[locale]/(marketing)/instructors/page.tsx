@@ -70,10 +70,11 @@ export default async function InstructorsPage({ params }: { params: Promise<{ lo
                   <p className="font-display text-[1.25rem] leading-tight font-medium tracking-[-0.02em]">
                     {instructor.name}
                   </p>
-                  {/* Намтар нь hover дээр ГАРЧ ирнэ — тайван үедээ зураг
-                      дангаараа ярина. */}
+                  {/* Хөрөг доорх хоёр мөр нь «энэ хэн бэ» -д хариулах ёстой
+                      тул ТАСАЛСАН НАМТАР биш ҮҮРГИЙН мөр: тасалсан намтар нь
+                      дунд нь тасарч, хариултаа өгөлгүй дуусдаг. */}
                   <p className="t-meta bio-reveal mt-1.5 line-clamp-2 text-white/70">
-                    {loc(instructor, 'bio', locale)}
+                    {loc(instructor, 'role', locale) || loc(instructor, 'bio', locale)}
                   </p>
                 </div>
               </div>

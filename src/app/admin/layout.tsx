@@ -48,15 +48,11 @@ const groups: NavGroup[] = [
   },
 ]
 
-/* Сайтын агуулга нь АЖИЛТАНД нээлттэй — утас, хаяг солих нь эрхийн асуудал
+/* Агуулга нь АЖИЛТАНД нээлттэй — асуулт хариулт засах нь эрхийн асуудал
    биш, өдөр тутмын ажил. */
 const contentGroup: NavGroup = {
   label: 'Агуулга',
-  items: [
-    { href: '/admin/content', label: 'Сайтын агуулга', icon: 'file' },
-    { href: '/admin/faq', label: 'Түгээмэл асуулт', icon: 'info' },
-    { href: '/admin/gallery', label: 'Галерей', icon: 'image' },
-  ],
+  items: [{ href: '/admin/faq', label: 'Түгээмэл асуулт', icon: 'info' }],
 }
 
 /** Зөвхөн админд харагдах хэсэг — ажилтан эрх олгож чадахгүй. */

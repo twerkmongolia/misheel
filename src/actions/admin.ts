@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
+import { MAX_IMAGE_BYTES, formatBytes } from '@/lib/uploads'
 import { createClient } from '@/lib/supabase/server'
 import { getUser, requireAdmin, requireStaff } from '@/lib/auth/dal'
 import type { Instructor, OrderStatus } from '@/lib/supabase/database.types'
@@ -267,13 +268,74 @@ export async function toggleActive(formData: FormData): Promise<void> {
 
 /* ── Багш ──────────────────────────────────────────────────────────────── */
 
+/**
+ * Олон мөрт талбарыг жагсаалт болгоно: МӨР БҮР нэг зүйл.
+ *
+ * Таслалаар салгаагүй шалтгаан нь бодит өгөгдөлд бий: «Эдийн засагч —
+ * Санкт-Петербург хотод төгссөн» гэсэн МӨРӨНД таслал агуулагдана. Таслалыг
+ * тусгаарлагч болговол тэр мөр хоёр хуваагдана. Мөр таслалт нь ажилтны
+ * бичиж байгаа зүйлийн дотор хэзээ ч тохиолдохгүй цорын ганц тэмдэг.
+ */
+const lines = z
+  .string()
+  .default('')
+  .transform((value) =>
+    value
+      .split('\n')
+      .map((line) => line.trim())
+      .filter(Boolean),
+  )
+
+/**
+ * Twerk Mongolia -д хэдэн жил болсон.
+ *
+ * Хоосон бол `null` — `0` БИШ. Тэг нь «мэдэхгүй» гэсэн үг биш, «тэг жил»
+ * гэсэн ХУДАЛ баримт бөгөөд хуудсан дээр «0 жил» болж гарна.
+ */
+const years = z
+  .string()
+  .trim()
+  .default('')
+  .transform((value) => (value === '' ? null : Number(value)))
+  .refine((value) => value === null || (Number.isInteger(value) && value > 0 && value < 100), {
+    message: 'Жилийг 1-99 хооронд бичнэ үү',
+  })
+
 const instructorSchema = z.object({
   name: z.string().trim().min(2),
+  role_mn: z.string().trim().default(''),
+  role_en: z.string().trim().default(''),
   bio_mn: z.string().trim().default(''),
   bio_en: z.string().trim().default(''),
+  background_mn: lines,
+  background_en: lines,
+  expertise_mn: lines,
+  expertise_en: lines,
+  languages_mn: lines,
+  languages_en: lines,
+  years,
   instagram: z.string().trim().default(''),
   photo_url: z.string().trim().default(''),
 })
+
+/**
+ * Instagram -ыг ГАНЦ хэлбэрт оруулна: @-гүй хэрэглэгчийн нэр.
+ *
+ * Ажилтан хаягийн мөрөөс бүтэн холбоос хуулж буулгах нь хамгийн энгийн
+ * зан үйл — нэг удаа ингэж орсноос болж нийтийн хуудсан дээрх холбоос
+ * `instagram.com/https://www.instagram.com/...` болж эвдэрсэн. Оролтыг
+ * хориглохын оронд ХҮЛЭЭЖ АВААД цэвэрлэнэ.
+ */
+function instagramHandle(value: string): string | null {
+  const handle = value
+    .trim()
+    .replace(/^https?:\/\//i, '')
+    .replace(/^(www\.)?instagram\.com\//i, '')
+    .replace(/^@/, '')
+    .replace(/[/?#].*$/, '')
+
+  return handle || null
+}
 
 export async function createInstructor(formData: FormData): Promise<void> {
   await requireStaff()
@@ -291,7 +353,7 @@ export async function createInstructor(formData: FormData): Promise<void> {
     .insert({
       ...parsed.data,
       slug,
-      instagram: parsed.data.instagram || null,
+      instagram: instagramHandle(parsed.data.instagram),
       photo_url: parsed.data.photo_url || null,
     })
     .select('id')
@@ -350,9 +412,18 @@ export async function updateInstructor(formData: FormData): Promise<void> {
   const supabase = await createClient()
   const patch: Partial<Instructor> = {
     name: parsed.data.name,
+    role_mn: parsed.data.role_mn,
+    role_en: parsed.data.role_en,
     bio_mn: parsed.data.bio_mn,
     bio_en: parsed.data.bio_en,
-    instagram: parsed.data.instagram || null,
+    background_mn: parsed.data.background_mn,
+    background_en: parsed.data.background_en,
+    expertise_mn: parsed.data.expertise_mn,
+    expertise_en: parsed.data.expertise_en,
+    languages_mn: parsed.data.languages_mn,
+    languages_en: parsed.data.languages_en,
+    years: parsed.data.years,
+    instagram: instagramHandle(parsed.data.instagram),
   }
 
   const [photo] = pickFiles(formData)
@@ -564,7 +635,6 @@ export async function addVariant(formData: FormData): Promise<void> {
 
 /* ── Барааны зураг ─────────────────────────────────────────────────────── */
 
-const MAX_IMAGE_BYTES = 5 * 1024 * 1024
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/avif']
 
 /**
@@ -579,7 +649,7 @@ const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/avi
  */
 async function uploadImage(
   supabase: Awaited<ReturnType<typeof createClient>>,
-  folder: 'products' | 'instructors' | 'courses' | 'gallery',
+  folder: 'products' | 'instructors' | 'courses',
   ownerId: string,
   file: File,
 ): Promise<{ url: string } | { error: string }> {
@@ -587,7 +657,7 @@ async function uploadImage(
     return { error: `${file.name}: JPG, PNG, WEBP эсвэл AVIF байх ёстой` }
   }
   if (file.size > MAX_IMAGE_BYTES) {
-    return { error: `${file.name}: 5MB-аас хэтэрсэн байна` }
+    return { error: `${file.name}: ${formatBytes(MAX_IMAGE_BYTES)}-аас хэтэрсэн байна` }
   }
 
   const extension = file.name.split('.').pop()?.toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg'
@@ -738,101 +808,6 @@ export async function updateOrderStatus(formData: FormData): Promise<void> {
   redirect(`${safe}${safe.includes('?') ? '&' : '?'}ok=1`)
 }
 
-/* ── Галерей ───────────────────────────────────────────────────────────── */
-
-/**
- * Галерейд зураг нэмнэ — олноор.
- *
- * Урьд нь галерей нь `public/media/gallery/` хавтас руу гараар файл хийж
- * удирдагддаг байсан (§ marketing/gallery/page.tsx). Тэр нь програмистад
- * хурдан ч, ажилтанд боломжгүй: серверийн файлын систем рүү хүрэх эрх
- * хэрэггүй байх ёстой. Одоо Storage руу байршуулж, мөр үүсгэнэ — өгөгдлийн
- * санд мөр гарсан даруйд хавтас нь ажиллахаа болино.
- */
-export async function addGalleryImages(formData: FormData): Promise<void> {
-  await requireStaff()
-
-  const files = pickFiles(formData)
-  const altMn = String(formData.get('alt_mn') ?? '').trim()
-  const altEn = String(formData.get('alt_en') ?? '').trim()
-
-  if (files.length === 0) redirect('/admin/gallery?error=Зураг сонгоогүй байна')
-
-  const supabase = await createClient()
-  const { data: last } = await supabase
-    .from('gallery_items')
-    .select('sort_order')
-    .order('sort_order', { ascending: false })
-    .limit(1)
-    .maybeSingle()
-
-  let order = last?.sort_order ?? 0
-
-  for (const file of files) {
-    /* Мөр нь зурагнаас ӨМНӨ үүсэх боломжгүй (замд id нь хэрэгтэй), зураг нь
-       мөрөөс өмнө үүсэх ёсгүй (өнчин файл үлдэнэ). Тиймээс эхлээд түр
-       санамсаргүй нэрээр байршуулж, дараа нь мөр үүсгэнэ. */
-    const uploaded = await uploadImage(supabase, 'gallery', 'items', file)
-    if ('error' in uploaded) {
-      redirect(`/admin/gallery?error=${encodeURIComponent(uploaded.error)}`)
-    }
-
-    order += 1
-    const { error } = await supabase.from('gallery_items').insert({
-      url: uploaded.url,
-      alt_mn: altMn,
-      alt_en: altEn,
-      sort_order: order,
-    })
-    if (error) redirect(`/admin/gallery?error=${encodeURIComponent(error.message)}`)
-  }
-
-  await audit('gallery.add', 'gallery_items', null, { count: files.length })
-  revalidatePath('/admin/gallery')
-  revalidatePath('/', 'layout')
-  redirect('/admin/gallery?ok=1')
-}
-
-export async function updateGalleryItem(formData: FormData): Promise<void> {
-  await requireStaff()
-
-  const id = uuid.safeParse(formData.get('id'))
-  if (!id.success) redirect('/admin/gallery?error=Зураг олдсонгүй')
-
-  const supabase = await createClient()
-  const { error } = await supabase
-    .from('gallery_items')
-    .update({
-      alt_mn: String(formData.get('alt_mn') ?? '').trim(),
-      alt_en: String(formData.get('alt_en') ?? '').trim(),
-      sort_order: Number(formData.get('sort_order') ?? 0) || 0,
-    })
-    .eq('id', id.data)
-
-  if (error) redirect(`/admin/gallery?error=${encodeURIComponent(error.message)}`)
-
-  await audit('gallery.update', 'gallery_items', id.data, {})
-  revalidatePath('/admin/gallery')
-  revalidatePath('/', 'layout')
-  redirect('/admin/gallery?ok=1')
-}
-
-export async function deleteGalleryItem(formData: FormData): Promise<void> {
-  await requireStaff()
-
-  const id = uuid.safeParse(formData.get('id'))
-  if (id.success) {
-    const supabase = await createClient()
-    const { error } = await supabase.from('gallery_items').delete().eq('id', id.data)
-    if (error) redirect(`/admin/gallery?error=${encodeURIComponent(error.message)}`)
-    await audit('gallery.delete', 'gallery_items', id.data, {})
-  }
-
-  revalidatePath('/admin/gallery')
-  revalidatePath('/', 'layout')
-  redirect('/admin/gallery?ok=1')
-}
-
 /* ── Түгээмэл асуулт ───────────────────────────────────────────────────── */
 
 const faqSchema = z.object({
@@ -921,85 +896,6 @@ export async function deleteFaq(formData: FormData): Promise<void> {
   redirect('/admin/faq?ok=1')
 }
 
-/* ── Сайтын агуулга ────────────────────────────────────────────────────── */
-
-/**
- * `site_content` мөрийг шинэчилнэ.
- *
- * Хүснэгт бүхэлдээ ХОЁР jsonb баганатай: `value_mn`, `value_en`. Талбарууд
- * нь түлхүүр бүрд өөр (§ admin/content/page.tsx `GROUPS`) тул энэ үйлдэл
- * тэдгээрийг нэрлэхгүй — формын талбарын нэрнээс нь уншина:
- *
- *   `mn__title`   → зөвхөн монгол хувилбарт
- *   `en__title`   → зөвхөн англи хувилбарт
- *   `both__phone` → хоёуланд нь (утас, Instagram зэрэг хэлнээс хамаарахгүй)
- *
- * Хуучин утгын ДЭЭР бичнэ, орлуулахгүй: формд ороогүй талбар (жишээ нь
- * гараар нэмсэн түлхүүр) алдагдахгүй.
- */
-export async function updateSiteContent(formData: FormData): Promise<void> {
-  await requireStaff()
-
-  const key = String(formData.get('key') ?? '').trim()
-  if (!key) redirect('/admin/content?error=Түлхүүр алга')
-
-  const supabase = await createClient()
-  const { data: existing } = await supabase
-    .from('site_content')
-    .select('value_mn, value_en')
-    .eq('key', key)
-    .maybeSingle()
-
-  type Value = Record<string, string | number>
-  const mn: Value = { ...((existing?.value_mn as Value) ?? {}) }
-  const en: Value = { ...((existing?.value_en as Value) ?? {}) }
-
-  /* Тоон талбарыг ТООГООР хадгална. jsonb дотор `"6"` ба `6` хоёр өөр зүйл —
-     сайт нь `cancel_cutoff_hours` -ийг тоо гэж уншдаг тул мөр болгож
-     хадгалбал цуцлах хугацаа чимээгүй ажиллахаа болино. */
-  const numeric = new Set(
-    String(formData.get('numeric') ?? '')
-      .split(',')
-      .map((name) => name.trim())
-      .filter(Boolean),
-  )
-
-  const cast = (name: string, raw: string) => {
-    if (!numeric.has(name)) return raw
-    const value = Number(raw)
-    return Number.isFinite(value) ? value : 0
-  }
-
-  for (const [field, raw] of formData.entries()) {
-    if (typeof raw !== 'string') continue
-    const value = raw.trim()
-
-    if (field.startsWith('mn__')) {
-      const name = field.slice(4)
-      mn[name] = cast(name, value)
-    } else if (field.startsWith('en__')) {
-      const name = field.slice(4)
-      en[name] = cast(name, value)
-    } else if (field.startsWith('both__')) {
-      const name = field.slice(6)
-      mn[name] = cast(name, value)
-      en[name] = cast(name, value)
-    }
-  }
-
-  const { error } = await supabase
-    .from('site_content')
-    .upsert({ key, value_mn: mn, value_en: en, updated_at: new Date().toISOString() })
-
-  if (error) redirect(`/admin/content?error=${encodeURIComponent(error.message)}`)
-
-  await audit('site_content.update', 'site_content', null, { key })
-  revalidatePath('/admin/content')
-  // Агуулга нь бүх нийтийн хуудсанд тархсан — бүхэлд нь шинэчилнэ
-  revalidatePath('/', 'layout')
-  redirect(`/admin/content?ok=1#${key}`)
-}
-
 /* ── Хэрэглэгчийн эрх ──────────────────────────────────────────────────── */
 
 export async function setUserRole(formData: FormData): Promise<void> {
@@ -1017,8 +913,11 @@ export async function setUserRole(formData: FormData): Promise<void> {
   }
 
   revalidatePath('/admin/customers')
-  // Цонх байсан газраа эргэж нээгдэнэ (§ components/admin/CustomerTable.tsx)
-  redirect(`/admin/customers?ok=1${id.success ? `&open=${id.data}` : ''}`)
+  /* Цонхноос зассан бол цонх байсан газраа эргэж нээгдэнэ. Хүснэгтээс шууд
+     зассан үед НЭЭГДЭХГҮЙ — хүн хаана байснаа алдахгүй
+     (§ components/admin/CustomerTable.tsx `RoleCell`). */
+  const reopen = formData.get('reopen') === '1' && id.success
+  redirect(`/admin/customers?ok=1${reopen ? `&open=${id.data}` : ''}`)
 }
 
 

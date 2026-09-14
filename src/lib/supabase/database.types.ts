@@ -49,8 +49,21 @@ export type Instructor = {
   profile_id: string | null
   slug: string
   name: string
+  /** Нэрийн доорх ганц мөр: «Twerk Mongolia багш · Уран бүтээлч · …». */
+  role_mn: string
+  role_en: string
   bio_mn: string
   bio_en: string
+  /** Боловсрол, мэргэжил, туршлага — дарааллаараа утгатай эгнээ. */
+  background_mn: string[]
+  background_en: string[]
+  /** Заадаг чиглэл. Богино, шошго хэлбэртэй. */
+  expertise_mn: string[]
+  expertise_en: string[]
+  languages_mn: string[]
+  languages_en: string[]
+  /** Twerk Mongolia -д хэдэн жил болсон. Мэдэхгүй бол NULL — `0` биш. */
+  years: number | null
   photo_url: string | null
   instagram: string | null
   sort_order: number
@@ -66,15 +79,6 @@ export type Location = {
   map_url: string | null
   default_capacity: number
   is_active: boolean
-}
-
-export type GalleryItem = {
-  id: string
-  url: string
-  alt_mn: string
-  alt_en: string
-  sort_order: number
-  created_at: string
 }
 
 export type FaqItem = {
@@ -306,7 +310,6 @@ export type Database = {
       site_content: Table<SiteContent>
       instructors: Table<Instructor>
       locations: Table<Location>
-      gallery_items: Table<GalleryItem>
       faq_items: Table<FaqItem>
       class_types: Table<ClassType>
       class_sessions: Table<ClassSession>

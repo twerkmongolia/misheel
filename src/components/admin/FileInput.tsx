@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState, type ComponentProps } from 'react'
 import { AdminIcon } from './AdminIcon'
+import { MAX_IMAGE_BYTES, MAX_TOTAL_BYTES, formatBytes } from '@/lib/uploads'
+import { shrinkImage } from '@/lib/shrink-image'
 
 /**
  * Зураг сонгогч — урьдчилан харах, хасах боломжтой.
@@ -23,6 +25,24 @@ import { AdminIcon } from './AdminIcon'
  * `input.files` нь зөвхөн `FileList` хүлээж авдаг тул `DataTransfer` -ээр
  * шинийг угсарна. Ингэснээр форм илгээхэд ҮЛДСЭН файлууд л явна — устгасан
  * зураг чимээгүй хамт орох эрсдэлгүй.
+ *
+ * ── Хэмжээг ЭНД барина ─────────────────────────────────────────────────
+ * Хэтэрсэн зургийг серверт илгээх нь утгагүй: хүсэлт нь үйлдэл рүү хүрэлгүй
+ * Next -ийн задлах давхаргад унах ба ажилтан «Алдаа гарлаа» гэсэн хоосон
+ * хуудас хардаг (§ next.config.ts `bodySizeLimit`). Тэр уналтыг код барьж
+ * чадахгүй — цорын ганц зөв газар нь ЭНД, файл сонгосон агшин.
+ *
+ * `setCustomValidity` нь формыг илгээхээс өөрөө сэргийлнэ: нэмэлт төлөв,
+ * дуудагч тал бүр дээр давтагдах шалгалт шаардахгүй.
+ *
+ * ── Эхлээд ШАХНА, дараа нь шалгана ─────────────────────────────────────
+ * Утсаар авсан зураг 4-12MB байдаг нь хэвийн. Ажилтнаас «өөрөө шахаад ир»
+ * гэж шаардах нь түүнийг өөр программ руу явуулна — өөрөөр хэлбэл зураг
+ * огт оруулахгүй байх хамгийн найдвартай шалтгаан. Тиймээс сонгосон
+ * даруйд нь хөтөч дээр жижигрүүлнэ (§ lib/shrink-image.ts).
+ *
+ * Хэмжээний мессеж нь ЗӨВХӨН шахалт ч хүрэлцээгүй үед гарна: хамгаалалт
+ * хэвээр, гэхдээ өдөр тутам тааралдахаа больсон.
  */
 export function FileInput({
   className = '',
@@ -49,8 +69,32 @@ export function FileInput({
     setItems(next.map((file) => ({ file, url: URL.createObjectURL(file) })))
   }
 
+  const [busy, setBusy] = useState(false)
+
   const files = items.map((item) => item.file)
-  const label = files.length === 0 ? placeholder : multiple ? 'Өөр зураг нэмэх' : 'Зураг солих'
+  const label = busy
+    ? 'Зураг бэлдэж байна…'
+    : files.length === 0
+      ? placeholder
+      : multiple
+        ? 'Өөр зураг нэмэх'
+        : 'Зураг солих'
+
+  const oversized = files.find((file) => file.size > MAX_IMAGE_BYTES)
+  const total = files.reduce((sum, file) => sum + file.size, 0)
+
+  const problem = oversized
+    ? `${oversized.name} — ${formatBytes(oversized.size)}. Нэг зураг ${formatBytes(MAX_IMAGE_BYTES)}-аас хэтэрч болохгүй.`
+    : total > MAX_TOTAL_BYTES
+      ? `Сонгосон зургууд нийлээд ${formatBytes(total)} байна. Нэг удаад ${formatBytes(MAX_TOTAL_BYTES)} хүртэл илгээнэ — цөөрүүлж, үлдсэнийг нь дараа нэмнэ үү.`
+      : ''
+
+  /* Хэмжээ хэтэрсэн үед формыг илгээхээс хөтөч өөрөө татгалзана. Оролт нь
+     тунгалаг (доор) тул хөтчийн бөмбөлөг харагдахгүй байж болно — тиймээс
+     мессежийг доор нь өөрсдөө бичнэ. */
+  useEffect(() => {
+    ref.current?.setCustomValidity(problem)
+  }, [problem])
 
   return (
     <span className="flex flex-col gap-3">
@@ -104,14 +148,34 @@ export function FileInput({
           ref={ref}
           type="file"
           multiple={multiple}
+          aria-invalid={problem ? true : undefined}
           onChange={(event) => {
-            sync([...(event.target.files ?? [])])
+            const picked = [...(event.target.files ?? [])]
             onChange?.(event)
+            if (picked.length === 0) {
+              sync(picked)
+              return
+            }
+
+            /* Шахалт нь зураг тус бүрд хэдэн зуун миллисекунд авна. Тэр
+               хугацаанд шошго «Зураг бэлдэж байна…» гэж хэлнэ — чимээгүй
+               саатал нь эвдэрсэн мэт мэдрэгдэнэ. */
+            setBusy(true)
+            void Promise.all(picked.map((file) => shrinkImage(file, MAX_IMAGE_BYTES)))
+              .then(sync)
+              .catch(() => sync(picked))
+              .finally(() => setBusy(false))
           }}
           className={`absolute inset-0 cursor-pointer opacity-0 ${className}`}
           {...props}
         />
       </span>
+
+      {problem && (
+        <span role="alert" className="t-meta text-warn">
+          {problem}
+        </span>
+      )}
     </span>
   )
 }

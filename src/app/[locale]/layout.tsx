@@ -1,3 +1,4 @@
+import { headers } from 'next/headers'
 import { notFound } from 'next/navigation'
 import { Header } from '@/components/site/Header'
 import { TodayBar } from '@/components/site/TodayBar'
@@ -7,7 +8,7 @@ import { ContactDialog } from '@/components/site/ContactDialog'
 import { contactChannels } from '@/lib/contact'
 import { getSiteContent } from '@/lib/data'
 import { content, getDictionary } from '@/lib/i18n'
-import { isLocale } from '@/lib/i18n/config'
+import { isLocale, PATH_HEADER } from '@/lib/i18n/config'
 
 export default async function LocaleLayout({
   children,
@@ -18,6 +19,23 @@ export default async function LocaleLayout({
 }) {
   const { locale } = await params
   if (!isLocale(locale)) notFound()
+
+  /* ── Сурагчийн хэсэг энэ бүрхүүлийг ӨМСӨХГҮЙ ─────────────────────────────
+     Маркетингийн толгой, хөл хоёр нь ЗАРАХ зорилготой: цэс нь «юу байна»,
+     хөл нь «бид хэн бэ» гэж ярина. Нэвтэрсэн сурагч аль хэдийн худалдан
+     авсан — түүнд хэрэгтэй зүйл нь хичээл, бүртгэл, захиалга гурав. Тэр
+     гурвыг зарлалын дундуур хайлгах нь ажлын хэрэгслийг сурталчилгааны
+     хуудсан дээр байрлуулахтай адил.
+
+     Тиймээс сурагчийн хэсэг өөрийн бүрхүүлтэй (§ (account)/layout.tsx) —
+     удирдлага өөрийн бүрхүүлтэй байдагтай яг ижил шалтгаанаар.
+
+     Замыг `params` -аас мэдэх боломжгүй (layout нь доорх хуудсаа хардаггүй)
+     тул proxy -оос толгойгоор ирнэ (§ lib/i18n/config.ts `PATH_HEADER`). */
+  const path = (await headers()).get(PATH_HEADER) ?? ''
+  if (path === `/${locale}/account` || path.startsWith(`/${locale}/account/`)) {
+    return children
+  }
 
   const t = getDictionary(locale)
 

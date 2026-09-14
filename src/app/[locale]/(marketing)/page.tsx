@@ -1,11 +1,12 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import type { CSSProperties, ReactNode } from 'react'
 import { Arrow, ButtonLink, Empty, Eyebrow } from '@/components/ui'
 import { ContactTrigger } from '@/components/site/ContactDialog'
 import { Media } from '@/components/site/media'
 import { SessionList } from '@/components/site/SessionList'
+import { CourseCard } from '@/components/site/CourseCard'
 import { VideoEmbed } from '@/components/site/VideoEmbed'
 import { Stat } from '@/components/site/Stat'
 import { content, getDictionary, loc, isLocale } from '@/lib/i18n'
@@ -14,13 +15,14 @@ import { formatMnt } from '@/lib/format'
 import { youtubeId } from '@/lib/youtube'
 import {
   getClassTypes,
+  getCourses,
   getInstructors,
   getMyBookedSessionIds,
   getProducts,
   getSiteContent,
   getUpcomingSessions,
 } from '@/lib/data'
-import { getUser } from '@/lib/auth/dal'
+import { getProfile, getUser } from '@/lib/auth/dal'
 
 /**
  * Админ `site_content` дээрх `videos` мөрийг засаагүй үед харагдах бичлэгүүд.
@@ -137,11 +139,28 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   const { locale } = await params
   if (!isLocale(locale)) notFound()
 
+  /* ── Нэвтэрсэн сурагчид нүүр хуудас ХЭРЭГГҮЙ ─────────────────────────────
+     Энэ хуудас бол ЗАРЛАЛ: «бид хэн бэ, юу заадаг вэ, яагаад ирэх ёстой
+     вэ». Тэр асуултуудад аль хэдийн хариулсан, төлбөрөө төлсөн хүнд энэ нь
+     дахин хэлсэн үг — тэр «миний хичээл хаана байна» гэдгийг л хайж байна.
+     Тиймээс сурагчийн нүүр нь СУРАЛЦАХ хэсэг байна.
+
+     Зөвхөн `customer`. Ажилтан, багш нар сайтаа ХАРАХ шаардлагатай —
+     тэдний хувьд энэ хуудас нь ажлын хэрэгсэл (§ actions/auth.ts дээр
+     ажилтан нэвтрэхэд /admin руу ордогтой ижил санаа). */
+  const profile = await getProfile()
+  if (profile?.role === 'customer') redirect(`/${locale}/account/courses`)
+
   const t = getDictionary(locale)
-  const [site, sessions, classTypes, instructors, products, user] = await Promise.all([
+  const [site, sessions, classTypes, courses, instructors, products, user] = await Promise.all([
     getSiteContent(['hero', 'about', 'videos']),
     getUpcomingSessions(6),
     getClassTypes(),
+    /* Танхим ба онлайн НЭГ эгнээнд. Хүний сонголт нь яг тэр хоёрын
+       хооронд байдаг тул тэднийг салгах нь харьцуулалтыг таслана
+       (§ (marketing)/courses/page.tsx). Дөрөв нь хангалттай — нүүр
+       хуудас бол каталог биш, урилга. */
+    getCourses({ limit: 4 }),
     getInstructors(),
     getProducts(),
     getUser(),
@@ -173,6 +192,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
      эзэлбэл дараалал тасарч, «02 дараа нь 04» болно. */
   const chapters = [
     { id: 'schedule', show: true },
+    { id: 'courses', show: courses.length > 0 },
     { id: 'classes', show: classTypes.length > 0 },
     { id: 'instructors', show: instructors.length > 0 },
     { id: 'videos', show: videos.length > 0 },
@@ -343,7 +363,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                 {classTypes.map((classType) => (
                   <span
                     key={classType.id}
-                    className="font-display flex items-center gap-10 text-[1.75rem] leading-none font-bold tracking-[0.01em] whitespace-nowrap text-foreground-soft uppercase sm:text-[2.5rem]"
+                    className="font-display flex items-center gap-10 text-[1.75rem] leading-none font-extrabold tracking-[-0.022em] whitespace-nowrap text-foreground-soft sm:text-[2.5rem]"
                   >
                     {loc(classType, 'name', locale)}
                     <span aria-hidden className="h-1.5 w-1.5 shrink-0 rounded-full bg-faint" />
@@ -376,6 +396,31 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           <SessionList sessions={sessions} locale={locale} booked={booked} />
         )}
       </Chapter>
+
+      {/* ══ 02 · Анги, курс ═══════════════════════════════════════════════
+          Хуваарийн ЯГ дараа. Хуваарь нь «энэ долоо хоногт юу байна» гэж
+          хариулдаг бол анги нь «би хаанаас эхлэх вэ» гэдэгт хариулна —
+          нэг удаагийн хичээлээс бүтэн хөтөлбөр рүү шилжих тэр алхам нь
+          студийн хамгийн үнэтэй шилжилт тул хамгийн дээр сууна.
+
+          Тор, зам биш ХОЁР БАГАНА: анги цөөхөн (2-4) байдаг тул зам нь
+          хагас хоосон, гурван баганат тор нь картуудыг хэт жижигрүүлнэ. */}
+      {courses.length > 0 && (
+        <Chapter
+          id="courses"
+          index={no('courses')}
+          count={chapterCount}
+          title={t.home.coursesTitle}
+          note={t.home.coursesNote}
+          action={<More href={`/${locale}/courses`}>{t.common.all}</More>}
+        >
+          <div className="grid gap-x-6 gap-y-10 sm:grid-cols-2" data-stagger>
+            {courses.map((course, index) => (
+              <CourseCard key={course.id} course={course} locale={locale} index={index} />
+            ))}
+          </div>
+        </Chapter>
+      )}
 
       {/* ══ 02 · Хичээлийн төрлүүд ════════════════════════════════════════
           Хэвтээ зам. Тор нь «бүгд ижил жинтэй» гэж хэлдэг бол зам нь
@@ -420,7 +465,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
                 <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 p-5 text-white">
                   <div className="min-w-0">
-                    <p className="font-display text-[1.45rem] leading-tight font-semibold tracking-[0.005em]">
+                    <p className="font-display text-[1.4rem] leading-tight font-bold tracking-[-0.015em]">
                       {loc(classType, 'name', locale)}
                     </p>
                     <p className="t-meta mt-1.5 text-white/65">
@@ -475,13 +520,14 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                     overlay
                   />
                   <div className="absolute inset-x-0 bottom-0 p-5 text-white">
-                    <p className="font-display text-[1.3rem] leading-tight font-semibold tracking-[0.005em]">
+                    <p className="font-display text-[1.25rem] leading-tight font-bold tracking-[-0.015em]">
                       {instructor.name}
                     </p>
-                    {/* Товч намтар нь hover дээр ГАРЧ ирнэ: тайван үедээ
-                        зураг дангаараа ярина, сонирхсон үед нь дэлгэрнэ. */}
+                    {/* ҮҮРГИЙН мөр нь hover дээр ГАРЧ ирнэ: тайван үедээ
+                        зураг дангаараа ярина, сонирхсон үед нь хэн болохыг
+                        хэлнэ. Үүрэг бичээгүй багш дээр намтраараа ухарна. */}
                     <p className="t-meta bio-reveal mt-1.5 line-clamp-2 text-white/70">
-                      {loc(instructor, 'bio', locale)}
+                      {loc(instructor, 'role', locale) || loc(instructor, 'bio', locale)}
                     </p>
                   </div>
                 </div>

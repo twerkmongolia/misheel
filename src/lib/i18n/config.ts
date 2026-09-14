@@ -23,6 +23,21 @@ export const LOCALE_COOKIE = 'locale'
  */
 export const LOCALE_HEADER = 'x-locale'
 
+/**
+ * Хүсэлтийн ЗАМ — layout руу толгойгоор.
+ *
+ * Layout нь өөрийнхөө доор ямар хуудас зурагдаж байгааг мэддэггүй: `params`
+ * нь зөвхөн segment-ийн утгыг өгнө, `usePathname` нь зөвхөн хөтөч дээр
+ * ажиллана. Гэтэл `[locale]` -ийн layout нь сурагчийн хэсэгт толгой, хөлөө
+ * зурах ЁСГҮЙ (§ app/[locale]/layout.tsx) — тэр шийдвэрийг гаргахын тулд
+ * замаа мэдэх ёстой.
+ *
+ * `LOCALE_HEADER` -тэй ЯГ ижил арга: proxy нь хүсэлт бүр дээр ажилладаг тул
+ * мэдээллийг тэндээс наана. Толгой ирээгүй тохиолдолд (proxy-ийн matcher-аас
+ * гадуурх зам) сайтын бүрхүүл зурагдана — аюулгүй тал руугаа унана.
+ */
+export const PATH_HEADER = 'x-pathname'
+
 export function isLocale(value: string): value is Locale {
   return (locales as readonly string[]).includes(value)
 }

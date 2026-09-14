@@ -6,6 +6,9 @@ const mn = {
     home: 'Нүүр',
     about: 'Бидний тухай',
     aboutShort: 'Тухай',
+    /* Хөлний баганын гарчиг. «Бидний тухай» -г гарчиг болгоход доорх
+       эхний холбоос нь ЯГ ижил үгтэй болж, өөрийгөө давтана. */
+    studio: 'Студи',
     classes: 'Хичээлүүд',
     courses: 'Анги, курс',
     studioCourses: 'Танхимын анги',
@@ -16,7 +19,6 @@ const mn = {
     instructors: 'Багш нар',
     shop: 'Дэлгүүр',
     faq: 'Түгээмэл асуулт',
-    gallery: 'Галерей',
     contact: 'Холбоо барих',
     account: 'Миний булан',
     admin: 'Удирдлага',
@@ -27,10 +29,14 @@ const mn = {
     menu: 'Цэс',
     language: 'Хэл',
   },
+  /**
+   * Дээд тууз (§ site/TodayBar.tsx) — зөвхөн огноо.
+   *
+   * `weekday` нь монголд «Даваа ГАРАГ» гэсэн дагавар; англид «Monday day»
+   * гэж хэлэхгүй тул тэнд хоосон.
+   */
   today: {
     label: 'Өнөөдөр',
-    classToday: 'Өнөөдрийн хичээл',
-    noClass: 'Өнөөдөр хичээл байхгүй',
     weekday: 'гараг',
   },
   common: {
@@ -80,7 +86,6 @@ const mn = {
     courses: 'Танхимын болон онлайн ангиуд — эхлэх огноо, хуваарь, төлбөр, суудлын үлдэгдэл.',
     schedule: 'Долоо хоногийн хичээлийн хуваарь. Суудал урьдчилан захиалснаар баталгаажна.',
     instructors: 'Заалыг хөтөлдөг багш нар — туршлага, заадаг хичээлүүд.',
-    gallery: 'Заал, тайз, Battle Show-гийн гэрэл зургууд.',
     shop: 'Дасгалд зориулсан хувцас, хэрэгсэл. Заалнаас эсвэл хүргэлтээр.',
     faq: 'Хичээл, бүртгэл, төлбөрийн талаар хамгийн олон асуугддаг асуултууд.',
     contact: 'Хаяг, утас, олон нийтийн сүлжээ — хичээл, тоглолт, хамтын ажиллагааны талаар бичээрэй.',
@@ -163,6 +168,7 @@ const mn = {
   home: {
     upcoming: 'Ойрын хичээлүүд',
     upcomingAll: 'Бүх хуваарь',
+    coursesTitle: 'Анги, курс',
     classesTitle: 'Хичээлийн төрлүүд',
     instructorsTitle: 'Багш нар',
     shopTitle: 'Дэлгүүрээс',
@@ -174,11 +180,27 @@ const mn = {
     weekly: 'долоо хоног бүрийн хичээл',
     // Бүлэг бүрийн дэд гарчиг — гарчгийн хажууд суух нэг өгүүлбэр.
     scheduleNote: 'Суудал урьдчилан захиалснаар баталгаажна. Долоо хоног бүр шинэчлэгдэнэ.',
+    coursesNote: 'Танхимд багштайгаа, эсвэл гэрээсээ онлайнаар. Эхнээс нь дуустал нь дагадаг бүтэн хөтөлбөр.',
     classesNote: 'Анхан шатнаас ахисан түвшин хүртэл. Аль ч цэгээс эхэлж болно.',
     instructorsNote: 'Заалыг хөтөлдөг хүмүүс. Хичээл бүр тэдний нэгэнтэй холбоотой.',
     videosNote: 'Заалны уур амьсгалыг үг хэлж чадахгүй — хөдөлгөөнийг харна уу.',
     shopNote: 'Дасгалд зориулсан хувцас, хэрэгсэл. Заалнаас эсвэл хүргэлтээр.',
     scroll: 'Гүйлгэ',
+  },
+  /**
+   * Багшийн хуудасны хэсгийн нэрс.
+   *
+   * Багшийн БАРИМТ нь өгөгдлийн санд (§ instructors), ШОШГО нь энд. Тэр
+   * зааг чухал: «Мэргэжлийн намтар» гэсэн гарчгийг арван багш дээр арван
+   * удаа хадгалах шалтгаан алга — гарчиг бол хуудсынх, багшийнх биш.
+   */
+  instructor: {
+    background: 'Мэргэжлийн намтар',
+    bio: 'Танилцуулга',
+    expertise: 'Заадаг чиглэл',
+    languages: 'Хэл',
+    years: 'Twerk Mongolia-д',
+    yearsUnit: 'жил',
   },
   schedule: {
     title: 'Хичээлийн хуваарь',
@@ -209,6 +231,7 @@ const mn = {
     success: 'Бүртгэл амжилттай боллоо.',
     cancelled: 'Бүртгэл цуцлагдлаа.',
     myBookings: 'Миний хичээлүүд',
+    myBookingsShort: 'Хичээл',
     upcoming: 'Ирэх хичээлүүд',
     past: 'Өнгөрсөн',
     cancelBooking: 'Цуцлах',
@@ -282,6 +305,8 @@ const mn = {
     cancel: 'Болих',
     /* ── Миний анги ──────────────────────────────────────────────────── */
     mine: 'Миний анги',
+    /** Утасны доод самбарт — урт нэр дөрвөн баганад багтахгүй. */
+    mineShort: 'Анги',
     mineLead: 'Элссэн танхим болон онлайн ангиуд.',
     mineEmpty: 'Та ямар ч ангид элсээгүй байна.',
     mineEmptyHint: 'Нээлттэй ангиудыг хараад өөрт тохирохыг нь сонгоорой.',
@@ -342,6 +367,7 @@ const mn = {
     orderNote: 'Нэмэлт тайлбар',
     placeOrder: 'Захиалах',
     myOrders: 'Миний захиалгууд',
+    myOrdersShort: 'Захиалга',
     noOrders: 'Захиалга алга байна.',
     orderNo: 'Захиалгын дугаар',
     bankTransfer: 'Банкны шилжүүлэг',
@@ -379,6 +405,10 @@ const mn = {
     fullName: 'Овог нэр',
     phone: 'Утасны дугаар',
     forgot: 'Нууц үгээ мартсан уу?',
+    /* «Нэвтрэх» ч, «Бүртгүүлэх» ч биш: Google талд хоёр нь НЭГ урсгал —
+       хаяг нь эхний удаад бүртгэл үүсгэж, дараа нь түүн рүү нэвтэрнэ. */
+    google: 'Google-ээр үргэлжлүүлэх',
+    or: 'эсвэл',
     noAccount: 'Бүртгэлгүй юу?',
     hasAccount: 'Бүртгэлтэй юу?',
     checkEmail: 'И-мэйл хаягаа шалгана уу — баталгаажуулах холбоос илгээлээ.',
@@ -394,7 +424,28 @@ const mn = {
     emailLocked: 'И-мэйл хаяг нь таны нэвтрэх нэр тул энд өөрчлөгдөхгүй.',
     changePassword: 'Нууц үг солих',
     noName: 'Нэргүй',
+    /** Сурагчийн самбарын толгой дээрх шошго (§ (account)/layout.tsx). */
+    student: 'Сурагч',
     profileMissing: 'Профайл олдсонгүй. Дахин нэвтэрч үзнэ үү.',
+    /**
+     * Нэвтрэлт бүтэлгүйтсэн шалтгаанууд (§ app/auth/*).
+     *
+     * Өмнө нь БҮХ шалтгаан «Алдаа гарлаа» гэсэн ганц мөр болж хувирдаг
+     * байв. Хүн юу буруу болсныг мэдэхгүй, бид ч мэдэхгүй — тиймээс дахин
+     * оролдохоос өөр зөвлөгөө өгөх аргагүй. Шалтгаан бүр өөр үйлдэл
+     * шаарддаг тул тус тусад нь нэрлэв.
+     */
+    errors: {
+      /** Google руу явуулж ч чадсангүй — тохиргоо эсвэл сүлжээ. */
+      oauthStart: 'Google-ээр нэвтрэх үйлчилгээ түр ажиллахгүй байна. Дараа дахин оролдоно уу.',
+      /** Google дээр хүн өөрөө цуцалсан, эсвэл зөвшөөрөл өгөөгүй. */
+      provider: 'Google дээр нэвтрэлт дуусалгүй буцлаа. Дахин оролдоно уу.',
+      /** Буцаж ирсэн ч кодгүй — ихэвчлэн буцах хаяг зөвшөөрөгдөөгүй. */
+      missingCode: 'Нэвтрэлт дуусаагүй байна. Дахин оролдоно уу.',
+      /** Код session болж солигдсонгүй — хугацаа нь дууссан, эсвэл дахин ашигласан. */
+      exchange: 'Нэвтрэх холбоосын хугацаа дууссан байна. Дахин нэвтэрнэ үү.',
+      unknown: 'Алдаа гарлаа. Дахин оролдоно уу.',
+    },
     role: {
       instructor: 'Багш',
       staff: 'Ажилтан',
@@ -454,6 +505,7 @@ const en: Dictionary = {
     home: 'Home',
     about: 'About',
     aboutShort: 'About',
+    studio: 'Studio',
     classes: 'Classes',
     courses: 'Courses',
     studioCourses: 'Studio courses',
@@ -464,7 +516,6 @@ const en: Dictionary = {
     instructors: 'Instructors',
     shop: 'Shop',
     faq: 'FAQ',
-    gallery: 'Gallery',
     contact: 'Contact',
     account: 'My account',
     admin: 'Admin',
@@ -477,8 +528,6 @@ const en: Dictionary = {
   },
   today: {
     label: 'Today',
-    classToday: "Today's class",
-    noClass: 'No class today',
     weekday: '',
   },
   common: {
@@ -520,7 +569,6 @@ const en: Dictionary = {
     courses: 'Studio and online courses — start dates, schedule, price and seats left.',
     schedule: 'This week\'s class schedule. Seats are confirmed by booking ahead.',
     instructors: 'The people who run the room — background and the classes they teach.',
-    gallery: 'Photographs from the studio, the stage and the Battle Show.',
     shop: 'Clothing and kit for training. Pick up at the studio or have it delivered.',
     faq: 'The questions we hear most about classes, booking and payment.',
     contact: 'Address, phone and socials — write to us about classes, shows or working together.',
@@ -589,6 +637,7 @@ const en: Dictionary = {
   home: {
     upcoming: 'Upcoming classes',
     upcomingAll: 'Full schedule',
+    coursesTitle: 'Courses',
     classesTitle: 'Class types',
     instructorsTitle: 'Instructors',
     shopTitle: 'From the shop',
@@ -599,11 +648,20 @@ const en: Dictionary = {
     years: 'years',
     weekly: 'classes every week',
     scheduleNote: 'Your seat is confirmed once you book. Updated every week.',
+    coursesNote: 'In the studio with a teacher, or online from home. A full programme, start to finish.',
     classesNote: 'From absolute beginner to advanced. Start wherever you are.',
     instructorsNote: 'The people who lead the room. Every class belongs to one of them.',
     videosNote: 'Words cannot carry the feeling of the room — watch the movement.',
     shopNote: 'Clothing and gear made for practice. In studio or delivered.',
     scroll: 'Scroll',
+  },
+  instructor: {
+    background: 'Professional background',
+    bio: 'Bio',
+    expertise: 'Areas of expertise',
+    languages: 'Languages',
+    years: 'With Twerk Mongolia',
+    yearsUnit: 'years',
   },
   schedule: {
     title: 'Class schedule',
@@ -632,6 +690,7 @@ const en: Dictionary = {
     success: 'You are booked in.',
     cancelled: 'Booking cancelled.',
     myBookings: 'My classes',
+    myBookingsShort: 'Classes',
     upcoming: 'Upcoming',
     past: 'Past',
     cancelBooking: 'Cancel',
@@ -699,6 +758,7 @@ const en: Dictionary = {
     submit: 'Confirm enrolment',
     cancel: 'Cancel',
     mine: 'My courses',
+    mineShort: 'Courses',
     mineLead: 'The studio and online courses you have joined.',
     mineEmpty: 'You have not joined any course yet.',
     mineEmptyHint: 'Have a look at what is open and pick the one that fits.',
@@ -759,6 +819,7 @@ const en: Dictionary = {
     orderNote: 'Note',
     placeOrder: 'Place order',
     myOrders: 'My orders',
+    myOrdersShort: 'Orders',
     noOrders: 'No orders yet.',
     orderNo: 'Order number',
     bankTransfer: 'Bank transfer',
@@ -796,6 +857,8 @@ const en: Dictionary = {
     fullName: 'Full name',
     phone: 'Phone number',
     forgot: 'Forgotten your password?',
+    google: 'Continue with Google',
+    or: 'or',
     noAccount: 'No account yet?',
     hasAccount: 'Already registered?',
     checkEmail: 'Check your email — we sent a confirmation link.',
@@ -811,7 +874,15 @@ const en: Dictionary = {
     emailLocked: 'Your email is your login, so it cannot be changed here.',
     changePassword: 'Change password',
     noName: 'No name yet',
+    student: 'Student',
     profileMissing: 'We could not find your profile. Try signing in again.',
+    errors: {
+      oauthStart: 'Signing in with Google is unavailable right now. Please try again later.',
+      provider: 'Google sent you back before sign-in finished. Please try again.',
+      missingCode: 'Sign-in did not complete. Please try again.',
+      exchange: 'That sign-in link has expired. Please sign in again.',
+      unknown: 'Something went wrong. Please try again.',
+    },
     role: {
       instructor: 'Instructor',
       staff: 'Staff',
