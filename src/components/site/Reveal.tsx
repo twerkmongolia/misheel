@@ -1,6 +1,5 @@
 'use client'
 
-import { usePathname } from 'next/navigation'
 import { useEffect } from 'react'
 
 /**
@@ -11,6 +10,29 @@ import { useEffect } from 'react'
  * санаатай: JS нь ХЭЗЭЭ гэдгийг л шийднэ, ЮУ БОЛОХЫГ загварын хуудас
  * шийднэ. Тиймээс хөдөлгөөний хэлийг өөрчлөхөд энэ файл хөндөгдөхгүй.
  *
+ * ── Яагаад MutationObserver вэ ─────────────────────────────────────────
+ * Урьд нь ажиглагч ЗӨВХӨН замын өөрчлөлт дээр дахин зэвсэглэдэг байв
+ * (`usePathname`). Гэвч шүүлтүүр нь замыг ӨӨРЧИЛДӨГГҮЙ — зөвхөн асуултыг:
+ * `/mn/courses?mode=studio` → `?mode=online`. Карт бүр `key` -тэй тул React
+ * тэднийг ДАХИН ашиглахгүй, ШИНЭ элемент үүсгэнэ — шинэ элемент нь
+ * `.is-in` -гүй, ажиглагдаагүй, тиймээс `opacity: 0` дээрээ ҮҮРД үлдэнэ.
+ * Анги, дэлгүүрийн жагсаалт шүүсний дараа ХООСОН харагдах шалтгаан яг энэ
+ * байлаа.
+ *
+ * Одоо DOM-д шинэ зангилаа орж ирэх бүрд ажиглана. Энэ нь чиглүүлэгчээс
+ * ХАМААРАХГҮЙ: шүүлтүүр, хуудаслалт, дараа нэмэгдэх ямар ч динамик агуулга
+ * ижилхэн хамрагдана.
+ *
+ * ── Suspense-ийн ЗӨӨЛТ ────────────────────────────────────────────────
+ * Streaming SSR нь бэлэн болоогүй хэсгийг эхлээд `<div hidden>` дотор
+ * зурж, дараа нь `$RC` скриптээр байрандаа ЗӨӨДӨГ. Тэр элемент нь
+ * НУУГДМАЛ үедээ ажиглагдсан байдаг — огтлолцоогүй, тиймээс нээгдээгүй.
+ * Зөөгдөх нь «шинэ зангилаа» биш тул зөвхөн ажиглалт нэмэх нь хүрэхгүй.
+ *
+ * Тиймээс DOM өөрчлөгдөх бүрд ХАРАГДАХ ХЭСГИЙГ дахин шүүрдэнэ: хэмжилт
+ * нь ажиглагчийн дохиог хүлээхгүй, шууд `getBoundingClientRect` дээр
+ * тогтоно. Дебаунс нь дараалсан олон мутацийг нэг шүүрдэлт болгоно.
+ *
  * Яагаад `animation-timeline: view()` биш вэ:
  *   · Firefox дээр хараахан ажиллахгүй — хэрэглэгчийн нэлээд хэсэг нь
  *     хөдөлгөөнгүй үлдэнэ.
@@ -20,10 +42,6 @@ import { useEffect } from 'react'
  *     буруу сонгож, тунгалаг хэвээр гацаж болзошгүй.
  */
 export function Reveal() {
-  // App Router нь хуудас солиход бүтэн ачаалдаггүй — шинэ DOM гарч ирэхэд
-  // дахин ажиглах ёстой. Замын өөрчлөлт нь тэр дохио.
-  const pathname = usePathname()
-
   useEffect(() => {
     const root = document.documentElement
 
@@ -53,7 +71,32 @@ export function Reveal() {
     )
 
     const targets = () => document.querySelectorAll('[data-rv]:not(.is-in)')
-    targets().forEach((el) => observer.observe(el))
+
+    const watch = (el: Element) => {
+      if (!el.classList.contains('is-in')) observer.observe(el)
+    }
+
+    /** Зангилаа ӨӨРӨӨ ажиглагдах зүйл байж ч болно, дотроо агуулж ч болно. */
+    const scan = (node: Element) => {
+      if (node.matches('[data-rv]')) watch(node)
+      node.querySelectorAll('[data-rv]:not(.is-in)').forEach(watch)
+    }
+
+    targets().forEach(watch)
+
+    /* Шинээр орж ирсэн агуулгыг барина (§ файлын толгой). Зөвхөн НЭМЭГДСЭН
+       зангилааг шалгана — бүх DOM-ыг дахин шүүрдэх нь мутаци бүр дээр
+       давтагдах ба урт жагсаалтад үнэтэй болно. */
+    const mutations = new MutationObserver((records) => {
+      for (const record of records) {
+        for (const node of record.addedNodes) {
+          if (node.nodeType === Node.ELEMENT_NODE) scan(node as Element)
+        }
+      }
+      // Зөөгдсөн (шинэ биш) элементүүдийг барих — дээрх тайлбарыг үзнэ үү.
+      schedule()
+    })
+    mutations.observe(document.body, { childList: true, subtree: true })
 
     /**
      * Аюулгүйн тор.
@@ -70,6 +113,9 @@ export function Reveal() {
     const sweep = () => {
       for (const el of targets()) {
         const box = el.getBoundingClientRect()
+        // Өндөр, өргөнгүй элемент нь ХАРАГДАХГҮЙ эцэгтэй (Suspense-ийн
+        // нуугдсан сав) — түүнийг нээх нь эрт, ажиглагч барина.
+        if (box.width === 0 && box.height === 0) continue
         if (box.top < window.innerHeight && box.bottom > 0) {
           show(el)
           observer.unobserve(el)
@@ -77,19 +123,22 @@ export function Reveal() {
       }
     }
 
-    const arm = () => {
-      timer = window.setTimeout(sweep, 400)
+    /** Дараалсан мутацуудыг нэг шүүрдэлт болгоно. */
+    const schedule = () => {
+      window.clearTimeout(timer)
+      timer = window.setTimeout(sweep, 120)
     }
 
-    if (document.readyState === 'complete') arm()
-    else window.addEventListener('load', arm, { once: true })
+    if (document.readyState === 'complete') schedule()
+    else window.addEventListener('load', schedule, { once: true })
 
     return () => {
       observer.disconnect()
+      mutations.disconnect()
       window.clearTimeout(timer)
-      window.removeEventListener('load', arm)
+      window.removeEventListener('load', schedule)
     }
-  }, [pathname])
+  }, [])
 
   return null
 }

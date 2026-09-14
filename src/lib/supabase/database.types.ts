@@ -276,6 +276,18 @@ export type Payment = {
   created_at: string
 }
 
+/**
+ * Төлбөрийн gateway-ийн хуваалцсан токен (§ migration `payment_tokens`).
+ *
+ * Хүснэгтэд RLS асаалттай, policy огт байхгүй — зөвхөн service-role хүрнэ.
+ */
+export type PaymentToken = {
+  provider: string
+  access_token: string
+  expires_at: string
+  updated_at: string
+}
+
 export type ContactMessage = {
   id: string
   name: string
@@ -324,6 +336,7 @@ export type Database = {
       course_access: Table<CourseAccess>
       course_enrollments: Table<CourseEnrollment>
       payments: Table<Payment>
+      payment_tokens: Table<PaymentToken>
       contact_messages: Table<ContactMessage>
       audit_log: Table<AuditEntry>
     }
@@ -356,6 +369,22 @@ export type Database = {
         Returns: void
       }
       set_order_status: { Args: { p_order_id: string; p_status: OrderStatus }; Returns: void }
+      /**
+       * Төлбөрийг барагдуулна — ЗӨВХӨН webhook-оос, service-role -оор
+       * (§ migration `settle_payment`). Буцаах утга нь үр дүнгийн код:
+       * `paid` · `failed` · `already_paid` · `amount_mismatch` · `not_found`.
+       */
+      settle_payment: {
+        Args: {
+          p_payment_id: string
+          p_provider: string
+          p_provider_ref: string
+          p_amount: number
+          p_paid: boolean
+          p_raw?: unknown
+        }
+        Returns: string
+      }
       create_session_series: {
         Args: {
           p_class_type_id: string

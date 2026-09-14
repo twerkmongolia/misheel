@@ -16,6 +16,14 @@ export default async function MockPayPage({
 }: {
   params: Promise<{ invoiceId: string }>
 }) {
+  /* ⚠️ Энэ бол ХУУРАМЧ төлбөрийн хуудас: «Амжилттай төлөх» товч нь мөнгө
+     хөдөлгөхгүйгээр webhook илгээдэг. Production-д нээлттэй байвал хэн ч
+     захиалгаа төлөгдсөн болгож чадна.
+
+     Provider-ийн шалгалт хангалтгүй: `PAYMENT_PROVIDER` -ыг санамсаргүй
+     `mock` дээр орхих нь яг тэр алдаа. Тиймээс орчноор нь таслана. */
+  if (process.env.NODE_ENV === 'production') notFound()
+
   const { invoiceId } = await params
   const invoice = getInvoice(invoiceId)
 

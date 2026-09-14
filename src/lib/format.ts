@@ -5,7 +5,6 @@ import type { Locale as AppLocale } from './i18n/config'
 /** Студи Улаанбаатарт байрладаг. DB бүхэлдээ UTC — харуулахдаа л хөрвүүлнэ. */
 export const TIMEZONE = 'Asia/Ulaanbaatar'
 
-const MN_WEEKDAYS = ['Ня', 'Да', 'Мя', 'Лха', 'Пү', 'Ба', 'Бя']
 const MN_WEEKDAYS_LONG = ['Ням', 'Даваа', 'Мягмар', 'Лхагва', 'Пүрэв', 'Баасан', 'Бямба']
 
 const mntFormatter = new Intl.NumberFormat('mn-MN')
@@ -33,12 +32,6 @@ export function formatDateTime(iso: string, locale: AppLocale): string {
   return `${formatDate(iso, locale)} ${formatTime(iso)}`
 }
 
-export function weekdayShort(iso: string, locale: AppLocale): string {
-  const date = new Date(iso)
-  if (locale === 'en') return formatInTimeZone(date, TIMEZONE, 'EEE', { locale: enUS })
-  return MN_WEEKDAYS[Number(formatInTimeZone(date, TIMEZONE, 'i')) % 7] ?? ''
-}
-
 export function weekdayLong(iso: string, locale: AppLocale): string {
   const date = new Date(iso)
   if (locale === 'en') return formatInTimeZone(date, TIMEZONE, 'EEEE', { locale: enUS })
@@ -59,11 +52,6 @@ export function formatDayShort(iso: string, locale: AppLocale): string {
   const month = formatInTimeZone(date, TIMEZONE, 'M')
   const day = formatInTimeZone(date, TIMEZONE, 'd')
   return `${month}-р сарын ${day}`
-}
-
-/** Сарын хэдэн нь вэ — зөвхөн тоо. Долоо хоногийн тоймд хэрэглэнэ. */
-export function dayOfMonth(iso: string): string {
-  return formatInTimeZone(new Date(iso), TIMEZONE, 'd')
 }
 
 /**

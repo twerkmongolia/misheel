@@ -1,8 +1,8 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { notFound, redirect } from 'next/navigation'
+import { notFound } from 'next/navigation'
 import type { CSSProperties, ReactNode } from 'react'
-import { Arrow, ButtonLink, Empty, Eyebrow } from '@/components/ui'
+import { Arrow, ButtonLink, Eyebrow } from '@/components/ui'
 import { ContactTrigger } from '@/components/site/ContactDialog'
 import { Media } from '@/components/site/media'
 import { SessionList } from '@/components/site/SessionList'
@@ -22,7 +22,7 @@ import {
   getSiteContent,
   getUpcomingSessions,
 } from '@/lib/data'
-import { getProfile, getUser } from '@/lib/auth/dal'
+import { getUser } from '@/lib/auth/dal'
 
 /**
  * Админ `site_content` дээрх `videos` мөрийг засаагүй үед харагдах бичлэгүүд.
@@ -139,18 +139,6 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   const { locale } = await params
   if (!isLocale(locale)) notFound()
 
-  /* ── Нэвтэрсэн сурагчид нүүр хуудас ХЭРЭГГҮЙ ─────────────────────────────
-     Энэ хуудас бол ЗАРЛАЛ: «бид хэн бэ, юу заадаг вэ, яагаад ирэх ёстой
-     вэ». Тэр асуултуудад аль хэдийн хариулсан, төлбөрөө төлсөн хүнд энэ нь
-     дахин хэлсэн үг — тэр «миний хичээл хаана байна» гэдгийг л хайж байна.
-     Тиймээс сурагчийн нүүр нь СУРАЛЦАХ хэсэг байна.
-
-     Зөвхөн `customer`. Ажилтан, багш нар сайтаа ХАРАХ шаардлагатай —
-     тэдний хувьд энэ хуудас нь ажлын хэрэгсэл (§ actions/auth.ts дээр
-     ажилтан нэвтрэхэд /admin руу ордогтой ижил санаа). */
-  const profile = await getProfile()
-  if (profile?.role === 'customer') redirect(`/${locale}/account/courses`)
-
   const t = getDictionary(locale)
   const [site, sessions, classTypes, courses, instructors, products, user] = await Promise.all([
     getSiteContent(['hero', 'about', 'videos']),
@@ -191,7 +179,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   /* Дугаарлалт нь ӨГӨГДӨЛТЭЙ бүлгүүдийг л тоолно — хоосон бүлэг дугаар
      эзэлбэл дараалал тасарч, «02 дараа нь 04» болно. */
   const chapters = [
-    { id: 'schedule', show: true },
+    { id: 'schedule', show: sessions.length > 0 },
     { id: 'courses', show: courses.length > 0 },
     { id: 'classes', show: classTypes.length > 0 },
     { id: 'instructors', show: instructors.length > 0 },
@@ -279,12 +267,28 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                 className="enter flex w-full flex-col gap-3 min-[420px]:w-auto min-[420px]:flex-row min-[420px]:flex-wrap min-[420px]:items-center"
                 style={{ '--d': '480ms' } as CSSProperties}
               >
-                <ButtonLink href={`/${locale}/schedule`} className="btn-lg">
-                  {hero.cta ?? t.nav.schedule}
+                {/* Хоёр товч = студийн ХОЁР САНАЛ. Хүн сайт нээхдээ аль
+                    хэдийн «заалд явах уу, гэрээсээ үзэх үү» гэдгээ бодож
+                    байдаг — баатрын товч тэр шийдвэрийг ХҮЛЭЭЖ авах ёстой,
+                    дахин нэг жагсаалт дамжуулах биш.
+
+                    Урьд нь энд «Хуваарь харах» ба «Хичээлүүд» байв: эхнийх
+                    нь аль хэдийн ирдэг хүний хэрэгсэл, хоёр дахь нь зөвхөн
+                    каталог. Хоёулаа ЮУ ЗАРЖ байгааг хэлдэггүй.
+
+                    Шошго нь толь бичгээс — `site_content.hero.cta` -аас
+                    БИШ: тэр талбарыг засах админ хуудас байхгүй болсон тул
+                    хэл сонголт нь хөлдүү утга дээр гацна. */}
+                <ButtonLink href={`/${locale}/courses?mode=studio`} className="btn-lg">
+                  {t.nav.studioCourses}
                   <Arrow />
                 </ButtonLink>
-                <ButtonLink href={`/${locale}/classes`} variant="secondary" className="btn-lg">
-                  {t.nav.classes}
+                <ButtonLink
+                  href={`/${locale}/courses?mode=online`}
+                  variant="secondary"
+                  className="btn-lg"
+                >
+                  {t.nav.onlineCourses}
                 </ButtonLink>
               </div>
             </div>
@@ -378,24 +382,31 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       {/* ══ 01 · Ойрын хичээлүүд ══════════════════════════════════════════
           Тор биш ЖАГСААЛТ, түүнчлэн ӨДРӨӨР БҮЛЭГЛЭСЭН. Огноо бүлгийн
           гарчигт нэг л удаа бичигдэж, мөрүүд нь зөвхөн цаг ба хичээлээ
-          хэлнэ — нүд доошоо гүйж, хичээлүүдийг шууд харьцуулна. */}
-      <Chapter
-        id="schedule"
-        index={no('schedule')}
-        count={chapterCount}
-        title={t.home.upcoming}
-        note={t.home.scheduleNote}
-        action={<More href={`/${locale}/schedule`}>{t.home.upcomingAll}</More>}
-      >
-        {sessions.length === 0 ? (
-          <Empty>{t.schedule.noSessions}</Empty>
-        ) : (
-          /* `back` дамжуулаагүй — бүртгэл хийгдсэний дараа хуваарийн хуудас
-             руу буцна. Баталгаажуулах мэдэгдэл зөвхөн тэнд харагддаг тул
-             энд буцаавал хэрэглэгч «болов уу, үгүй юу» гэдгээ мэдэхгүй. */
+          хэлнэ — нүд доошоо гүйж, хичээлүүдийг шууд харьцуулна.
+
+          ── Хоосон үед ОГТ ГАРАХГҮЙ ─────────────────────────────────────
+          Урьд нь энэ бүлэг үргэлж зурагддаг байсан ба хуваарь хоосон үед
+          «Энэ хугацаанд хичээл алга байна» гэсэн том хайрцаг үлддэг байв.
+          Нүүр хуудасны ЭХНИЙ бүлэг нь ҮГҮЙСГЭЛ байж болохгүй: гэрээ
+          нээгээд «юу ч алга» гэж угтахтай адил.
+
+          Хуваарь орсон даруйд бүлэг өөрөө эргэж ирнэ — бусад бүлгүүдтэй
+          яг ижил дүрэм (§ дээрх `chapters`). */}
+      {sessions.length > 0 && (
+        <Chapter
+          id="schedule"
+          index={no('schedule')}
+          count={chapterCount}
+          title={t.home.upcoming}
+          note={t.home.scheduleNote}
+          action={<More href={`/${locale}/schedule`}>{t.home.upcomingAll}</More>}
+        >
+          {/* `back` дамжуулаагүй — бүртгэл хийгдсэний дараа хуваарийн хуудас
+              руу буцна. Баталгаажуулах мэдэгдэл зөвхөн тэнд харагддаг тул
+              энд буцаавал хэрэглэгч «болов уу, үгүй юу» гэдгээ мэдэхгүй. */}
           <SessionList sessions={sessions} locale={locale} booked={booked} />
-        )}
-      </Chapter>
+        </Chapter>
+      )}
 
       {/* ══ 02 · Анги, курс ═══════════════════════════════════════════════
           Хуваарийн ЯГ дараа. Хуваарь нь «энэ долоо хоногт юу байна» гэж

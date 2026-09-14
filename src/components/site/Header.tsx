@@ -1,7 +1,6 @@
 import Link from 'next/link'
 import { getDictionary, type Locale } from '@/lib/i18n'
 import { getProfile } from '@/lib/auth/dal'
-import { cartCount } from '@/lib/cart'
 import { logout } from '@/actions/auth'
 import { LocaleSwitch } from './LocaleSwitch'
 import { NavLink } from './NavLink'
@@ -20,7 +19,7 @@ import { ContactTrigger } from './ContactDialog'
  */
 export async function Header({ locale }: { locale: Locale }) {
   const t = getDictionary(locale)
-  const [profile, count] = await Promise.all([getProfile(), cartCount()])
+  const profile = await getProfile()
   const staff = profile?.role === 'staff' || profile?.role === 'admin'
 
   /* Ширээний компьютерын гол цэс — таван зүйл. «Холбоо барих» энд БАЙХГҮЙ:
@@ -55,8 +54,6 @@ export async function Header({ locale }: { locale: Locale }) {
   ]
 
   // Гар утасны доод самбар — хамгийн олон дардаг дөрөв + цэс.
-  // Сагс энд БИШ дээд мөрөнд: тоолуур нь шинэчлэгдэхийг харах хэрэгтэй бөгөөд
-  // дэлгүүрийн урсгалд байнга дардаг зүйл биш.
   const tabs = [
     { href: `/${locale}`, label: t.nav.home, icon: 'home' as const },
     { href: `/${locale}/schedule`, label: t.nav.booking, icon: 'calendar' as const },
@@ -118,26 +115,11 @@ export async function Header({ locale }: { locale: Locale }) {
           </nav>
 
           {/* ── Хэрэгсэл ────────────────────────────────────────────────
-              Гурван бүлэг, хоёр зураасаар зааглагдана: ХЭЛ · САГС · БҮРТГЭЛ.
-              Зураасгүй бол зургаан жижиг элемент нэг урт эгнээ болж, аль нь
-              алинтайгаа холбоотойг нүд ялгаж чадахгүй. */}
+              Хоёр бүлэг, зураасаар зааглагдана: ХЭЛ · БҮРТГЭЛ. Зураасгүй бол
+              жижиг элементүүд нэг урт эгнээ болж, аль нь алинтайгаа
+              холбоотойг нүд ялгаж чадахгүй. */}
           <div className="ml-auto hidden items-center gap-1 lg:ml-0 lg:flex">
             <LocaleSwitch current={locale} label={t.nav.language} />
-
-            <span aria-hidden className="mx-3 h-5 w-px bg-line" />
-
-            <NavLink
-              href={`/${locale}/cart`}
-              className="icon-btn relative"
-              aria-label={t.nav.cart}
-            >
-              <CartIcon />
-              {count > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-foreground px-1 text-[10px] leading-none font-bold text-background tabular-nums">
-                  {count}
-                </span>
-              )}
-            </NavLink>
 
             <span aria-hidden className="mx-3 h-5 w-px bg-line" />
 
@@ -168,22 +150,6 @@ export async function Header({ locale }: { locale: Locale }) {
                 {t.nav.login}
               </Link>
             )}
-          </div>
-
-          {/* Гар утсанд — зөвхөн сагс. Үлдсэн навигаци доод самбарт байна. */}
-          <div className="ml-auto flex items-center lg:hidden">
-            <Link
-              href={`/${locale}/cart`}
-              aria-label={t.nav.cart}
-              className="icon-btn relative h-11 w-11"
-            >
-              <CartIcon />
-              {count > 0 && (
-                <span className="absolute top-1 right-1 grid h-4 min-w-4 place-items-center rounded-full bg-foreground px-1 text-[10px] leading-none font-bold text-background tabular-nums">
-                  {count}
-                </span>
-              )}
-            </Link>
           </div>
         </div>
       </HeaderShell>
@@ -226,8 +192,8 @@ export async function Header({ locale }: { locale: Locale }) {
                   </>
                 )}
 
-                {/* Хэл — цэсний ёроолд. Утсан дээр толгой мөрөнд зөвхөн
-                    сагс байдаг тул хэл солих цорын ганц хүрэх цэг нь энэ. */}
+                {/* Хэл — цэсний ёроолд. Утсан дээр толгой мөрөнд хэрэгсэл
+                    байхгүй тул хэл солих цорын ганц хүрэх цэг нь энэ. */}
                 <div className="flex items-center justify-center gap-2 pt-2">
                   <LocaleSwitch current={locale} label={t.nav.language} placement="up" />
                 </div>
@@ -237,23 +203,5 @@ export async function Header({ locale }: { locale: Locale }) {
         }
       />
     </>
-  )
-}
-
-function CartIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.4"
-      strokeLinecap="square"
-      strokeLinejoin="miter"
-      className="h-[18px] w-[18px]"
-      aria-hidden="true"
-    >
-      <path d="M3 4.5h2.4l2.2 10.5h9.6l2-7.4H6.3" />
-      <path d="M9 18.6h.01M16.4 18.6h.01" strokeWidth="2" strokeLinecap="round" />
-    </svg>
   )
 }

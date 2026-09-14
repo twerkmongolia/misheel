@@ -1,7 +1,8 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { Alert, Badge, Button, ButtonLink, Card, PageHeader, TableWrap, Td, Th } from '@/components/ui'
-import { cancelOrder } from '@/actions/orders'
+import { cancelOrder, payOrder } from '@/actions/orders'
+import { PaymentWatch } from '@/components/site/PaymentWatch'
 import { content, getDictionary, isLocale } from '@/lib/i18n'
 import { privateMetadata } from '@/lib/seo'
 import { formatDateTime, formatMnt } from '@/lib/format'
@@ -35,10 +36,12 @@ export async function generateMetadata({
 
 export default async function OrderPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string; orderNo: string }>
+  searchParams: Promise<{ error?: string }>
 }) {
-  const { locale, orderNo } = await params
+  const [{ locale, orderNo }, search] = await Promise.all([params, searchParams])
   if (!isLocale(locale) || !isSupabaseConfigured()) notFound()
 
   const t = getDictionary(locale)
@@ -49,8 +52,18 @@ export default async function OrderPage({
   const { data: order } = await supabase.from('orders').select('*').eq('order_no', orderNo).maybeSingle()
   if (!order) notFound()
 
-  const [{ data: items }, site] = await Promise.all([
+  const [{ data: items }, { data: payment }, site] = await Promise.all([
     supabase.from('order_items').select('*').eq('order_id', order.id),
+    /* Нэхэмжлэл үүссэн эсэх — `provider_ref` байгаа нь «хүн gateway руу
+       очсон» гэсэн үг. Тэр үед л хүлээх дэлгэц утгатай: нэхэмжлэлгүй
+       захиалга дээр хүлээх зүйл байхгүй. */
+    supabase
+      .from('payments')
+      .select('provider_ref')
+      .eq('target_type', 'order')
+      .eq('target_id', order.id)
+      .eq('status', 'pending')
+      .maybeSingle(),
     getSiteContent(['shop']),
   ])
 
@@ -71,18 +84,48 @@ export default async function OrderPage({
         <span className="t-small text-muted">{formatDateTime(order.created_at, locale)}</span>
       </div>
 
+      {search.error === 'PAY_FAILED' && <Alert tone="danger">{t.shop.payFailed}</Alert>}
+
       {order.status === 'pending_payment' && (
-        <Card className="flex flex-col gap-3">
-          <h2 className="font-semibold">{t.shop.bankTransfer}</h2>
-          <p className="t-small text-foreground-soft">{t.shop.payInstructions}</p>
-          {bank && <p className="font-mono text-sm">{bank}</p>}
+        <Card className="flex flex-col gap-5">
           <div className="flex items-baseline gap-2">
             <span className="t-small text-muted">{t.common.total}</span>
             <span className="font-display t-h2 tabular-nums">{formatMnt(order.total)}</span>
           </div>
-          <p className="t-small text-muted">
-            Гүйлгээний утга: <span className="font-mono">{order.order_no}</span>
-          </p>
+
+          {/* ── Онлайн төлбөр нь ҮНДСЭН зам ────────────────────────────
+              Карт, банкны апп — хэдхэн товшилт. Товч нь ШИНЭ нэхэмжлэл
+              үүсгэдэг тул хугацаа нь дууссан холбоос дээр гацахгүй
+              (§ actions/orders.ts `payOrder`). */}
+          <div className="flex flex-col gap-3">
+            <form action={payOrder} className="self-start">
+              <input type="hidden" name="order_no" value={order.order_no} />
+              <input type="hidden" name="locale" value={locale} />
+              <Button type="submit">{t.shop.payNow}</Button>
+            </form>
+
+            {/* Нэхэмжлэл гарсан бол хүн төлбөрөө хийчихээд буцаж ирсэн
+                байж болно — webhook хараахан ирээгүй байхад «хүлээгдэж
+                буй» гэж харагдах нь айдас төрүүлнэ. */}
+            {payment?.provider_ref && (
+              <PaymentWatch label={t.shop.payWaiting} timeoutLabel={t.shop.payWaitingSlow} />
+            )}
+          </div>
+
+          {/* ── Шилжүүлэг нь НӨӨЦ зам ──────────────────────────────────
+              Онлайн төлбөр бүтэхгүй хүн (карт хаагдсан, апп байхгүй) энд
+              унана. Данс нь доор, жижгээр: хоёр аргыг зэрэг тэнцүү
+              харуулбал хүн аль нь «зөв» бол гэж эргэлзэнэ. */}
+          {bank && (
+            <div className="flex flex-col gap-1.5 border-t border-line pt-4">
+              <p className="t-label text-muted">{t.shop.bankTransfer}</p>
+              <p className="t-small text-foreground-soft">{t.shop.payInstructions}</p>
+              <p className="font-mono text-sm">{bank}</p>
+              <p className="t-small text-muted">
+                Гүйлгээний утга: <span className="font-mono">{order.order_no}</span>
+              </p>
+            </div>
+          )}
         </Card>
       )}
 

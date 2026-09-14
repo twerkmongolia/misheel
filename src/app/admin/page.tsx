@@ -55,10 +55,18 @@ export default async function AdminDashboard() {
       .select('total, status')
       .gte('created_at', prevWeek.toISOString())
       .lt('created_at', weekAgo.toISOString()),
+    /* ── ТӨЛӨГДСӨН захиалга ──────────────────────────────────────────
+       Төлбөр хүлээж буй захиалга бол зүгээр л ОРХИГДСОН сагс: төлбөр
+       онлайн болсон тул хүн төлөх эсвэл төлөхгүй, дунд төлөв гэж үгүй.
+       Тэднийг самбар дээр жагсаах нь ажилтныг хэзээ ч ирэхгүй мөнгө
+       хүлээлгэнэ.
+
+       Ажилтанд хэрэгтэй нь: мөнгө нь ОРСОН, одоо бэлтгэх ёстой захиалга.
+       Хамгийн ЭРТ төлөгдсөнийг эхэнд — хүлээлт нь хамгийн урт нь тэр. */
     supabase
       .from('orders')
       .select('*')
-      .eq('status', 'pending_payment')
+      .eq('status', 'paid')
       .order('created_at', { ascending: true })
       .limit(5),
     supabase.from('product_variants').select('*').lte('stock_qty', 3).order('stock_qty').limit(8),
@@ -141,11 +149,11 @@ export default async function AdminDashboard() {
           }
         />
         <StatCard
-          icon="clock"
-          label="Төлбөр хүлээж буй"
+          icon="receipt"
+          label="Бэлтгэх захиалга"
           value={newOrders?.length ?? 0}
-          hint={newOrders?.length ? 'Шалгах шаардлагатай' : 'Хүлээгдэж буй алга'}
-          href="/admin/orders"
+          hint={newOrders?.length ? 'Төлбөр орсон, хүргэлт хүлээж буй' : 'Бүгд бэлтгэгдсэн'}
+          href="/admin/orders?status=paid"
         />
       </StatRow>
 
@@ -197,8 +205,8 @@ export default async function AdminDashboard() {
 
       <div className="grid items-start gap-6 lg:grid-cols-2">
         <Panel
-          title="Шинэ захиалга"
-          description="Хамгийн удаан хүлээснээс эхэлж 5"
+          title="Бэлтгэх захиалга"
+          description="Төлбөр орсон, хамгийн эртнээс эхэлж 5"
           actions={
             <Link
               href="/admin/orders"
@@ -210,7 +218,7 @@ export default async function AdminDashboard() {
           flush
         >
           {!newOrders || newOrders.length === 0 ? (
-            <EmptyState icon="receipt" title="Хүлээгдэж буй захиалга алга" />
+            <EmptyState icon="receipt" title="Бэлтгэх захиалга алга" />
           ) : (
             <ul>
               {newOrders.map((order) => {
@@ -225,7 +233,7 @@ export default async function AdminDashboard() {
                      дэвсгэрээ сольж, хаана байгаагаа хэлнэ. */
                   <li key={order.id} className="border-b border-line last:border-b-0">
                     <Link
-                      href="/admin/orders?status=pending_payment"
+                      href="/admin/orders?status=paid"
                       className="admin-row flex items-center justify-between gap-3 px-5 py-3 text-sm"
                     >
                       <span className="min-w-0 flex-1 truncate font-medium">

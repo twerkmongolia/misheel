@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest'
 import {
   addDays,
   dayKey,
-  dayOfMonth,
   formatDate,
   formatDateTime,
   formatDayShort,
@@ -12,7 +11,6 @@ import {
   toLocalInput,
   weekStart,
   weekdayLong,
-  weekdayShort,
 } from './format'
 
 /* ───────────────────────────────────────────────────────────────────────────
@@ -71,8 +69,7 @@ describe('УБ-ын цагийн бүс', () => {
     expect(toLocalInput(null)).toBe('')
   })
 
-  it('dayOfMonth ба formatDayShort нь мөн УБ-аар', () => {
-    expect(dayOfMonth(lateUtc)).toBe('4')
+  it('formatDayShort нь мөн УБ-аар', () => {
     expect(formatDayShort(lateUtc, 'en')).toBe('4 Sep')
     expect(formatDayShort(lateUtc, 'mn')).toBe('9-р сарын 4')
   })
@@ -82,13 +79,12 @@ describe('гарагийн нэр', () => {
   // 2026-09-04 бол Баасан гараг (УБ).
   const friday = '2026-09-03T18:30:00.000Z'
 
-  it('монголоор товч ба бүтэн', () => {
-    expect(weekdayShort(friday, 'mn')).toBe('Ба')
+  it('монголоор', () => {
     expect(weekdayLong(friday, 'mn')).toBe('Баасан')
   })
 
   it('англиар', () => {
-    expect(weekdayShort(friday, 'en')).toBe('Fri')
+    expect(weekdayLong(friday, 'en')).toBe('Friday')
   })
 })
 

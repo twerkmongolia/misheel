@@ -24,13 +24,13 @@ import { TAB, TAB_ACTIVE, TAB_IDLE, TAB_LABEL } from './tab'
    ертөнцийн хооронд шилжихэд гар нь ижил зүйлийг ижил газраас олно.
    ─────────────────────────────────────────────────────────────────────── */
 
-export type AccountIcon = 'courses' | 'calendar' | 'receipt' | 'bag' | 'person'
+export type AccountIcon = 'courses' | 'play' | 'bag' | 'person'
 
 export type AccountTab = {
   href: string
   label: string
   icon: AccountIcon
-  /** Утасны доод самбарын нэр. Урт нэр дөрвөн баганад тасарна. */
+  /** Утасны доод самбарын нэр. Урт нэр таван баганад тасарна. */
   short?: string
   /** Эцэг зам — дэд хуудсууд дээр идэвхтэй болохгүй. */
   exact?: boolean
@@ -92,6 +92,47 @@ export function AccountBottomNav({ tabs }: { tabs: AccountTab[] }) {
   )
 }
 
+/**
+ * Хувийн хуудсуудын дотоод цэс — анги, хичээл, захиалга, профайл.
+ *
+ * Дээд табаас ТУСДАА: тэдгээр нь нийтийн сайт руу ГАРГАДАГ бол эдгээр нь
+ * самбарын дотор үлдээдэг. Нэг эгнээнд нийлүүлбэл хүн аль товч хаашаа
+ * аваачихыг таамаглах ёстой болно.
+ *
+ * Тиймээс агуулгын ДЭЭД талд, бөмбөлөг хэлбэрээр: толгойн доогуур зурааст
+ * табуудаас хэлбэрээрээ ялгарна.
+ */
+export function AccountSubNav({
+  items,
+}: {
+  items: { href: string; label: string; exact?: boolean }[]
+}) {
+  const pathname = usePathname()
+
+  return (
+    <nav
+      aria-label="Хувийн хуудсууд"
+      className="-mx-4 mb-8 overflow-x-auto px-4 [scrollbar-width:none] sm:-mx-6 sm:px-6 lg:mb-10 [&::-webkit-scrollbar]:hidden"
+    >
+      <div className="flex min-w-max gap-2">
+        {items.map((item) => {
+          const on = item.exact ? pathname === item.href : pathname.startsWith(item.href)
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              aria-current={on ? 'page' : undefined}
+              className={`chip ${on ? 'chip-on' : ''}`}
+            >
+              {item.label}
+            </Link>
+          )
+        })}
+      </div>
+    </nav>
+  )
+}
+
 function isActive(tab: AccountTab, pathname: string): boolean {
   return tab.exact ? pathname === tab.href : pathname.startsWith(tab.href)
 }
@@ -109,16 +150,13 @@ function Icon({ name, filled }: { name: AccountIcon; filled: boolean }) {
         <path d="M4.5 19.5a2 2 0 0 1 2-2H19v3H6.5a2 2 0 0 1-2-1Z" />
       </>
     ),
-    calendar: (
+    /* Онлайн — дэлгэц дээрх тоглуулагч. Хуанли (хуваарь) БИШ: онлайн анги
+       нь тогтсон цаггүй, өөрийн хэмнэлээр үздэг. */
+    play: (
       <>
-        <rect x="3.5" y="5.5" width="17" height="15" rx="2.5" />
-        <path d="M3.5 10h17M8 3.5v4M16 3.5v4" />
-      </>
-    ),
-    receipt: (
-      <>
-        <path d="M5.5 3.5h13v17l-2.2-1.6-2.2 1.6-2.1-1.6-2.2 1.6-2.1-1.6-2.2 1.6v-17Z" />
-        <path d="M9 8h6M9 12h6" />
+        <rect x="2.5" y="4.5" width="19" height="13" rx="2.5" />
+        <path d="M8 20.5h8" />
+        <path d="M10.5 8.5l4.5 2.5-4.5 2.5v-5Z" />
       </>
     ),
     bag: (

@@ -1,13 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
-import {
-  defaultLocale,
-  isLocale,
-  LOCALE_COOKIE,
-  LOCALE_HEADER,
-  locales,
-  PATH_HEADER,
-} from '@/lib/i18n/config'
+import { defaultLocale, isLocale, LOCALE_COOKIE, LOCALE_HEADER, locales } from '@/lib/i18n/config'
 
 /**
  * Next 16-д Middleware нь Proxy болж нэрлэгдсэн — файл нь `src/proxy.ts`.
@@ -164,7 +157,6 @@ export async function proxy(request: NextRequest) {
   const forward = () => {
     const headers = new Headers(request.headers)
     headers.set(LOCALE_HEADER, localeHeader)
-    headers.set(PATH_HEADER, pathname)
     if (!isPrefetch) {
       // Next нь эдгээрийг уншиж, өөрийн скрипт бүрд nonce наана.
       headers.set('x-nonce', nonce)
@@ -260,7 +252,11 @@ export async function proxy(request: NextRequest) {
   const segment = rest[0] ?? ''
   if (!userId && PROTECTED_SEGMENTS.includes(segment)) {
     const login = new URL(`/${first}/login`, request.url)
-    login.searchParams.set('next', pathname)
+    /* ⚠️ `search` -тэй ХАМТ: `/checkout?variant=…&qty=…` дээр сонголт нь
+       хаягийн мөрөнд амьдардаг (сагс байхгүй). Зөвхөн `pathname` хадгалбал
+       нэвтэрсэн хүн хоосон худалдан авалтын хуудсан дээр буугаад «сонгосон
+       бараа алга» гэж уншина — өөрөө юу ч буруу хийгээгүй мөртлөө. */
+    login.searchParams.set('next', `${pathname}${search}`)
     return harden(NextResponse.redirect(login))
   }
 

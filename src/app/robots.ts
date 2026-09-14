@@ -23,8 +23,6 @@ export default function robots(): MetadataRoute.Robots {
         // Хоёр хэл тус бүрд
         '/mn/account',
         '/en/account',
-        '/mn/cart',
-        '/en/cart',
         '/mn/checkout',
         '/en/checkout',
         '/mn/order/',

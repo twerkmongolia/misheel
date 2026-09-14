@@ -10,7 +10,8 @@
     "check": "tsc --noEmit && eslint && vitest run",
     "check:build": "NEXT_DIST_DIR=.next-check next build",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "dev:2": "NEXT_DIST_DIR=.next-alt next dev -p 3002"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.5",

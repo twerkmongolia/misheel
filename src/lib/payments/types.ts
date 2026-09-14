@@ -24,7 +24,10 @@ export interface CreateInvoiceInput {
   callbackUrl: string
   /** Төлбөр дуусмагц хэрэглэгчийг буцаах URL */
   returnUrl: string
-  /** Нэхэмжлэлийн хүчинтэй хугацаа, секундээр */
+  /**
+   * Нэхэмжлэлийн хүчинтэй хугацаа, секундээр. Өгөөгүй бол провайдерын
+   * анхдагч (Bonum: 30 минут) — тэнд энэ утга ЗААВАЛ явдаг (§ bonum.ts).
+   */
   expiresIn?: number
   items?: { name: string; price: number; qty: number }[]
 }

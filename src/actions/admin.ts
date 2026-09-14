@@ -18,16 +18,30 @@ import type { Instructor, OrderStatus } from '@/lib/supabase/database.types'
 
 const uuid = z.string().uuid()
 
+/**
+ * Аудитын мөр — «хэн юуг хэзээ» гэдгийн цорын ганц хариулт.
+ *
+ * ⚠️ Алдааг ЗАЛГИХГҮЙ. Урьд нь `insert` -ийн буцаах утгыг шалгадаггүй
+ * байсан бөгөөд `audit_log` дээр бичих RLS дүрэм байхгүй байв: үйлдэл бүр
+ * чимээгүй татгалзагдаж, хүснэгт хоосон хэвээр байлаа. Хоёулаа дуугүй
+ * байсан тул хэн ч анзаараагүй.
+ *
+ * Гэхдээ ШИДЭХГҮЙ: аудит бүтэлгүйтсэнээс болж ажилтны хийсэн ажил
+ * (бараа хадгалах, эрх олгох) нурах ёсгүй. Лог нь дараагийн хүнд
+ * шалтгааныг хэлнэ.
+ */
 async function audit(action: string, entity: string, entityId: string | null, diff?: unknown) {
   const user = await getUser()
   const supabase = await createClient()
-  await supabase.from('audit_log').insert({
+  const { error } = await supabase.from('audit_log').insert({
     actor_id: user?.id ?? null,
     action,
     entity,
     entity_id: entityId,
     diff: diff ?? null,
   })
+
+  if (error) console.error(`[audit] ${action} бичигдсэнгүй — ${error.message}`)
 }
 
 /* ── Хуваарь ───────────────────────────────────────────────────────────── */
@@ -607,7 +621,6 @@ export async function addVariant(formData: FormData): Promise<void> {
   const parsed = z
     .object({
       product_id: uuid,
-      sku: z.string().trim().min(2),
       size: z.string().trim().default(''),
       color: z.string().trim().default(''),
       price: z.coerce.number().int().min(0),
@@ -620,15 +633,34 @@ export async function addVariant(formData: FormData): Promise<void> {
   }
 
   const supabase = await createClient()
+
+  /* ── SKU-г ажилтнаас АСУУХГҮЙ ─────────────────────────────────────────
+     Бараа үүсгэхэд код нь аль хэдийн автоматаар үүсдэг (§ `createProduct`).
+     Дараа нь хувилбар нэмэхэд гараар бичүүлэх нь тэр дүрмийг зөрчих ба
+     ажилтнаас өөрт нь ямар ч утгагүй мөр зохиохыг шаардана —
+     «GUTAL-36-HAR» гэж бичих үү, «gutal36» гэх үү гэдэг нь зөвхөн
+     эргэлзээ. Нэг барааны кодууд ижил хэвтэй байх нь нөөц тулгахад
+     чухал тул машин л зохиох ёстой. */
+  const { data: product } = await supabase
+    .from('products')
+    .select('slug')
+    .eq('id', parsed.data.product_id)
+    .maybeSingle()
+
+  if (!product) redirect('/admin/products?error=Бараа олдсонгүй')
+
+  const sku = await uniqueSku(supabase, product.slug, parsed.data.size, parsed.data.color)
+
   const { error } = await supabase.from('product_variants').insert({
     ...parsed.data,
+    sku,
     size: parsed.data.size || null,
     color: parsed.data.color || null,
   })
 
   if (error) redirect(`/admin/products?error=${encodeURIComponent(error.message)}`)
 
-  await audit('variant.create', 'product_variants', null, { sku: parsed.data.sku })
+  await audit('variant.create', 'product_variants', null, { sku })
   revalidatePath('/admin/products')
   redirect(backToProduct(formData))
 }
@@ -746,6 +778,58 @@ export async function uploadProductImage(formData: FormData): Promise<void> {
   revalidatePath('/admin/products')
   revalidatePath('/', 'layout')
   redirect(backToProduct(formData))
+}
+
+/**
+ * Барааг бүрмөсөн устгана.
+ *
+ * ── Захиалгын түүх ЭВДЭРЭХГҮЙ ──────────────────────────────────────────
+ * Схем нь үүнд аль хэдийн бэлдсэн: `order_items` нь барааны нэр, хувилбар,
+ * үнийг ХУУЛБАРААР хадгалдаг ба `variant_id` нь `on delete set null`
+ * (§ migration `order_items`). Тиймээс өнгөрсөн захиалга бүтнээрээ
+ * уншигдсаар байна — зөвхөн холбоос нь тасарна.
+ *
+ * Хувилбар, зураг хоёр нь `on delete cascade` тул өөрсдөө дагаж устана.
+ * Storage дахь ФАЙЛ нь дагахгүй — тэднийг энд гараар цэвэрлэнэ, эс бөгөөс
+ * ашиглагдахгүй зураг мөнхөд төлбөр нэмнэ.
+ *
+ * ── Идэвхгүй болгох vs устгах ──────────────────────────────────────────
+ * Түр зогсоох бол «Идэвхгүй» тэмдэглэгээ хангалттай: бараа дэлгүүрээс
+ * алга болох ч тоо баримт нь үлдэнэ. Устгал нь БУЦААХГҮЙ тул зөвхөн
+ * алдаатай оруулсан, эсвэл дахин хэзээ ч зарахгүй бараанд.
+ */
+export async function deleteProduct(formData: FormData): Promise<void> {
+  await requireStaff()
+
+  const id = uuid.safeParse(formData.get('id'))
+  if (!id.success) redirect('/admin/products?error=Бараа олдсонгүй')
+
+  const supabase = await createClient()
+
+  /* Файлуудыг мөр устахаас ӨМНӨ цуглуулна — дараа нь хаягийг нь мэдэх
+     газар үлдэхгүй. */
+  const { data: images } = await supabase
+    .from('product_images')
+    .select('url')
+    .eq('product_id', id.data)
+
+  const marker = '/storage/v1/object/public/media/'
+  const paths = (images ?? [])
+    .map((image) => image.url.indexOf(marker))
+    .map((index, at) => (index === -1 ? null : (images ?? [])[at]!.url.slice(index + marker.length)))
+    .filter((path): path is string => Boolean(path))
+
+  const { error } = await supabase.from('products').delete().eq('id', id.data)
+  if (error) redirect(`/admin/products?error=${encodeURIComponent(error.message)}`)
+
+  /* Зургийг мөр амжилттай устсаны ДАРАА. Урвуу дараалал нь бараа үлдээд
+     зураг нь алга болох эрсдэлтэй. */
+  if (paths.length > 0) await supabase.storage.from('media').remove(paths)
+
+  await audit('product.delete', 'products', id.data, {})
+  revalidatePath('/admin/products')
+  revalidatePath('/', 'layout')
+  redirect('/admin/products?ok=1')
 }
 
 export async function deleteProductImage(formData: FormData): Promise<void> {

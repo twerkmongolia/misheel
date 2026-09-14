@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { headers } from 'next/headers'
 import { Inter, Manrope } from 'next/font/google'
+import { Reveal } from '@/components/site/Reveal'
 import { defaultLocale, isLocale, LOCALE_HEADER } from '@/lib/i18n/config'
 import './globals.css'
 
@@ -154,6 +155,18 @@ export default async function RootLayout({ children }: LayoutProps<'/'>) {
       <body className="flex min-h-full flex-col">
         <InlineScript html={bootScript} nonce={nonce} />
         {children}
+
+        {/* ── Гүйлтийн ажиглагч — ҮНДСЭН layout дээр ────────────────────
+            Дээрх скрипт `<html>` дээр `rv-on` анги нэмдэг ба тэр анги нь
+            `[data-rv]` бүхнийг НУУНА (§ globals.css § 6). Нуухыг CSS, нээхийг
+            энэ ажиглагч хийдэг тул хоёр нь ЗААВАЛ хамт байх ёстой.
+
+            Урьд нь ажиглагч `[locale]/layout.tsx` дотор байсан бөгөөд
+            сурагчийн бүрхүүл тэр салбарыг алгасдаг болмогц нэвтэрсэн хүнд
+            БҮХ агуулга үл үзэгдэх болсон: анги, бараа, карт бүгд тэнд
+            байгаа атлаа тунгалаг. Layout хуваагдах бүрд дагаж нүүх зүйл
+            биш — үндэст нэг л удаа. */}
+        <Reveal />
       </body>
     </html>
   )

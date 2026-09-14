@@ -15,7 +15,7 @@
  */
 
 /** Формын нийт хязгаар. `next.config.ts` -тай ЗААВАЛ тэнцүү байна. */
-export const MAX_UPLOAD_BYTES = 5 * 1024 * 1024
+const MAX_UPLOAD_BYTES = 5 * 1024 * 1024
 
 /** Нэг зураг. Нийтээс доогуур — дээрх тайлбарыг үзнэ үү. */
 export const MAX_IMAGE_BYTES = 4 * 1024 * 1024

@@ -1,5 +1,6 @@
 'use client'
 
+import { usePathname, useSearchParams } from 'next/navigation'
 import { useEffect, useRef, type ReactNode } from 'react'
 import { DialogFrame } from './Dialog'
 import { AdminIcon, type NavIcon } from './AdminIcon'
@@ -65,6 +66,25 @@ export function FormDialog({
   useEffect(() => {
     if (defaultOpen) ref.current?.showModal()
   }, [defaultOpen])
+
+  /* ── Хадгалсны дараа ӨӨРӨӨ хаагдана ───────────────────────────────────
+     Server action нь `redirect()` хийхэд Next нь ХУУДСЫГ ДАХИН АЧААЛДАГГҮЙ
+     — client талын шилжилт болно. `<dialog>` нь DOM-д үлддэг тул НЭЭЛТТЭЙ
+     хэвээр байна: ажилтан бөглөсөн формоо хараад «болсонгүй» гэж бодоод
+     дахин дарна. Ингэж есөн ижил бараа үүссэн тохиолдол гарсан.
+
+     Тиймээс хаяг өөрчлөгдмөгц хаана. `defaultOpen` (алдаа гарсан үе) нь
+     дээрх effect-ээр дахин нээгдэх тул энд түүнийг хөндөхгүй. */
+  const pathname = usePathname()
+  const params = useSearchParams()
+  const url = `${pathname}?${params}`
+  const opened = useRef(url)
+
+  useEffect(() => {
+    if (url === opened.current) return
+    opened.current = url
+    if (!defaultOpen) ref.current?.close()
+  }, [url, defaultOpen])
 
   useEffect(() => {
     if (!rowTrigger) return

@@ -90,6 +90,10 @@ export default async function AdminCoursesPage({
       ? supabase
           .from("course_enrollments")
           .select("*")
+          /* Төлбөрөө хийгээгүй элсэлт бол зөвхөн САНАЛ — хүн товч дарсан
+             ч мөнгө ороогүй. Түүнийг элсэгчийн жагсаалтад тоолох нь
+             суудлын тоог худал өсгөж, ажилтан дүүрсэн гэж бодно. */
+          .neq("status", "pending_payment")
           .in("course_id", ids)
           .order("created_at", { ascending: false })
       : { data: [] },
@@ -213,9 +217,6 @@ export default async function AdminCoursesPage({
               {courses.map((course) => {
                 const rows = rowsByCourse.get(course.id) ?? [];
                 const liveCount = rows.filter((row) => live(row.status)).length;
-                const pending = rows.filter(
-                  (row) => row.status === "pending_payment",
-                ).length;
                 const online = course.mode === "online";
                 const telegram = accessById.get(course.id)?.telegram_url ?? "";
 
@@ -274,13 +275,6 @@ export default async function AdminCoursesPage({
                         {liveCount}
                         {course.capacity !== null && `/${course.capacity}`}
                       </span>
-                      {pending > 0 && (
-                        <Sub>
-                          <span className="text-warn">
-                            {pending} төлбөр хүлээж буй
-                          </span>
-                        </Sub>
-                      )}
                     </Td>
 
                     <Td label="Элсэлт">

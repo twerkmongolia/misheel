@@ -15,7 +15,8 @@
 
 # next.js
 /.next/
-/.next-check/
+# Хоёр дахь dev сервер, шалгалтын build — тус бүр өөрийн хавтастай
+/.next-*/
 /out/
 
 # production

@@ -1,9 +1,10 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { Empty } from '@/components/ui'
+import { Alert, Empty } from '@/components/ui'
 import { Media } from '@/components/site/media'
 import { getDictionary, loc, isLocale } from '@/lib/i18n'
+import { orderErrorMessage } from '@/lib/errors'
 import { pageMetadata } from '@/lib/seo'
 import { formatMnt } from '@/lib/format'
 import { getProducts, type ProductView } from '@/lib/data'
@@ -87,7 +88,7 @@ export default async function ShopPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>
-  searchParams: Promise<{ category?: string; sort?: string }>
+  searchParams: Promise<{ category?: string; sort?: string; error?: string }>
 }) {
   const [{ locale }, search] = await Promise.all([params, searchParams])
   if (!isLocale(locale)) notFound()
@@ -137,6 +138,10 @@ export default async function ShopPage({
       <PageBanner page="shop" title={t.shop.title} lead={t.home.shopNote} />
 
       <div className="shell flex flex-col gap-10 pt-10 sm:pt-12">
+        {/* Худалдан авалт бүтэлгүйтвэл хүн ЭНД буцаж ирнэ (§ actions/orders.ts).
+            Юу болсныг хэлэхгүй бол тэр дөнгөж сая дарсан товчоо олохгүй. */}
+        {search.error && <Alert tone="warn">{orderErrorMessage(t, search.error)}</Alert>}
+
         {/* ── Шүүлт ба эрэмбэ — хуваарийн хуудастай НЭГ хэлээр ────────────
             Урьд нь доогуур зураастай текст байсан бөгөөд толгойн навигацитай
             яг ижил харагддаг тул «энэ хуудсыг сольдог уу, шүүдэг үү» гэдэг нь

@@ -2,7 +2,6 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { Alert, Badge, Button, PageHeader } from '@/components/ui'
 import { Media } from '@/components/site/media'
-import { addToCart } from '@/actions/cart'
 import { getDictionary, loc, isLocale } from '@/lib/i18n'
 import { pageMetadata } from '@/lib/seo'
 import { formatMnt } from '@/lib/format'
@@ -72,10 +71,12 @@ export default async function ProductPage({
           {!product.inStock ? (
             <Alert tone="danger">{t.shop.outOfStock}</Alert>
           ) : (
-            /* Хувилбар сонголт нь radio — JavaScript-гүйгээр ажиллана. */
-            <form action={addToCart} className="flex flex-col gap-4">
-              <input type="hidden" name="locale" value={locale} />
-
+            /* ── Шууд худалдан авалт ──────────────────────────────────
+               Сагс байхгүй тул энэ форм нь ЭНГИЙН GET: сонголтыг хаягийн
+               мөр болгож (`?variant=…&qty=…`) баталгаажуулах хуудас руу
+               аваачна. Server Action ч, JavaScript ч хэрэггүй — хөтөч
+               өөрөө хийдэг ажлыг давхардуулах шалтгаангүй. */
+            <form method="get" action={`/${locale}/checkout`} className="flex flex-col gap-4">
               <fieldset className="flex flex-col gap-2">
                 <legend className="mb-1 text-sm font-medium">{t.shop.selectVariant}</legend>
                 <div className="flex flex-col gap-2">
@@ -93,7 +94,7 @@ export default async function ProductPage({
                         <span className="flex items-center gap-3">
                           <input
                             type="radio"
-                            name="variant_id"
+                            name="variant"
                             value={variant.id}
                             required
                             disabled={soldOut}
@@ -131,7 +132,7 @@ export default async function ProductPage({
               </label>
 
               <Button type="submit" className="self-start">
-                {t.shop.addToCart}
+                {t.shop.buyNow}
               </Button>
             </form>
           )}

@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
+import { startPayment } from './orders'
 import { getUser } from '@/lib/auth/dal'
 import { defaultLocale, isLocale, type Locale } from '@/lib/i18n/config'
 
@@ -85,10 +86,21 @@ export async function enrollCourse(formData: FormData): Promise<void> {
 
   revalidatePath('/', 'layout')
 
-  /* Төлбөрийн зааврыг ЗАХИАЛГЫН хуудас барина — дэлгүүрийн урсгалтай яг
-     нэг газар. Хоёр өөр «төлбөрөө хийнэ үү» дэлгэц байх нь ажилтанд ч,
-     хэрэглэгчид ч хоёр өөр үнэн үүсгэнэ. */
-  redirect(`/${locale}/order/${orderNo}?new=1`)
+  /* ── Шууд төлбөр рүү ─────────────────────────────────────────────────
+     `enroll_course` нь захиалга, захиалгын мөр, `payments` мөрийг
+     дэлгүүртэй ЯГ ижил хэлбэрээр үүсгэдэг (§ migration `enroll_course`)
+     тул төлөх зам нь ч ижил байх ёстой: сагснаас гарахад Bonum руу
+     шилждэгтэй адил, элсмэгц мөн тийш.
+
+     Хоёр өөр «төлбөрөө хийнэ үү» дэлгэц байх нь хэрэглэгчид хоёр өөр
+     үнэн үүсгэнэ — нэг нь товч дарж төлдөг, нөгөө нь данс хуулдаг гэж.
+
+     Нэхэмжлэл үүсэхгүй бол захиалгын хуудас руу: элсэлт нь аль хэдийн
+     үүссэн тул алдах зүйл алга, тэнд «Онлайнаар төлөх» товч хүлээж
+     байна (§ actions/orders.ts `payOrder`). */
+  const link = await startPayment(supabase, orderNo, locale)
+
+  redirect(link ?? `/${locale}/order/${orderNo}?new=1`)
 }
 
 /**

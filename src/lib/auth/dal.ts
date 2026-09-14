@@ -108,15 +108,7 @@ export async function requireUser(locale: Locale, next?: string): Promise<Sessio
   return user
 }
 
-export async function isStaff(): Promise<boolean> {
-  const profile = await getProfile()
-  return profile?.role === 'staff' || profile?.role === 'admin'
-}
 
-export async function isAdmin(): Promise<boolean> {
-  const profile = await getProfile()
-  return profile?.role === 'admin'
-}
 
 /**
  * Удирдлагын хуудсуудад. Эрхгүй бол нүүр рүү буцаана.

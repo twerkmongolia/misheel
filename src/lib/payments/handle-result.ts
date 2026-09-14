@@ -1,26 +1,81 @@
+import 'server-only'
+
 import type { WebhookResult } from './types'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { isSupabaseConfigured } from '@/lib/supabase/env'
+import { getPaymentProvider } from './index'
 import { mockInvoices, processedPayments } from './store'
 
 /**
- * Төлбөрийн эцсийн үр дүнг боловсруулах цорын ганц цэг.
+ * Төлбөрийн эцсийн үр дүнг боловсруулах ЦОРЫН ГАНЦ цэг.
  *
- * Supabase холбогдмогц энэ функц дотор дараах зүйлс болно (транзакц дотор):
+ * ── Ажил нь бүхэлдээ өгөгдлийн санд ──────────────────────────────────────
+ * Идэмпотент байдал, дүн тулгалт, захиалгын төлөв гурав нь НЭГ транзакц
+ * дотор, НЭГ түгжээний дор болох ёстой (§ migration `settle_payment`).
+ * Энд TypeScript дээр тус тусад нь хийвэл хоёр webhook зэрэг ирэхэд
+ * хоёулаа «pending» гэж уншаад хоёулаа төлөгдсөн гэж бичнэ.
  *
- *   1. `payments` -оос `id = result.transactionId` -ыг FOR UPDATE -ээр авна.
- *   2. Хэрэв аль хэдийн `paid`/`failed` бол ЮУ Ч ХИЙХГҮЙ буцна  ← idempotency.
- *      (Bonum webhook-оо давтан илгээж болно.)
- *   3. `result.amount` нь тухайн захиалгын дүнтэй тохирч байгаа эсэхийг шалгана.
- *   4. Амжилттай бол:
- *        • target_type='order'   → orders.status = 'paid', нөөц хасах
- *                                  (stock_qty = stock_qty - qty WHERE stock_qty >= qty)
- *        • target_type='booking' → bookings.status = 'confirmed'
- *   5. `payments` мөрийг шинэчилж, түүхий payload-ыг `raw` баганад хадгална.
- *   6. Баталгаажуулах и-мэйл илгээнэ.
+ * Тиймээс энэ функцийн үүрэг ганцхан: дуудаад, үр дүнг нь ЛОГЛОХ.
  *
- * Одоохондоо mock санах ойн төлвийг шинэчилж, консолд бичнэ.
+ * ── Яагаад service-role вэ ───────────────────────────────────────────────
+ * Webhook нь нэвтрээгүй хүсэлт — `auth.uid()` хоосон тул RLS нь ямар ч
+ * мөрийг харуулахгүй. Гарын үсэг нь аль хэдийн шалгагдсан (§ webhook route)
+ * тул энд RLS-ийг тойрох нь зөв: итгэлийн хил нь гарын үсэг дээр байна.
  */
 export async function handlePaymentResult(result: WebhookResult): Promise<void> {
-  // 1. Idempotency — DB дээр `payments.transactionId` unique index энэ үүргийг гүйцэтгэнэ.
+  /* Supabase тохируулаагүй үед (шинэ машин, `PAYMENT_PROVIDER=mock`) санах
+     ойн mock төлөв дээр ажиллана — хөгжүүлэгч бүтэн урсгалыг өгөгдлийн
+     сангүйгээр харна. */
+  if (!isSupabaseConfigured()) {
+    handleInMemory(result)
+    return
+  }
+
+  const supabase = createAdminClient()
+  const { data, error } = await supabase.rpc('settle_payment', {
+    p_payment_id: result.transactionId,
+    // Тогтмол 'bonum' БИШ: mock-оор ажиллаж байхад тэр нэр худал болно.
+    p_provider: getPaymentProvider().name,
+    p_provider_ref: result.providerRef,
+    p_amount: result.amount,
+    p_paid: result.status === 'paid',
+    p_raw: result.raw as never,
+  })
+
+  if (error) {
+    /* ХАЯХГҮЙ — дээрх route нь алдааг 500 болгож буцаана. Bonum 200-аас
+       өөр хариу авбал webhook-оо ДАХИН илгээнэ, тэр нь яг зөв: түр зуурын
+       асуудал (сүлжээ, DB тасарсан) дараагийн оролдлогод засрах ёстой. */
+    console.error(`[payments] ${result.transactionId}: settle_payment амжилтгүй — ${error.message}`)
+    throw new Error(`settle_payment: ${error.message}`)
+  }
+
+  const outcome = String(data)
+
+  /* `amount_mismatch` ба `not_found` нь ДАХИН оролдоод засрахгүй — хүн
+     шалгах ёстой. Тиймээс алдаа шидэхгүй (Bonum-д 200 буцаана), гэхдээ
+     логт ТОД үлдээнэ. */
+  if (outcome === 'amount_mismatch') {
+    console.error(
+      `[payments] ${result.transactionId}: ДҮН ЗӨРЖ БАЙНА — provider ${result.amount}₮ ` +
+        `гэж мэдэгдсэн ч манай мөрийн дүн өөр. Гараар шалгана уу.`,
+    )
+    return
+  }
+
+  if (outcome === 'not_found') {
+    console.error(`[payments] ${result.transactionId}: ийм төлбөрийн мөр алга`)
+    return
+  }
+
+  console.info(
+    `[payments] ${result.transactionId} → ${outcome.toUpperCase()} ` +
+      `(${result.amount}₮, invoice ${result.providerRef})`,
+  )
+}
+
+/** Өгөгдлийн сангүй орчны хувилбар — зөвхөн хөгжүүлэлтэд (§ store.ts). */
+function handleInMemory(result: WebhookResult): void {
   const already = processedPayments.get(result.transactionId)
   if (already) {
     console.info(`[payments] ${result.transactionId}: аль хэдийн ${already}, алгасав`)
@@ -29,7 +84,6 @@ export async function handlePaymentResult(result: WebhookResult): Promise<void> 
 
   const invoice = mockInvoices.get(result.providerRef)
 
-  // 2. Дүнгийн шалгалт — provider-ээс ирсэн дүнд сохроор итгэхгүй.
   if (invoice && invoice.amount !== result.amount) {
     console.error(
       `[payments] ${result.transactionId}: дүн зөрж байна ` +
@@ -38,7 +92,6 @@ export async function handlePaymentResult(result: WebhookResult): Promise<void> 
     return
   }
 
-  // 3. Төлөв тэмдэглэх.
   processedPayments.set(result.transactionId, result.status)
   if (invoice) {
     invoice.status = result.status
@@ -47,8 +100,6 @@ export async function handlePaymentResult(result: WebhookResult): Promise<void> 
 
   console.info(
     `[payments] ${result.transactionId} → ${result.status.toUpperCase()} ` +
-      `(${result.amount}₮, invoice ${result.providerRef})`,
+      `(${result.amount}₮, invoice ${result.providerRef}) · санах ойд`,
   )
-
-  // TODO(Шат 5): Supabase транзакц — дээрх 1-6 алхам.
 }

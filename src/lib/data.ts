@@ -464,7 +464,7 @@ export async function getMyEnrollment(
  * функц нь идэвхтэй элсэлтгүй хүнд зүгээр л `null` буцаана — сервер дээр
  * дахин шалгах нь хоёр дахь хамгаалалт биш, зөвхөн давхардал болно.
  */
-export async function getCourseAccess(courseId: string): Promise<CourseAccess | null> {
+async function getCourseAccess(courseId: string): Promise<CourseAccess | null> {
   if (!isSupabaseConfigured()) return null
 
   const supabase = await createClient()

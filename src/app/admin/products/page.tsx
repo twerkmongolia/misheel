@@ -22,6 +22,7 @@ import { CardDialog } from '@/components/admin/CardDialog'
 import {
   addVariant,
   createProduct,
+  deleteProduct,
   deleteProductImage,
   toggleActive,
   updateStock,
@@ -308,7 +309,7 @@ export default async function AdminProductsPage({
                       <Table minWidth={520}>
                         <thead>
                           <tr>
-                            <Th>SKU</Th>
+                            <Th>Код</Th>
                             <Th>Хэмжээ / өнгө</Th>
                             <Th>Үнэ ба нөөц</Th>
                           </tr>
@@ -367,9 +368,8 @@ export default async function AdminProductsPage({
                     className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-end"
                   >
                     <input type="hidden" name="product_id" value={product.id} />
-                    <Field label="SKU" className="col-span-2">
-                      <Input name="sku" required className="sm:w-32" />
-                    </Field>
+                    {/* SKU энд БАЙХГҮЙ: хэмжээ, өнгөнөөс нь автоматаар
+                        үүснэ (§ actions/admin.ts `uniqueSku`). */}
                     <Field label="Хэмжээ">
                       <Input name="size" className="sm:w-20" />
                     </Field>
@@ -391,6 +391,27 @@ export default async function AdminProductsPage({
                     </Field>
                     <Button type="submit" className="col-span-2 sm:col-auto">
                       Хувилбар нэмэх
+                    </Button>
+                  </form>
+                </div>
+
+                {/* ── Устгах ─────────────────────────────────────────────
+                    Цонхны ХАМГИЙН ЁРООЛД, тусдаа шугамын доор: устгал нь
+                    буцаахгүй тул өдөр тутмын товчнуудын дунд суух ёсгүй.
+                    Ажилтан түүнийг ХАЙЖ олох ёстой, санамсаргүй тааралдах
+                    ёсгүй.
+
+                    `btn-risk` нь тасархай хүрээтэй (§ globals.css) —
+                    хэлбэр нь өөрөө «болгоомжил» гэж хэлнэ. */}
+                <div className="flex flex-wrap items-center justify-between gap-3 border-t border-line pt-5">
+                  <p className="t-meta max-w-[32ch] text-faint">
+                    Түр зогсоох бол «Идэвхгүй болгох» хангалттай. Устгасан барааг сэргээх
+                    боломжгүй — өнгөрсөн захиалгын түүх хэвээр үлдэнэ.
+                  </p>
+                  <form action={deleteProduct}>
+                    <input type="hidden" name="id" value={product.id} />
+                    <Button type="submit" variant="danger" size="sm">
+                      Устгах
                     </Button>
                   </form>
                 </div>
