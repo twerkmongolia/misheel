@@ -5,7 +5,6 @@ const mn = {
   nav: {
     home: 'Нүүр',
     about: 'Бидний тухай',
-    aboutShort: 'Тухай',
     /* Хөлний баганын гарчиг. «Бидний тухай» -г гарчиг болгоход доорх
        эхний холбоос нь ЯГ ижил үгтэй болж, өөрийгөө давтана. */
     studio: 'Студи',
@@ -162,10 +161,8 @@ const mn = {
   home: {
     upcoming: 'Ойрын хичээлүүд',
     upcomingAll: 'Бүх хуваарь',
-    coursesTitle: 'Анги, курс',
     classesTitle: 'Хичээлийн төрлүүд',
     instructorsTitle: 'Багш нар',
-    shopTitle: 'Дэлгүүрээс',
     videosTitle: 'Бидний бичлэгүүд',
     watchOnYoutube: 'YouTube дээр үзэх',
     playVideo: 'Бичлэг тоглуулах',
@@ -174,11 +171,11 @@ const mn = {
     weekly: 'долоо хоног бүрийн хичээл',
     // Бүлэг бүрийн дэд гарчиг — гарчгийн хажууд суух нэг өгүүлбэр.
     scheduleNote: 'Суудал урьдчилан захиалснаар баталгаажна. Долоо хоног бүр шинэчлэгдэнэ.',
-    coursesNote: 'Танхимд багштайгаа, эсвэл гэрээсээ онлайнаар. Эхнээс нь дуустал нь дагадаг бүтэн хөтөлбөр.',
     classesNote: 'Анхан шатнаас ахисан түвшин хүртэл. Аль ч цэгээс эхэлж болно.',
     instructorsNote: 'Заалыг хөтөлдөг хүмүүс. Хичээл бүр тэдний нэгэнтэй холбоотой.',
     videosNote: 'Заалны уур амьсгалыг үг хэлж чадахгүй — хөдөлгөөнийг харна уу.',
     shopNote: 'Дасгалд зориулсан хувцас, хэрэгсэл. Заалнаас эсвэл хүргэлтээр.',
+    faqAll: 'Бүх асуулт',
   },
   /**
    * Багшийн хуудасны хэсгийн нэрс.
@@ -397,8 +394,19 @@ const mn = {
     hasAccount: 'Бүртгэлтэй юу?',
     checkEmail: 'И-мэйл хаягаа шалгана уу — баталгаажуулах холбоос илгээлээ.',
     resetTitle: 'Нууц үг сэргээх',
-    resetSent: 'Нууц үг сэргээх холбоосыг и-мэйлээр илгээлээ.',
+    resetSent:
+      'Нууц үг сэргээх холбоосыг и-мэйлээр илгээлээ. Ирээгүй бол спам хавтсаа шалгана уу.',
     newPassword: 'Шинэ нууц үг',
+    /* Маягтын доорх зөвлөмж. `AuthForms.tsx` дотор ХАТУУ бичигдсэн байсан тул
+       англи хуудсан дээр ч монголоор гардаг байв. */
+    passwordHint: '8+ тэмдэгт',
+    /* Сэргээх холбоосгүйгээр `/reset-password` дээр буусан хүнд. Маягт нь
+       нээлттэй мөртлөө ямар ч тохиолдолд ажиллахгүй тул түүнийг ХАРУУЛАХГҮЙ
+       (§ (auth)/reset-password/page.tsx). */
+    resetNoLink:
+      'Энэ хуудсыг и-мэйлээр ирсэн холбоосоор нээнэ. Холбоосын хугацаа дууссан бол шинийг нь авна уу.',
+    resetAgain: 'Шинэ холбоос авах',
+    backToLogin: 'Нэвтрэх хуудас руу буцах',
     updated: 'Мэдээлэл шинэчлэгдлээ.',
     profile: 'Профайл',
     memberSince: 'Гишүүн болсон',
@@ -428,6 +436,37 @@ const mn = {
       missingCode: 'Нэвтрэлт дуусаагүй байна. Дахин оролдоно уу.',
       /** Код session болж солигдсонгүй — хугацаа нь дууссан, эсвэл дахин ашигласан. */
       exchange: 'Нэвтрэх холбоосын хугацаа дууссан байна. Дахин нэвтэрнэ үү.',
+
+      /* ── Маягтын шалгалт ────────────────────────────────────────────────
+         Эдгээр нь `actions/auth.ts` дотор ХАТУУ бичигдсэн байв — үр дүнд нь
+         англи сайт дээр маягт бөглөж байсан хүн монгол алдаа уншдаг байлаа.
+         Server Action хуудасны хэлийг мэдэхгүй тул маягт нь нуугдмал
+         `locale` талбараар түүнийг дамжуулдаг (§ AuthForms.tsx). */
+      email: 'И-мэйл хаяг буруу байна',
+      password: 'Нууц үг дор хаяж 8 тэмдэгт байх ёстой',
+      name: 'Нэрээ бүтнээр нь бичнэ үү',
+      phone: 'Утасны дугаараа бичнэ үү',
+
+      /* ── Нэвтрэлт ───────────────────────────────────────────────────────
+         `credentials` нь буруу нууц үг БА байхгүй хаяг ХОЁУЛАНД. Ялгаж
+         хэлбэл хэн ч дурын хаягаар туршиж «энэ хүн бүртгэлтэй юу» гэдгийг
+         мэдэж авах боломжтой болно. */
+      credentials: 'И-мэйл эсвэл нууц үг буруу байна.',
+      /** Хэдэн удаа бичсэн ч болохгүй — и-мэйлээ нээх ёстой. */
+      notConfirmed:
+        'И-мэйл хаягаа эхлээд баталгаажуулна уу — бүртгүүлэхэд илгээсэн холбоосыг дарна.',
+      /** 429. Дахин дарах нь зөвхөн хүлээх хугацааг уртасгана. */
+      tooMany: 'Хэт олон оролдлого боллоо. Хэдэн минутын дараа дахин оролдоно уу.',
+      exists: 'Энэ и-мэйл аль хэдийн бүртгэлтэй байна. Нэвтрэх хуудсаар орно уу.',
+
+      /* ── Нууц үг солих ──────────────────────────────────────────────────
+         `sessionMissing` нь ихэвчлэн сэргээх холбоосын хугацаа дууссан,
+         эсвэл хүн `/reset-password` хаягийг шууд бичиж орсон гэсэн үг. */
+      weakPassword: 'Нууц үг хэтэрхий энгийн байна. Урт, холимог үг сонгоно уу.',
+      samePassword: 'Шинэ нууц үг хуучинтайгаа ижил байна.',
+      sessionMissing: 'Хугацаа дууссан байна. Нууц үг сэргээх холбоосыг дахин авна уу.',
+      saveFailed: 'Хадгалж чадсангүй. Дахин оролдоно уу.',
+
       unknown: 'Алдаа гарлаа. Дахин оролдоно уу.',
     },
     role: {
@@ -456,7 +495,6 @@ const en: Dictionary = {
   nav: {
     home: 'Home',
     about: 'About',
-    aboutShort: 'About',
     studio: 'Studio',
     classes: 'Classes',
     courses: 'Courses',
@@ -580,10 +618,8 @@ const en: Dictionary = {
   home: {
     upcoming: 'Upcoming classes',
     upcomingAll: 'Full schedule',
-    coursesTitle: 'Courses',
     classesTitle: 'Class types',
     instructorsTitle: 'Instructors',
-    shopTitle: 'From the shop',
     videosTitle: 'Watch us',
     watchOnYoutube: 'Watch on YouTube',
     playVideo: 'Play video',
@@ -591,11 +627,11 @@ const en: Dictionary = {
     years: 'years',
     weekly: 'classes every week',
     scheduleNote: 'Your seat is confirmed once you book. Updated every week.',
-    coursesNote: 'In the studio with a teacher, or online from home. A full programme, start to finish.',
     classesNote: 'From absolute beginner to advanced. Start wherever you are.',
     instructorsNote: 'The people who lead the room. Every class belongs to one of them.',
     videosNote: 'Words cannot carry the feeling of the room — watch the movement.',
     shopNote: 'Clothing and gear made for practice. In studio or delivered.',
+    faqAll: 'All questions',
   },
   instructor: {
     background: 'Professional background',
@@ -795,8 +831,13 @@ const en: Dictionary = {
     hasAccount: 'Already registered?',
     checkEmail: 'Check your email — we sent a confirmation link.',
     resetTitle: 'Reset password',
-    resetSent: 'We emailed you a reset link.',
+    resetSent: 'We emailed you a reset link. If it has not arrived, check your spam folder.',
     newPassword: 'New password',
+    passwordHint: '8+ characters',
+    resetNoLink:
+      'Open this page from the link we email you. If that link has expired, ask for a new one.',
+    resetAgain: 'Send a new link',
+    backToLogin: 'Back to log in',
     updated: 'Saved.',
     profile: 'Profile',
     memberSince: 'Member since',
@@ -813,6 +854,22 @@ const en: Dictionary = {
       provider: 'Google sent you back before sign-in finished. Please try again.',
       missingCode: 'Sign-in did not complete. Please try again.',
       exchange: 'That sign-in link has expired. Please sign in again.',
+
+      email: 'That email address does not look right',
+      password: 'Your password needs at least 8 characters',
+      name: 'Please give your full name',
+      phone: 'Please give a phone number',
+
+      credentials: 'That email or password is not right.',
+      notConfirmed: 'Please confirm your email first — open the link we sent when you signed up.',
+      tooMany: 'Too many attempts. Please wait a few minutes and try again.',
+      exists: 'That email is already registered. Please log in instead.',
+
+      weakPassword: 'That password is too easy to guess. Try a longer, more mixed one.',
+      samePassword: 'That is the same password you already have.',
+      sessionMissing: 'That link has expired. Please request a new reset link.',
+      saveFailed: 'We could not save that. Please try again.',
+
       unknown: 'Something went wrong. Please try again.',
     },
     role: {

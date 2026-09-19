@@ -6,6 +6,7 @@ import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 import { requireAdmin } from '@/lib/auth/dal'
 import { findAccountByEmail, inviteAccount } from '@/lib/auth/accounts'
+import { siteOrigin } from '@/lib/site-url'
 
 /**
  * Удирдлагын эрх олгох, хураах.
@@ -48,8 +49,27 @@ export async function grantAccess(formData: FormData): Promise<void> {
   // 2. Үгүй бол урина. Урилга нь `auth.users` мөр үүсгэдэг тул эрхийг нь
   //    дараагийн алхамд шууд тавьж болно — тэр хүн нууц үгээ тавимагц
   //    удирдлагын хэсэгт нэвтэрнэ.
+  //
+  //    ⚠️ Урилгын и-мэйл нь Supabase-ийн **Invite** загвараар явна. Анхдагч
+  //    загвар нь `{{ .ConfirmationURL }}` — тэр холбоос нь токеныг хаягийн
+  //    `#fragment` дотор буцаадаг бөгөөд СЕРВЕР түүнийг ХАРЖ ЧАДАХГҮЙ
+  //    (хөтөч fragment-ийг хүсэлтэд илгээдэггүй). Тиймээс урьсан хүн
+  //    «холбоосын хугацаа дууссан» гэсэн хуудсан дээр буух ба нууц үгээ
+  //    хэзээ ч тавьж чадахгүй.
+  //
+  //    Засвар нь КОДОД БИШ ЗАГВАРТ: Supabase → Authentication → Emails →
+  //    Invite user дотор холбоосыг `{{ .TokenHash }}` хэлбэрт шилжүүлнэ
+  //    (§ README «Хурдан эхлүүлэх» §5). Тэгвэл `/auth/callback` түүнийг
+  //    сервер талдаа session болгоно.
   if (!account) {
-    const origin = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
+    /* Буцах хаягийг ОРЧНЫ ХУВЬСАГЧААС биш ХҮСЭЛТЭЭС авна (§ lib/site-url.ts).
+       Өмнө нь `NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'` байв: тэр
+       хувьсагчийг Vercel дээр тавихаа мартвал — эсвэл `.env.local` дээрх
+       localhost утга production-д хуулбарлагдвал — админ ажилтнаа урихад
+       урилгын холбоос нь ТҮҮНИЙ ӨӨРИЙН компьютер руу заана. Урьсан хүн
+       холбоосыг дараад юу ч нээгдэхгүй, админ нь «илгээлээ» гэсэн ногоон
+       мэдэгдэл харна. */
+    const origin = await siteOrigin()
     const result = await inviteAccount(email, `${origin}/mn/reset-password`)
 
     if ('error' in result) {

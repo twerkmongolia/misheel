@@ -42,7 +42,7 @@ function FaqFields({ item }: { item?: FaqItem }) {
       </div>
 
       <div className="grid gap-5 sm:grid-cols-2">
-        <Field label="Хариулт (MN)" hint="2-3 өгүүлбэр">
+        <Field label="Хариулт (MN)" hint="Мөр таслалт хадгалагдана — жагсаалт бичиж болно">
           <Textarea name="answer_mn" rows={5} defaultValue={item?.answer_mn} required />
         </Field>
         <Field label="Хариулт (EN)">

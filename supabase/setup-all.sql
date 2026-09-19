@@ -1192,55 +1192,166 @@ insert into gallery_items (url, alt_mn, alt_en, sort_order) values
 ('/media/studio-6.svg', 'Үндсэн заал', 'Main studio', 6)
 on conflict do nothing;
 
-insert into faq_items (question_mn, question_en, answer_mn, answer_en, sort_order) values
-('Огт бүжиглэж байгаагүй бол болох уу?',
- 'Can I come with no dance experience?',
- 'Мэдээж. «Twerk үндэс» хичээл яг эхлэгчдэд зориулагдсан бөгөөд сурагчдын дийлэнх нь тэндээс эхэлдэг. Багш хөдөлгөөн бүрийг жижиг хэсэг болгон задалж, удаан хэмнэлээр давтуулдаг тул урьдчилсан бэлтгэл огт шаардлагагүй.',
- 'Absolutely. The Twerk Basics class is built for people starting from zero, and most of our students begin there. Every movement is broken into small pieces and repeated slowly, so no previous experience is needed.', 1),
-('Хичээлд хэрхэн бүртгүүлэх вэ?',
- 'How do I book a class?',
- 'Хуваарь хуудаснаас өөрт тохирох өдөр, цагаа сонгоод «Бүртгүүлэх» товчийг дарахад суудал тань шууд баталгаажна. Бүртгүүлэхийн өмнө нэвтэрсэн байх шаардлагатай — ингэснээр бүх бүртгэлээ «Миний булан» дотроос хараад, шаардлагатай үед цуцлах боломжтой болно.',
- 'Pick a day and time on the Schedule page and press Book — your seat is confirmed straight away. You need to be logged in first, which also lets you see every booking under My account and cancel it if your plans change.', 2),
-('Аль түвшнээс эхлэх вэ?',
- 'Which level should I start at?',
- 'Гурван түвшин бий: анхан, дунд, ахисан. Өмнө нь бүжиглэж байгаагүй бол анхан шатнаас эхэл; үндсэн хөдөлгөөнүүдийг мэддэг болсон үед дунд шат тохирно. Ахисан түвшин нь дор хаяж зургаан сарын тогтмол дадлага шаарддаг тул яаралгүй ойртоорой.',
- 'There are three levels: beginner, intermediate and advanced. Start at beginner if you have never danced; intermediate suits you once the basic movements feel familiar. Advanced asks for at least six months of steady practice, so there is no rush to get there.', 3),
-('Нэг хичээл хэдэн минут үргэлжлэх вэ?',
+-- Мөр таслалт нь ЗОРИУДЫНХ: хуудас хариултыг `whitespace-pre-line`
+-- -ээр харуулдаг тул жагсаалт бичсэн хэлбэрээрээ гарна (§ faq/page.tsx).
+insert into faq_items (id, question_mn, question_en, answer_mn, answer_en, sort_order, is_active)
+values
+('faaaaaaa-0001-4000-8000-000000000001',
+ 'Анх удаа Twerk сурч байгаа бол болох уу?',
+ 'Can I join if this is my first time doing Twerk?',
+ 'Тийм. Анхан шатны ангид өмнө нь бүжиглэж байгаагүй хүн ч хамрагдах боломжтой. Суурь хөдөлгөөнөөс эхлээд алхам бүрийг ойлгомжтой, дараалалтайгаар сурна.',
+ 'Yes. The beginner class is open to people who have never danced before. You start from the basic movements and learn every step in a clear order.',
+ 1, true),
+
+('faaaaaaa-0001-4000-8000-000000000002',
+ 'Хичээлд яаж хувцаслаж ирэх вэ?',
+ 'What should I wear to class?',
+ 'Twerk анги
+
+• Өгзөгний хөдөлгөөн чөлөөтэй харагдах шорт, сул шорт эсвэл сул өмд
+• Биед эвтэйхэн цамц, топ эсвэл өөрт тохиромжтой хувцас
+• Өвдгөвч
+• Зааланд өмсөх цэвэр, солих пүүз (ул нь зураас гаргадаггүй байх)
+
+Heels Twerk анги
+
+• Өгзөгний хөдөлгөөн чөлөөтэй харагдах шорт, сул шорт эсвэл сул өмд
+• Биед эвтэйхэн цамц, топ эсвэл өөрт тохиромжтой хувцас
+• Өвдгөвч
+• Өөрт тохирох өндөртэй, зориулалтын өсгийт (ул нь зураас гаргадаггүй, шовх үзүүргүй байх)
+
+Нэмэлт торкио зэрэг өөрт тохирсон гоёл, аксессуар хэрэглэж болно.
+
+Хамгийн гол нь өөртөө тухтай, өөрийгөө итгэлтэй, эмэгтэйлэг мэдрүүлэх хувцсаа сонгоорой. 🤭',
+ 'Twerk class
+
+• Shorts, loose shorts or loose trousers that let the hip movement show
+• A T-shirt, top or anything else you feel good moving in
+• Knee pads
+• Clean indoor trainers you change into (non-marking soles)
+
+Heels Twerk class
+
+• Shorts, loose shorts or loose trousers that let the hip movement show
+• A T-shirt, top or anything else you feel good moving in
+• Knee pads
+• Dance heels at a height that suits you (non-marking soles, no stiletto tips)
+
+You are welcome to add accessories that suit you, a torquio for example.
+
+Above all, choose the outfit that makes you feel comfortable, confident and feminine. 🤭',
+ 2, true),
+
+('faaaaaaa-0001-4000-8000-000000000003',
+ 'Twerk болон Heels Twerk хоёрын ялгаа юу вэ?',
+ 'What is the difference between Twerk and Heels Twerk?',
+ 'Twerk
+
+Үндсэн twerk хөдөлгөөн, техник, хэмнэл болон choreography-д төвлөрнө. Илүү эрч хүчтэй, хөдөлгөөн ихтэй хичээл.
+
+Heels Twerk
+
+Twerk-ийн суурь хөдөлгөөнөөс гадна өсгийт дээр зөв зогсох, алхах, биеийн шугам, эмэгтэйлэг хөдөлгөөн болон choreography-д төвлөрнө.
+
+Товчхондоо:
+
+Twerk — Техник + Хэмнэл + Эрч хүч
+Heels Twerk — Twerk + Heels + Feminine movement',
+ 'Twerk
+
+Focuses on the core twerk movements, technique, rhythm and choreography. The higher-energy class, with more movement.
+
+Heels Twerk
+
+On top of the twerk basics it focuses on standing and walking properly in heels, body lines, feminine movement and choreography.
+
+In short:
+
+Twerk — technique + rhythm + energy
+Heels Twerk — twerk + heels + feminine movement',
+ 3, true),
+
+('faaaaaaa-0001-4000-8000-000000000004',
+ 'Хичээл хэдэн минут үргэлжилдэг вэ?',
  'How long is a class?',
- 'Хичээлийн төрлөөс хамаарч 60-аас 90 минут. Яг хэдэн минут болохыг хуваарь дээрх цаг бүрийн хажууд, мөн хичээлийн дэлгэрэнгүй хуудаснаас харж болно. Эхлэхээс арав орчим минутын өмнө ирж, хувцсаа сольж, биеэ дулаацуулахыг зөвлөж байна.',
- 'Between 60 and 90 minutes, depending on the class. The exact length is shown next to every slot on the schedule and on each class page. Arrive about ten minutes early to change and warm up.', 4),
-('Юу өмсөж очих вэ?',
- 'What should I wear?',
- 'Хөдөлгөөнд саад болохгүй сунадаг өмд эсвэл лосин, тав тухтай пүүз. Өвдөг шалан дээр тулах хөдөлгөөн олон байдаг тул өвдөгний хамгаалалт нэг цагийг хамаагүй тав тухтай болгоно — манай дэлгүүрээс авах боломжтой.',
- 'Stretchy trousers or leggings you can move in, and comfortable trainers. A lot of the work happens on your knees, so knee pads make the hour far more comfortable — you can pick up a pair from our shop.', 5),
-('Хичээлээ цуцалж болох уу?',
- 'Can I cancel a booking?',
- 'Болно. Хичээл эхлэхээс 6 цагийн өмнө хүртэл «Миний булан» дотроос өөрөө цуцална. Түүнээс хойш систем цуцлахыг зөвшөөрөхгүй тул бидэн рүү шууд залгаарай — боломжтой бол суудлыг тань хүлээж байгаа өөр сурагчид шилжүүлнэ.',
- 'Yes. You can cancel yourself from My account up to six hours before the class starts. After that the system locks it, so please call us instead — where we can, we pass your seat on to another student who is waiting.', 6),
-('Төлбөрөө яаж хийх вэ?',
- 'How do I pay?',
- 'Одоогоор банкны шилжүүлгээр. Захиалга үүсгэсний дараа дансны дугаар, гүйлгээний утга дэлгэц дээр гарч ирэх бөгөөд төлбөр орсны дараа захиалга боловсруулагдана. Гүйлгээний утгыг яг бичсэнээр нь оруулах нь баталгаажилтыг хурдасгана.',
- 'By bank transfer for now. Once you place an order the account number and the reference appear on screen, and we process the order as soon as the payment arrives. Copying the reference exactly speeds the confirmation up.', 7),
-('Ганцаараа очиход эвгүй биш үү?',
- 'Is it strange to come on my own?',
- 'Сурагчдын олонх нь ганцаараа ирдэг. Эхний хичээл дээр хэн ч бие биенээ ажигладаггүй — бүгд толинд өөрийгөө хараад л завгүй байдаг. Хоёр гурван хичээлийн дараа заал танил болж, нэрсийг нь ч санаж эхэлнэ.',
- 'Most people arrive alone. In your first class nobody is watching you — everyone is busy watching themselves in the mirror. After two or three classes the room stops feeling new and you start knowing names.', 8),
-('Бие бялдрын бэлтгэл сайтай байх шаардлагатай юу?',
- 'Do I need to be fit already?',
- 'Үгүй. Хичээл бүр дулаацуулах дасгалаас эхэлж, ачааллаа аажмаар нэмдэг тул биеэ дасгах хугацаа өөрөө гарна. Хэрэв гэмтэл, мэс засал, эсвэл анхаарах шаардлагатай зүйл байвал хичээл эхлэхээс өмнө багшдаа хэлээрэй — хөдөлгөөнийг тань тохируулж өгнө.',
- 'No. Every class opens with a warm-up and builds the load gradually, so your body has time to catch up. If you are carrying an injury or anything we should know about, tell the instructor before the class and they will adapt the movements for you.', 9),
-('Хуваарь хэр олон удаа шинэчлэгддэг вэ?',
- 'How often is the schedule updated?',
- 'Долоо хоног бүр. Хуваарь хуудсан дээр өмнөх, дараагийн долоо хоног руу чөлөөтэй шилжиж, өдөр бүрд хэдэн хичээл байгааг нэг харцаар харна. Тухайн хичээл дүүрсэн бол мөр дээрээ «Дүүрсэн» гэж бичигдэнэ.',
- 'Every week. On the Schedule page you can move freely between the previous and the next week and see at a glance how many classes fall on each day. If a class is full, the row says so instead of offering a button.', 10),
-('Дэлгүүрийн захиалга хэрхэн ирэх вэ?',
- 'How does shop delivery work?',
- 'Улаанбаатар хотод 5,000₮ -ийн хүргэлтийн төлбөртэй. Захиалга баталгаажсаны дараа бид тантай утсаар холбогдож, хүргэх өдөр, цагийг тохирно. Заалнаас өөрөө авахыг хүсвэл захиалгын тайлбартаа бичээд үлдээгээрэй.',
- 'Delivery inside Ulaanbaatar costs ₮5,000. Once your order is confirmed we call you to agree a day and a time. If you would rather collect it at the studio, just say so in the order note.', 11),
-('Тоглолт, арга хэмжээнд урьж болох уу?',
- 'Can we book you for an event?',
- 'Болно. Twerk Mongolia корпоратив арга хэмжээ, тоглолт, бичлэгт тогтмол оролцдог. Огноо, байршил, хэдэн бүжигчин хэрэгтэйгээ холбоо барих хуудсаар бичиж илгээгээрэй — ажлын өдрүүдэд 24 цагийн дотор хариулна.',
- 'Yes. Twerk Mongolia performs regularly at corporate events, shows and shoots. Send us the date, the venue and how many dancers you need through the contact page and we will reply within 24 hours on weekdays.', 12)
+ 'Нэг хичээл 90 минут үргэлжилнэ.',
+ 'A class runs for 90 minutes.',
+ 4, true),
+
+('faaaaaaa-0001-4000-8000-000000000005',
+ 'Хичээлийн дараа дасгал, сунгалт хийх үү?',
+ 'Is there conditioning and stretching after class?',
+ 'Тийм. Хичээл бүрийн дараа булчинг ажиллуулах нэмэлт дасгал болон сунгалтыг тогтмол хийдэг.
+
+Үүнд:
+
+• Өгзөг, гуяны дасгал
+• Хэвлий болон core-ийн дасгал
+• Резинтэй дасгал
+• Сунгалт
+
+зэрэг багтана.',
+ 'Yes. Every class ends with extra conditioning work and stretching.
+
+That includes:
+
+• Glute and thigh work
+• Abs and core work
+• Resistance band work
+• Stretching',
+ 5, true),
+
+('faaaaaaa-0001-4000-8000-000000000006',
+ 'Нэг ангид хэдэн хүн байдаг вэ?',
+ 'How many people are in one class?',
+ 'Анги болон хөтөлбөрөөсөө хамаарч 10–20 суралцагчтай байна.',
+ 'Between 10 and 20 students, depending on the class and the programme.',
+ 6, true),
+
+('faaaaaaa-0001-4000-8000-000000000007',
+ 'Twerk хийснээр өгзөг томрох уу?',
+ 'Will twerking make my glutes bigger?',
+ 'Twerk-ийн хөдөлгөөнөөр өгзөг, ташаа, гуя болон core хэсгийн булчингууд идэвхтэй ажилладаг. Тогтмол хичээллэснээр булчин чангарч, өгзөгний хэлбэр илүү тодорч, өргөгдсөн харагдана.
+
+Үр дүн нь хүн бүрийн биеийн онцлог, хооллолт болон хичээллэх давтамжаас хамаарч өөр байна.
+
+Зарим суралцагчид анхны хэдэн долоо хоногоосоо хөдөлгөөний болон биеийн өөрчлөлтөө мэдэрч эхэлдэг.',
+ 'Twerk movement works the glutes, hips, thighs and core. With regular practice the muscles tighten and the shape of the glutes becomes more defined and lifted.
+
+Results differ from person to person, depending on your body, your diet and how often you train.
+
+Some students start to feel a change in their movement and their body within the first few weeks.',
+ 7, true),
+
+('faaaaaaa-0001-4000-8000-000000000008',
+ 'Twerk хичээллээд жин хасах уу?',
+ 'Will twerk classes help me lose weight?',
+ 'Twerk нь идэвхтэй хөдөлгөөн шаарддаг бүжгийн төрөл тул тогтмол хичээллэх нь энерги зарцуулалт болон биеийн идэвхийг нэмэгдүүлэхэд хувь нэмэр оруулна.
+
+Жин болон биеийн хэмжээнд гарах өөрчлөлт нь хүн бүрийн биеийн онцлог, хооллолт, өдөр тутмын хөдөлгөөн болон хичээллэх давтамжаас хамаарч өөр байна.
+
+Twerk-ийн гол зорилго нь зөвхөн турах биш, биеэ чангалах, галбиржуулах, хөдөлгөөний хяналт болон өөртөө итгэх итгэлийг хөгжүүлэх юм.
+
+Зарим тохиолдолд жин төдийлөн өөрчлөгдөхгүй ч биеийн хэлбэр, булчингийн чангарсан байдалд өөрчлөлт мэдрэгдэж болно.',
+ 'Twerk is an active dance form, so training regularly adds to the energy you burn and to how much you move overall.
+
+Changes in weight and body measurements differ from person to person, depending on your body, your diet, your daily activity and how often you train.
+
+The point of twerk is not only to get slimmer: it is to tone and shape the body, to build movement control and to grow your confidence.
+
+Sometimes the number on the scale barely moves while the shape of the body and the tone of the muscles clearly change.',
+ 8, true),
+
+('faaaaaaa-0001-4000-8000-000000000009',
+ 'Ангид бүртгүүлсний дараа юу болох вэ?',
+ 'What happens after I sign up for a class?',
+ 'Бүртгэл болон төлбөрөө баталгаажуулсны дараа таны бүртгэлтэй холбоо барих сувгаар хичээлийн дэлгэрэнгүй мэдээллийг хүргэнэ.
+
+Мөн тухайн ангийн Instagram group-д нэмэгдэж, хичээлийн хуваарь, зарлал болон бусад мэдээллийг хүлээн авна.',
+ 'Once your registration and payment are confirmed, we send the class details to the contact channel you registered with.
+
+You are also added to the Instagram group for that class, where the schedule, announcements and everything else are posted.',
+ 9, true)
 on conflict do nothing;
 
 

@@ -107,7 +107,7 @@ export function SignupForm({ t, locale }: Props) {
       <Field label={t.auth.email}>
         <Input name="email" type="email" required autoComplete="email" disabled={pending} />
       </Field>
-      <Field label={t.auth.password} hint="8+ тэмдэгт">
+      <Field label={t.auth.password} hint={t.auth.passwordHint}>
         <Input
           name="password"
           type="password"
@@ -130,13 +130,14 @@ export function SignupForm({ t, locale }: Props) {
 export function ForgotPasswordForm({ t, locale }: Props) {
   const [state, action, pending] = useActionState(requestPasswordReset, undefined)
 
-  if (state?.message === 'resetSent') {
-    return <Alert tone="good">{t.auth.resetSent}</Alert>
-  }
-
+  /* ⚠️ Амжилтын мессеж нь маягтыг ОРЛОХГҮЙ, дээр нь нэмэгдэнэ.
+     Өмнө нь орлодог байв — и-мэйлээ буруу бичсэн хүн (`gmial.com`) тэр
+     алдаагаа засах ямар ч аргагүй үлдэж, хэзээ ч ирэхгүй захидал хүлээж
+     суудаг байлаа. Хуудсыг дахин ачаалахаас өөр гарц байхгүй нь гэмтэл. */
   return (
     <form action={action} className="flex flex-col gap-4">
       <input type="hidden" name="locale" value={locale} />
+      {state?.message === 'resetSent' && <Alert tone="good">{t.auth.resetSent}</Alert>}
       {state?.error && <Alert tone="danger">{state.error}</Alert>}
 
       <Field label={t.auth.email}>
@@ -156,7 +157,7 @@ export function ResetPasswordForm({ t, locale }: Props) {
       <input type="hidden" name="locale" value={locale} />
       {state?.error && <Alert tone="danger">{state.error}</Alert>}
 
-      <Field label={t.auth.newPassword} hint="8+ тэмдэгт">
+      <Field label={t.auth.newPassword} hint={t.auth.passwordHint}>
         <Input
           name="password"
           type="password"

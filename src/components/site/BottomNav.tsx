@@ -1,11 +1,11 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useSearchParams } from 'next/navigation'
 import { useChromeScroll } from './useChromeScroll'
 import { TAB, TAB_ACTIVE, TAB_IDLE, TAB_LABEL } from './tab'
 
-export type TabIcon = 'home' | 'calendar' | 'bag' | 'star'
+export type TabIcon = 'home' | 'courses' | 'play' | 'bag'
 export type TabItem = { href: string; label: string; icon: TabIcon }
 
 /**
@@ -27,6 +27,11 @@ export function BottomNav({
   menu: React.ReactNode
 }) {
   const pathname = usePathname()
+  /* Хоёр таб НЭГ хуудас руу заана: `/courses?mode=studio` ба `?mode=online`.
+     `pathname` дотор асуулгын мөр БАЙДАГГҮЙ тул зөвхөн замаар тулгавал
+     хоёулаа зэрэг идэвхжинэ (эсвэл хоёулаа хэзээ ч идэвхжихгүй) — самбарын
+     дээд зураас нь «би хаана байна» гэдгийг хэлэхээ болино. */
+  const params = useSearchParams()
   const { hidden } = useChromeScroll()
 
   return (
@@ -40,9 +45,13 @@ export function BottomNav({
           програм мэт харагддаг. */}
       <nav className="flex items-stretch border-t border-line bg-background/92 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl backdrop-saturate-150">
         {tabs.map((tab) => {
+          const [path, query] = tab.href.split('?')
+          const mode = query ? new URLSearchParams(query).get('mode') : null
+
           // `/mn` нь зөвхөн яг тэр хуудсанд, бусад нь дэд замуудад ч идэвхтэй
-          const isHome = tab.href.split('/').filter(Boolean).length === 1
-          const active = isHome ? pathname === tab.href : pathname.startsWith(tab.href)
+          const isHome = path.split('/').filter(Boolean).length === 1
+          const onPath = isHome ? pathname === path : pathname.startsWith(path)
+          const active = onPath && (!mode || params.get('mode') === mode)
 
           return (
             <Link
@@ -68,15 +77,25 @@ export function BottomNav({
  * хуудас» гэдгийг зөвхөн дэвсгэрээр заавал сул. Хэлбэр нь давхар дохио.
  */
 /** Хаалттай хэлбэртэй дүрснүүд — идэвхтэй үедээ дүүрч болно. */
-const FILLABLE = new Set<TabIcon>(['home', 'star'])
+const FILLABLE = new Set<TabIcon>(['home'])
 
 function TabIcon({ name, filled }: { name: TabIcon; filled: boolean }) {
   const paths: Record<TabIcon, React.ReactNode> = {
     home: <path d="M4 11.2 12 4.5l8 6.7V19a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-7.8Z" />,
-    calendar: (
+    /* Танхим ба онлайны дүрс нь сурагчийн самбартай ЯГ ижил (§ AccountNav
+       `Icon`): нэвтэрсэн, нэвтрээгүй хоёр төлөвт нэг зүйл нэг дүрстэй
+       байхгүй бол хүн доод самбарыг өөр газар гэж уншина. */
+    courses: (
       <>
-        <rect x="3.5" y="5.5" width="17" height="15" rx="2.5" />
-        <path d="M3.5 10h17M8 3.5v4M16 3.5v4" />
+        <path d="M4.5 5.5A2 2 0 0 1 6.5 3.5H19v14H6.5a2 2 0 0 0-2 2V5.5Z" />
+        <path d="M4.5 19.5a2 2 0 0 1 2-2H19v3H6.5a2 2 0 0 1-2-1Z" />
+      </>
+    ),
+    play: (
+      <>
+        <rect x="2.5" y="4.5" width="19" height="13" rx="2.5" />
+        <path d="M8 20.5h8" />
+        <path d="M10.5 8.5l4.5 2.5-4.5 2.5v-5Z" />
       </>
     ),
     bag: (
@@ -84,9 +103,6 @@ function TabIcon({ name, filled }: { name: TabIcon; filled: boolean }) {
         <path d="M5.5 7.5h13l-1 12h-11l-1-12Z" />
         <path d="M9 7.5V6a3 3 0 0 1 6 0v1.5" />
       </>
-    ),
-    star: (
-      <path d="M12 3.2 14.29 8.85 20.37 9.28 15.71 13.21 17.17 19.12 12 15.9 6.83 19.12 8.29 13.21 3.63 9.28 9.71 8.85Z" />
     ),
   }
 

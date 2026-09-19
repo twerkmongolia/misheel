@@ -6,7 +6,7 @@ import { Arrow, ButtonLink, Eyebrow } from '@/components/ui'
 import { ContactTrigger } from '@/components/site/ContactDialog'
 import { Media } from '@/components/site/media'
 import { SessionList } from '@/components/site/SessionList'
-import { CourseCard } from '@/components/site/CourseCard'
+import { FaqList } from '@/components/site/FaqList'
 import { VideoEmbed } from '@/components/site/VideoEmbed'
 import { Stat } from '@/components/site/Stat'
 import { content, getDictionary, loc, isLocale } from '@/lib/i18n'
@@ -15,10 +15,9 @@ import { formatMnt } from '@/lib/format'
 import { youtubeId } from '@/lib/youtube'
 import {
   getClassTypes,
-  getCourses,
+  getFaq,
   getInstructors,
   getMyBookedSessionIds,
-  getProducts,
   getSiteContent,
   getUpcomingSessions,
 } from '@/lib/data'
@@ -140,17 +139,12 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   if (!isLocale(locale)) notFound()
 
   const t = getDictionary(locale)
-  const [site, sessions, classTypes, courses, instructors, products, user] = await Promise.all([
+  const [site, sessions, classTypes, instructors, faq, user] = await Promise.all([
     getSiteContent(['hero', 'about', 'videos']),
     getUpcomingSessions(6),
     getClassTypes(),
-    /* Танхим ба онлайн НЭГ эгнээнд. Хүний сонголт нь яг тэр хоёрын
-       хооронд байдаг тул тэднийг салгах нь харьцуулалтыг таслана
-       (§ (marketing)/courses/page.tsx). Дөрөв нь хангалттай — нүүр
-       хуудас бол каталог биш, урилга. */
-    getCourses({ limit: 4 }),
     getInstructors(),
-    getProducts(),
+    getFaq(),
     getUser(),
   ])
   /* Аль хичээлд нь аль хэдийн бүртгүүлснийг мэдэхгүй бол «Бүртгүүлэх» товч
@@ -180,11 +174,10 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
      эзэлбэл дараалал тасарч, «02 дараа нь 04» болно. */
   const chapters = [
     { id: 'schedule', show: sessions.length > 0 },
-    { id: 'courses', show: courses.length > 0 },
     { id: 'classes', show: classTypes.length > 0 },
     { id: 'instructors', show: instructors.length > 0 },
     { id: 'videos', show: videos.length > 0 },
-    { id: 'shop', show: products.length > 0 },
+    { id: 'faq', show: faq.length > 0 },
   ].filter((chapter) => chapter.show)
 
   const no = (id: string) =>
@@ -408,31 +401,6 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         </Chapter>
       )}
 
-      {/* ══ 02 · Анги, курс ═══════════════════════════════════════════════
-          Хуваарийн ЯГ дараа. Хуваарь нь «энэ долоо хоногт юу байна» гэж
-          хариулдаг бол анги нь «би хаанаас эхлэх вэ» гэдэгт хариулна —
-          нэг удаагийн хичээлээс бүтэн хөтөлбөр рүү шилжих тэр алхам нь
-          студийн хамгийн үнэтэй шилжилт тул хамгийн дээр сууна.
-
-          Тор, зам биш ХОЁР БАГАНА: анги цөөхөн (2-4) байдаг тул зам нь
-          хагас хоосон, гурван баганат тор нь картуудыг хэт жижигрүүлнэ. */}
-      {courses.length > 0 && (
-        <Chapter
-          id="courses"
-          index={no('courses')}
-          count={chapterCount}
-          title={t.home.coursesTitle}
-          note={t.home.coursesNote}
-          action={<More href={`/${locale}/courses`}>{t.common.all}</More>}
-        >
-          <div className="grid gap-x-6 gap-y-10 sm:grid-cols-2" data-stagger>
-            {courses.map((course, index) => (
-              <CourseCard key={course.id} course={course} locale={locale} index={index} />
-            ))}
-          </div>
-        </Chapter>
-      )}
-
       {/* ══ 02 · Хичээлийн төрлүүд ════════════════════════════════════════
           Хэвтээ зам. Тор нь «бүгд ижил жинтэй» гэж хэлдэг бол зам нь
           «үргэлжилсэн цуглуулга» гэж хэлнэ — галерейн хана. Мөн дэлгэцийн
@@ -585,42 +553,31 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         </Chapter>
       )}
 
-      {/* ══ 05 · Дэлгүүр ══════════════════════════════════════════════════
-          Хайрцаг биш ШУГАМААР тусгаарлагдсан бүртгэл. Барааны зураг өөрөө
-          хайрцаг тул дээр нь хүрээ нэмэх нь давхардал. */}
-      {products.length > 0 && (
+      {/* ══ 05 · Түгээмэл асуулт ══════════════════════════════════════════
+          Уриалгын ЯГ ӨМНӨ. Энэ хүртэл гүйж ирсэн хүн сонирхож байна гэсэн
+          үг — түүнийг «Бүртгүүлэх» дээр дарахаас нь өмнө зогсоодог зүйл бол
+          мэдээлэл дутсан асуултууд: юу өмсөх вэ, хэдэн минут вэ, төлсний
+          дараа юу болох вэ. Тэр асуултуудыг ӨӨР ХУУДСАН дээр үлдээх нь
+          хүнийг яг шийдвэрийнх нь мөчид сайтын урсгалаас гаргадаг.
+
+          БҮГД гарна, тасалбарлахгүй: «эхний дөрөв нь энд, бусад нь тэнд»
+          гэвэл яг хайж байсан асуулт нь нөгөө хуудсанд байх магадлал
+          үлдэнэ. Хаалттай аккордеон тул урт нь толгойн мөрүүд л — жагсаалт
+          дэндүү урсах болбол энд `slice` нэмэхийн оронд админаас асуултаа
+          цөөрүүлэх нь зөв. */}
+      {faq.length > 0 && (
         <Chapter
-          id="shop"
-          index={no('shop')}
+          id="faq"
+          index={no('faq')}
           count={chapterCount}
-          title={t.home.shopTitle}
-          note={t.home.shopNote}
-          action={<More href={`/${locale}/shop`}>{t.nav.shop}</More>}
+          title={t.nav.faq}
+          note={t.faq.lead}
+          action={<More href={`/${locale}/faq`}>{t.home.faqAll}</More>}
         >
-          <div className="grid grid-cols-2 gap-x-4 gap-y-10 sm:gap-x-6 lg:grid-cols-4" data-stagger>
-            {products.slice(0, 4).map((product, index) => (
-              <Link
-                key={product.id}
-                href={`/${locale}/shop/${product.slug}`}
-                className="group flex flex-col gap-4"
-                data-rv
-              >
-                <Media
-                  src={product.images[0]?.url}
-                  alt={loc(product, 'name', locale)}
-                  seed={index + 1}
-                  ratio="aspect-[4/5]"
-                  sizes="(max-width: 640px) 50vw, 25vw"
-                />
-                <div className="flex items-baseline justify-between gap-3 border-t border-line pt-3">
-                  <p className="t-small font-medium transition-opacity duration-200 group-hover:opacity-60">
-                    {loc(product, 'name', locale)}
-                  </p>
-                  <p className="t-meta shrink-0 text-muted">{formatMnt(product.minPrice)}</p>
-                </div>
-              </Link>
-            ))}
-          </div>
+          {/* Эхнийх нь ХААЛТТАЙ. /faq дээр нээлттэй байх нь зөв — хүн тэнд
+              зөвхөн үүний тулд ирсэн. Харин энд нээлттэй хариулт нь бүлгийг
+              өндөрсгөж, доорх уриалгыг дэлгэцнээс түлхэнэ. */}
+          <FaqList items={faq} locale={locale} openFirst={false} />
         </Chapter>
       )}
 

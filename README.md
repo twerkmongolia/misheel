@@ -62,6 +62,12 @@ TELEGRAM_CHANNEL_URL=https://t.me/+xxxx   # онлайн ангийн суваг
 > байхгүй: угтвартай бол Next нь утгыг клиентийн багцад оруулах тул
 > элсээгүй хүн ч эх кодоос уншина.
 
+`NEXT_PUBLIC_SITE_URL` нь зөвхөн НӨӨЦ утга. И-мэйлийн буцах хаягийг код нь
+хүсэлтийн толгойноос уншдаг (§ `lib/site-url.ts`) — ингэснээр localhost,
+preview, production гурвуулаа өөрөө зөв болно. Өмнө нь энэ хувьсагч дээр
+шууд найддаг байсан ба Vercel дээр тавихаа мартвал, эсвэл localhost хэвээр
+үлдвэл нууц үг сэргээх и-мэйл БУРУУ хаяг руу заадаг байв.
+
 ### 3. И-мэйл баталгаажуулалт
 
 Supabase → **Authentication** → **Sign In / Providers** → **Email** дотор
@@ -77,14 +83,106 @@ Supabase → **Authentication** → **Sign In / Providers** → **Email** дот
 шалгана уу» гэсэн мэдэгдэл гаргана (§ `actions/auth.ts`). Тохиргоог хожим
 буцааж асаасан ч апп зөв ажиллана.
 
-### 4. Ажиллуулах
+### 4. Буцах хаягууд (Redirect URLs) — ЭНИЙГ АЛГАСВАЛ НЭВТРЭЛТ АЖИЛЛАХГҮЙ
+
+Supabase → **Authentication** → **URL Configuration**:
+
+| Талбар | Утга |
+| --- | --- |
+| **Site URL** | `https://www.twerkmongolia.com` |
+| **Redirect URLs** | `https://www.twerkmongolia.com/**`<br>`https://twerkmongolia.com/**`<br>`http://localhost:3000/**`<br>`http://localhost:3002/**` |
+
+Preview deployment ашигладаг бол Vercel-ийн хэв маягаа бас нэмнэ
+(`https://*-<баг>.vercel.app/**`).
+
+**Яагаад `/**` вэ.** Бидний буцах хаяг нь асуултын мөр АВЧ явдаг —
+`/auth/callback?next=/mn/reset-password&locale=mn`. Supabase нь ХАЯГИЙГ
+БҮХЭЛД нь тулгадаг тул `…/auth/callback` гэж яг таг бичвэл асуулттай
+хувилбар нь таарахгүй.
+
+> ⚠️ **Энэ жагсаалт хоосон байхад юу болох вэ.** Supabase алдаа буцаадаггүй —
+> буцах хаягийг чимээгүйхэн ХАЯЖ, **Site URL** -ээр орлуулна. Үр дүнд нь:
+>
+> · **Google-ээр нэвтрэх** — хүн Google дээр бүх алхмыг зөв дуусгана. Дараа
+>   нь `/auth/callback` руу БИШ нүүр хуудас руу буцна. Тэнд кодыг session
+>   болгох код байхгүй тул хүн НЭВТРЭЭГҮЙ хэвээр нүүр хуудсан дээр зогсоно.
+>
+> · **Нууц үг сэргээх** — и-мэйл дэх холбоос нь нууц үгийн маягт руу биш
+>   нүүр хуудас руу аваачна. Хүн шинэ нууц үгээ хэзээ ч тавьж чадахгүй.
+>
+> Хоёулаа «яагаад ч юм болохгүй байна» гэж харагдана: сервер эрүүл, код
+> зөв, лог цэвэр. Тиймээс энэ бол нэвтрэлт эвдэрсэн үед ХАМГИЙН ТҮРҮҮНД
+> шалгах зүйл.
+
+**Шалгах арга.** Жагсаалтад юу байгааг дашбоардаас гадна ГАДНААС нь
+батлах боломжтой. Дараах хоёр алхам и-мэйл ИЛГЭЭХГҮЙ:
+
+```bash
+# 1. Нэг удаагийн токен авна (захидал явуулахгүй)
+TH=$(curl -s -X POST "$NEXT_PUBLIC_SUPABASE_URL/auth/v1/admin/generate_link" \
+  -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
+  -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"type":"recovery","email":"<бүртгэлтэй@хаяг>"}' \
+  | python3 -c "import sys,json;print(json.load(sys.stdin)['hashed_token'])")
+
+# 2. Холбоосыг ХҮН ШИГ дарж, хаашаа буухыг нь хардаг
+curl -s -o /dev/null -D - \
+  "$NEXT_PUBLIC_SUPABASE_URL/auth/v1/verify?token=$TH&type=recovery\
+&redirect_to=https%3A%2F%2Fwww.twerkmongolia.com%2Fauth%2Fcallback" | grep -i '^location:'
+```
+
+`location:` нь чиний өгсөн хаягаар эхэлж байвал жагсаалт зөв. Site URL
+(`https://www.twerkmongolia.com`) болж хувирсан бол тэр хаяг жагсаалтад АЛГА.
+
+> ⚠️ `generate_link` -ийн `options.redirect_to` -г ЭНЭ ШАЛГАЛТАД БҮҮ
+> ашигла: тэр талбарыг уг цэг үл хэрэгсэж, буцаах холбоосдоо ҮРГЭЛЖ Site
+> URL бичдэг. Тиймээс зөв тохируулсан жагсаалтыг ч «хоосон» мэт харуулна.
+> Жинхэнэ шалгалт нь дээрх `/verify` алхам.
+
+### 5. И-мэйл хүргэлт
+
+Supabase-ийн СУУРИЛУУЛСАН и-мэйл үйлчилгээ нь зөвхөн туршилтад
+зориулагдсан: цагт хэдхэн захидал, бөгөөд ихэвчлэн зөвхөн төслийн
+гишүүдийн хаяг руу л хүргэнэ. Өөрөөр хэлбэл жинхэнэ үйлчлүүлэгч «Нууц үгээ
+мартсан» дарахад захидал нь ХҮРЭХГҮЙ.
+
+Тиймээс Supabase → **Authentication** → **Emails** → **SMTP Settings**
+дотор өөрийн SMTP (Resend, SendGrid, Postmark г.м.) -ээ холбоно.
+
+**Нэмэлт (сонголттой): и-мэйлийн холбоосыг ӨӨР ТӨХӨӨРӨМЖ дээр ажиллуулах.**
+Анхдагч загвар нь PKCE ашигладаг бөгөөд тэр нь хүсэлт илгээсэн ХӨТӨЧ дээр
+үлдсэн нууц түлхүүр шаарддаг. Компьютер дээрээ хүсэлт илгээгээд и-мэйлээ
+УТСАНДАА нээсэн хүнд тэр түлхүүр байхгүй тул холбоос унана. **Reset
+Password** загварын холбоосыг дараах байдлаар солиход энэ хамаарал алга
+болно (§ `app/auth/callback/route.ts` нь хоёуланг нь дэмждэг):
+
+```
+{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=recovery&next=/mn/reset-password
+```
+
+**Invite загварт энэ нь СОНГОЛТ БИШ, ЗААВАЛ.** Админ → **Хандалт** дээрээс
+ажилтан урихад (§ `actions/access.ts`) Supabase нь **Invite user** загварыг
+илгээнэ. Анхдагч холбоос нь токеныг хаягийн `#fragment` дотор буцаадаг
+бөгөөд СЕРВЕР fragment-ийг харж чаддаггүй (хөтөч түүнийг хүсэлтэд
+илгээдэггүй) — өөрөөр хэлбэл урьсан хүн нууц үгээ ХЭЗЭЭ Ч тавьж чадахгүй.
+`token_hash` руу шилжүүлбэл сервер талдаа боловсруулагдана:
+
+```
+{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=invite&next=/mn/reset-password
+```
+
+И-мэйл баталгаажуулалтыг (§3) хожим асаах бол **Confirm signup** загварт ч
+мөн адил (`type=signup`).
+
+### 6. Ажиллуулах
 
 ```bash
 npm install
 npm run dev      # http://localhost:3000
 ```
 
-### 5. Өөрийгөө админ болгох
+### 7. Өөрийгөө админ болгох
 
 Сайтаар бүртгүүлээд Supabase SQL Editor дээр:
 
@@ -157,9 +255,14 @@ supabase/migrations/        схем, функц, RLS
 1. Repo-г Vercel-д холбоно.
 2. Дээрх орчны хувьсагчдыг Production болон Preview-д тавина.
    `NEXT_PUBLIC_SITE_URL` -ыг бодит домэйнээр солино.
-3. Supabase → Authentication → URL Configuration дотор
-   `https://<домэйн>/auth/callback` -ыг Redirect URL болгож нэмнэ.
+3. Supabase → Authentication → URL Configuration дотор **Site URL** ба
+   **Redirect URLs** -ыг бодит домэйнээр тавина (§ «Хурдан эхлүүлэх» §4).
+   Энэ алхмыг алгасвал Google-ээр нэвтрэх ба нууц үг сэргээх ХОЁУЛАА
+   чимээгүйхэн ажиллахаа болино.
 4. Google OAuth хэрэглэх бол Supabase → Authentication → Providers дээр асаана.
+   Google Cloud Console талд зөвшөөрөгдсөн буцах хаяг нь ВЕБ САЙТ БИШ
+   Supabase байна: `https://<проект>.supabase.co/auth/v1/callback`.
+5. И-мэйл хүргэлтийн SMTP -ээ холбоно (§ «Хурдан эхлүүлэх» §5).
 
 ## Скриптүүд
 

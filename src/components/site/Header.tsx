@@ -53,25 +53,43 @@ export async function Header({ locale }: { locale: Locale }) {
     { href: `/${locale}/about`, label: t.nav.about, wide: true },
   ]
 
-  // Гар утасны доод самбар — хамгийн олон дардаг дөрөв + цэс.
+  /* Гар утасны доод самбар — ЗАРЖ буй зүйлс + цэс.
+
+     ── Яагаад «Бүртгэл» (хуваарь) энд БАЙХГҮЙ вэ ──────────────────────
+     Хуваарь нь аль хэдийн ирдэг болсон хүний хэрэгсэл: тэр хүн ямар анги
+     байдгийг мэддэг, зөвхөн цагаа сонгоно. Харин доод самбар нь утсаар
+     сайт нээсэн ШИНЭ хүний нүдэнд хамгийн түрүүнд өртдөг дөрвөн үг — тэнд
+     нэг удаагийн цаг захиалга сууж байвал студийн үндсэн хоёр санал
+     (танхимд сурах, онлайнаар сурах) огт дурдагдалгүй өнгөрнө.
+
+     Ширээний навбар аль хэдийн яг энэ хоёроор эхэлдэг (§ дээрх `primary`)
+     — одоо утас нь түүнтэй нэг зүйл хэлнэ. Хуваарь нь хөл болон нүүр
+     хуудсанд хэвээр.
+
+     Богино нэр ЗААВАЛ: «Танхимын анги» таван баганад хоёр мөр болж
+     самбарыг өндөрсгөнө. `studioShort` / `onlineShort` нь сурагчийн
+     самбарт аль хэдийн хэрэглэгддэг тул нэр нь хоёр ертөнцөд ижил. */
   const tabs = [
     { href: `/${locale}`, label: t.nav.home, icon: 'home' as const },
-    { href: `/${locale}/schedule`, label: t.nav.booking, icon: 'calendar' as const },
+    { href: `/${locale}/courses?mode=studio`, label: t.nav.studioShort, icon: 'courses' as const },
+    { href: `/${locale}/courses?mode=online`, label: t.nav.onlineShort, icon: 'play' as const },
     { href: `/${locale}/shop`, label: t.nav.shop, icon: 'bag' as const },
-    // Табанд богино нэр — «Бидний тухай» хоёр мөр болж самбарыг өндөрсгөнө.
-    { href: `/${locale}/about`, label: t.nav.aboutShort, icon: 'star' as const },
   ]
 
   // Цэс нь табанд БАЙХГҮЙ зүйлсийг агуулна — давхардуулбал хэрэглэгч
-  // «энэ хоёр өөр газар өөр өөр юм уу?» гэж эргэлзэнэ.
+  // «энэ хоёр өөр газар өөр өөр юм уу?» гэж эргэлзэнэ. Анги, курс хоёр
+  // таб болсон тул эндээс гарч, оронд нь «Бидний тухай» орж ирлээ.
   const menuPrimary = [
-    { href: `/${locale}/courses?mode=studio`, label: t.nav.studioCourses },
-    { href: `/${locale}/courses?mode=online`, label: t.nav.onlineCourses },
     { href: `/${locale}/classes`, label: t.nav.classes },
     { href: `/${locale}/instructors`, label: t.nav.instructors },
   ]
 
-  const menuSecondary = [{ href: `/${locale}/faq`, label: t.nav.faq }]
+  /* Танилцах эгнээ — жижиг үсгээр. Хөлний «Студи» баганатай нэг санаа
+     (§ Footer): студи хэн бэ, юуг нь хамгийн их асуудаг вэ. */
+  const menuSecondary = [
+    { href: `/${locale}/about`, label: t.nav.about },
+    { href: `/${locale}/faq`, label: t.nav.faq },
+  ]
 
   return (
     <>
