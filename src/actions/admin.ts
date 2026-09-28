@@ -665,6 +665,38 @@ export async function addVariant(formData: FormData): Promise<void> {
   redirect(backToProduct(formData))
 }
 
+/**
+ * Хувилбарыг устгана.
+ *
+ * ── Захиалгын түүх ҮҮНЭЭС ХАМААРАХГҮЙ ──────────────────────────────────
+ * `order_items` нь нэр, хувилбар, үнээ ӨӨРТӨӨ хуулж авдаг бөгөөд
+ * `variant_id` нь `on delete set null` (§ migration `schema.sql` — тэнд
+ * «Бараа устсан ч захиалгын түүх бүрэн уншигдана» гэж бичсэн байдаг).
+ * Тиймээс аль хэдийн зарагдсан хувилбарыг устгасан ч хуучин захиалга
+ * бүрэн эхээрээ уншигдсаар үлдэнэ.
+ *
+ * ── Идэвхгүй болгох vs устгах ──────────────────────────────────────────
+ * `is_active = false` нь ЗАРАХАА зогсоох арга: хувилбар жагсаалтад үлдэж,
+ * нөөц, кодоо хадгална. Устгах нь түүнийг ОГТ арилгана — буруу бичсэн,
+ * хэзээ ч зарагдаагүй мөрд зориулсан. Хоёр өөр хэрэгцээ тул хоёулаа байна.
+ */
+export async function deleteVariant(formData: FormData): Promise<void> {
+  await requireStaff()
+
+  const id = uuid.safeParse(formData.get('variant_id'))
+  if (!id.success) redirect('/admin/products?error=Хувилбар олдсонгүй')
+
+  const supabase = await createClient()
+  const { error } = await supabase.from('product_variants').delete().eq('id', id.data)
+
+  if (error) redirect(`/admin/products?error=${encodeURIComponent(error.message)}`)
+
+  await audit('variant.delete', 'product_variants', id.data, {})
+  revalidatePath('/admin/products')
+  revalidatePath('/', 'layout')
+  redirect(backToProduct(formData))
+}
+
 /* ── Барааны зураг ─────────────────────────────────────────────────────── */
 
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/avif']

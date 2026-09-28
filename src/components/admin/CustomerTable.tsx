@@ -1,9 +1,8 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
-import { Badge, Button, Select, Table, Td, Th, type Tone } from './ui'
+import { useRef, useState } from 'react'
+import { Badge, Table, Td, Th, type Tone } from './ui'
 import { DialogFrame } from './Dialog'
-import { setUserRole } from '@/actions/admin'
 import { formatDate } from '@/lib/format'
 import type { UserRole } from '@/lib/supabase/database.types'
 
@@ -36,29 +35,20 @@ const tones: Record<UserRole, Tone> = {
  * Имэйл, бүртгэлийн дэлгэрэнгүй нь цонхонд амьдарна — мөр бүрд шахвал
  * хүснэгт нарийсаж, уншихад хэцүү болно.
  *
- * ЭРХ нь харин ӨӨР: тэр нь өдөр бүр хайгддаг үйлдэл (хэн админ бэ, хэнд
- * эрх өгөх вэ) бөгөөд цонхон дотор нуугдсан үедээ ОГТ ОЛДОХГҮЙ байв —
- * хуудсыг хараад «энд зөвхөн жагсаалт байна» гэж уншигдана. Тиймээс эрх
- * солих хэсэг хүснэгтэн дээрээ, шошгоны оронд шууд сууна.
+ * ── Эрх нь энд зөвхөн ХАРАГДАНА ────────────────────────────────────────
+ * Урьд нь мөр бүр дээр эрх солих сонголт сууж байв. Тэр нь хоёр асуудалтай:
+ * өдөр тутам гүйлгэж хардаг жагсаалт дээр хамгийн ноцтой үйлдэл хамгийн
+ * ойрхон зогсож, санамсаргүй дарагдах зай үлдээдэг; мөн эрх олгох нь аль
+ * хэдийн ӨӨРИЙН хуудастай (§ admin/access — зөвхөн админд, `grantAccess`).
+ * Нэг үйлдэл хоёр газар байвал аль нь үнэн болох нь эргэлзээтэй болно.
+ *
+ * Форм алга болсноор энэ цонх ЮУ Ч бичихээ больсон — тиймээс хаяг солигдох
+ * шалтгаан ч үгүй: `FormDialog` -ийн хаах хамгаалалт энд хэрэггүй
+ * (§ CLAUDE.md «Server Action доторх redirect»).
  */
-export function CustomerTable({
-  customers,
-  canEdit,
-  openId,
-}: {
-  customers: CustomerRow[]
-  canEdit: boolean
-  /** Эрх хадгалсны дараа цонх байсан газраа эргэж нээгдэнэ. */
-  openId?: string
-}) {
+export function CustomerTable({ customers }: { customers: CustomerRow[] }) {
   const ref = useRef<HTMLDialogElement>(null)
-  const [selected, setSelected] = useState<CustomerRow | null>(
-    () => customers.find((customer) => customer.id === openId) ?? null,
-  )
-
-  useEffect(() => {
-    if (openId && ref.current && !ref.current.open) ref.current.showModal()
-  }, [openId])
+  const [selected, setSelected] = useState<CustomerRow | null>(null)
 
   const open = (customer: CustomerRow) => {
     setSelected(customer)
@@ -100,64 +90,33 @@ export function CustomerTable({
                 {formatDate(customer.created_at, 'mn')}
               </Td>
               <Td align="right" label="Эрх">
-                {canEdit ? (
-                  <RoleCell customer={customer} />
-                ) : (
-                  <Badge tone={tones[customer.role]}>{roles[customer.role]}</Badge>
-                )}
+                <Badge tone={tones[customer.role]}>{roles[customer.role]}</Badge>
               </Td>
             </tr>
           ))}
         </tbody>
       </Table>
 
-      <dialog ref={ref} className="admin-dialog" onClick={(event) => {
+      <dialog
+        ref={ref}
+        className="admin-dialog"
+        onClick={(event) => {
           // Бүрхүүл дээр дарахад хаана — `<dialog>` дэвсгэрээ ч өөртөө тооцдог
           if (event.target === ref.current) ref.current?.close()
-        }}>
+        }}
+      >
         {selected && (
           <DialogFrame
             title={selected.name ?? 'Нэргүй хэрэглэгч'}
             subtitle={roles[selected.role]}
             onClose={() => ref.current?.close()}
           >
-            <div className="flex flex-col gap-5">
-              <dl className="flex flex-col">
-                <Row label="Имэйл" value={selected.email} mono />
-                <Row label="Утас" value={selected.phone} />
-                <Row label="Бүртгүүлсэн" value={formatDate(selected.created_at, 'mn')} />
-                <Row label="Эрх" value={roles[selected.role]} />
-              </dl>
-
-              {canEdit ? (
-                <form
-                  action={setUserRole}
-                  className="flex flex-wrap items-end justify-end gap-2 border-t border-line pt-4"
-                >
-                  <input type="hidden" name="user_id" value={selected.id} />
-                  {/* Хүснэгтээс шууд заслыг цонх нээлгүй үлдээнэ
-                      (§ actions/admin.ts `setUserRole`) */}
-                  <input type="hidden" name="reopen" value="1" />
-                  <label className="flex flex-1 flex-col gap-1.5 sm:flex-none">
-                    <span className="text-xs font-medium text-foreground-soft">Эрх солих</span>
-                    <Select name="role" defaultValue={selected.role} className="sm:w-40">
-                      {(Object.keys(roles) as UserRole[]).map((role) => (
-                        <option key={role} value={role}>
-                          {roles[role]}
-                        </option>
-                      ))}
-                    </Select>
-                  </label>
-                  <Button type="submit" variant="primary">
-                    Хадгалах
-                  </Button>
-                </form>
-              ) : (
-                <p className="border-t border-line pt-4 text-sm text-muted">
-                  Эрх өөрчлөх боломж зөвхөн админд нээлттэй.
-                </p>
-              )}
-            </div>
+            <dl className="flex flex-col">
+              <Row label="Имэйл" value={selected.email} mono />
+              <Row label="Утас" value={selected.phone} />
+              <Row label="Бүртгүүлсэн" value={formatDate(selected.created_at, 'mn')} />
+              <Row label="Эрх" value={roles[selected.role]} />
+            </dl>
           </DialogFrame>
         )}
       </dialog>
@@ -165,56 +124,10 @@ export function CustomerTable({
   )
 }
 
-/**
- * Хүснэгт дэх эрх солих нүд.
- *
- * Эрх бол хамгийн ноцтой талбар тул НЭГ дарахад хадгалагдахгүй: сонголт
- * солигдсон үед л «Хадгалах» гарч ирнэ. (Зарим хөтөч дээр `<select>` дээгүүр
- * гүйлгэхэд утга нь солигддог — санамсаргүй админ төрөхөөс сэргийлнэ.)
- *
- * Мөр өөрөө дарагдахад дэлгэрэнгүй цонх нээдэг тул энэ хэсгийн үйл явдлыг
- * дээш нь дамжуулахгүй.
- */
-function RoleCell({ customer }: { customer: CustomerRow }) {
-  const [role, setRole] = useState<UserRole>(customer.role)
-  const dirty = role !== customer.role
-
-  return (
-    <form
-      action={setUserRole}
-      className="flex items-center justify-end gap-1.5"
-      onClick={(event) => event.stopPropagation()}
-      onKeyDown={(event) => event.stopPropagation()}
-    >
-      <input type="hidden" name="user_id" value={customer.id} />
-      <Select
-        name="role"
-        value={role}
-        onChange={(event) => setRole(event.target.value as UserRole)}
-        aria-label={`${customer.name ?? 'Хэрэглэгч'} — эрх`}
-        className="h-8 w-32 text-xs"
-      >
-        {(Object.keys(roles) as UserRole[]).map((value) => (
-          <option key={value} value={value}>
-            {roles[value]}
-          </option>
-        ))}
-      </Select>
-      {dirty && (
-        <Button type="submit" variant="primary" size="sm">
-          Хадгалах
-        </Button>
-      )}
-    </form>
-  )
-}
-
 function Row({ label, value, mono }: { label: string; value: string | null; mono?: boolean }) {
   return (
     <div className="flex items-baseline justify-between gap-4 border-b border-line py-2.5 last:border-b-0">
-      <dt className="shrink-0 text-xs font-semibold tracking-[0.01em] text-muted">
-        {label}
-      </dt>
+      <dt className="shrink-0 text-xs font-semibold tracking-[0.01em] text-muted">{label}</dt>
       <dd className={`min-w-0 text-right text-sm break-all ${mono ? 'font-mono text-xs' : ''}`}>
         {value || '—'}
       </dd>

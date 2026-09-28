@@ -36,6 +36,9 @@ const groups: NavGroup[] = [
       { href: '/admin/courses?mode=studio', label: 'Танхимын анги', icon: 'layers' },
       { href: '/admin/courses?mode=online', label: 'Онлайн анги', icon: 'globe' },
       { href: '/admin/instructors', label: 'Багш нар', icon: 'users' },
+      /* Сурагчид нь «Хэрэглэгч» -ээс ТУСДАА: тэр нь бүртгүүлсэн бүх хүн,
+         энэ нь хичээл АВСАН хүмүүс. Хоёр өөр асуулт, хоёр өөр жагсаалт. */
+      { href: '/admin/students', label: 'Сурагчид', icon: 'check' },
     ],
   },
   {

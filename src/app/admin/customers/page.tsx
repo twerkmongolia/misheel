@@ -18,7 +18,7 @@ export default async function AdminCustomersPage({
      layout нь client талын шилжилтэд дахин ажилладаггүй, тиймээс эрх нь
      хасагдсан ажилтан хуудсыг бүрэн дахин ачаалах хүртэл бүх хүний и-мэйлийг
      уншсаар байна (§ lib/auth/accounts.ts — «дуудагч заавал шалгана»). */
-  const me = await requireStaff()
+  await requireStaff()
   const supabase = await createClient()
 
   /* PostgREST-ийн шүүлтүүрт `%`, таслал, хаалт нь тусгай утгатай. Цэвэрлэхгүй
@@ -34,7 +34,6 @@ export default async function AdminCustomersPage({
   // Имэйл нь `auth.users` дотор байдаг тул Admin API-аар авна.
   const [{ data: profiles }, emails] = await Promise.all([query, listAccountEmails()])
 
-  const canEdit = me.role === 'admin'
   const customers: CustomerRow[] = (profiles ?? []).map((profile) => ({
     id: profile.id,
     name: profile.full_name,
@@ -48,12 +47,11 @@ export default async function AdminCustomersPage({
     <>
       <PageHeader
         title="Хэрэглэгчид"
-        description="Эрхийг баруун талаас нь шууд солино. Мөр дээр дарж имэйл зэрэг дэлгэрэнгүйг нь харна. Сүүлд бүртгүүлсэн 200 хүн."
+        description="Мөр дээр дарж имэйл зэрэг дэлгэрэнгүйг нь харна. Эрх олгох, хасахыг «Админ» хуудаснаас хийнэ. Сүүлд бүртгүүлсэн 200 хүн."
       />
 
       {search.ok && <Alert tone="good">Шинэчлэгдлээ.</Alert>}
       {search.error && <Alert tone="danger">{search.error}</Alert>}
-      {!canEdit && <Alert tone="info">Танд эрх өөрчлөх боломж байхгүй — зөвхөн харах горим.</Alert>}
 
       <Panel
         title="Жагсаалт"
@@ -81,7 +79,7 @@ export default async function AdminCustomersPage({
             hint={search.q ? `«${search.q}» гэсэн хайлтад тохирох бичлэг алга.` : undefined}
           />
         ) : (
-          <CustomerTable customers={customers} canEdit={canEdit} openId={search.open} />
+          <CustomerTable customers={customers} />
         )}
       </Panel>
     </>

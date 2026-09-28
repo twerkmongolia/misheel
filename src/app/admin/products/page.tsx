@@ -24,6 +24,7 @@ import {
   createProduct,
   deleteProduct,
   deleteProductImage,
+  deleteVariant,
   toggleActive,
   updateStock,
   uploadProductImage,
@@ -154,7 +155,7 @@ export default async function AdminProductsPage({
                     <Input name="category" defaultValue="merch" />
                   </Field>
                   <Field label="Үндсэн үнэ (₮)">
-                    <Input type="number" name="base_price" defaultValue={50000} min={0} step={1000} required />
+                    <Input type="number" name="base_price" defaultValue={50000} min={0} step={1} required />
                   </Field>
                   <Field
                     label="Зураг"
@@ -328,38 +329,54 @@ export default async function AdminProductsPage({
                                 {[variant.size, variant.color].filter(Boolean).join(' · ') || '—'}
                               </Td>
                               <Td>
-                                <form
-                                  action={updateStock}
-                                  className="flex flex-wrap items-center justify-end gap-1.5"
-                                >
-                                  <input type="hidden" name="variant_id" value={variant.id} />
-                                  <input type="hidden" name="product_id" value={product.id} />
-                                  <Input
-                                    type="number"
-                                    name="price"
-                                    aria-label="Үнэ"
-                                    defaultValue={variant.price}
-                                    min={0}
-                                    step={1000}
-                                    className="h-[30px] w-28 text-xs"
-                                  />
-                                  <Input
-                                    type="number"
-                                    name="stock_qty"
-                                    aria-label="Нөөц"
-                                    defaultValue={variant.stock_qty}
-                                    min={0}
-                                    className="h-[30px] w-20 text-xs"
-                                  />
-                                  <Button type="submit" size="sm">
-                                    Хадгалах
-                                  </Button>
+                                <div className="flex flex-wrap items-center justify-end gap-1.5">
+                                  <form
+                                    action={updateStock}
+                                    className="flex flex-wrap items-center justify-end gap-1.5"
+                                  >
+                                    <input type="hidden" name="variant_id" value={variant.id} />
+                                    <input type="hidden" name="product_id" value={product.id} />
+                                    <Input
+                                      type="number"
+                                      name="price"
+                                      aria-label="Үнэ"
+                                      defaultValue={variant.price}
+                                      min={0}
+                                      step={1}
+                                      className="h-[30px] w-28 text-xs"
+                                    />
+                                    <Input
+                                      type="number"
+                                      name="stock_qty"
+                                      aria-label="Нөөц"
+                                      defaultValue={variant.stock_qty}
+                                      min={0}
+                                      className="h-[30px] w-20 text-xs"
+                                    />
+                                    <Button type="submit" size="sm">
+                                      Хадгалах
+                                    </Button>
+                                  </form>
+
+                                  {/* Устгах нь ТУСДАА форм: `<form>` дотор
+                                      `<form>` байж болохгүй. Хадгалахын
+                                      дараа, улаанаар зогсоно — хоёр өөр
+                                      үр дагавартай товч зэрэгцэж байхад
+                                      өнгө нь л андуурахаас сэргийлнэ. */}
+                                  <form action={deleteVariant}>
+                                    <input type="hidden" name="variant_id" value={variant.id} />
+                                    <input type="hidden" name="product_id" value={product.id} />
+                                    <Button type="submit" size="sm" variant="danger">
+                                      Устгах
+                                    </Button>
+                                  </form>
+
                                   {variant.stock_qty <= 3 && (
                                     <Badge tone={variant.stock_qty === 0 ? 'danger' : 'warn'}>
                                       {variant.stock_qty === 0 ? 'Дууссан' : 'Дуусаж байна'}
                                     </Badge>
                                   )}
-                                </form>
+                                </div>
                               </Td>
                             </tr>
                           ))}
@@ -388,7 +405,7 @@ export default async function AdminProductsPage({
                         name="price"
                         defaultValue={product.base_price}
                         min={0}
-                        step={1000}
+                        step={1}
                         className="sm:w-28"
                       />
                     </Field>
