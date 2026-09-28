@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { getUser } from '@/lib/auth/dal'
 import { getVariantsWithProduct } from '@/lib/data'
 import { readBuyIntent } from '@/lib/buy'
@@ -164,18 +165,44 @@ export async function startPayment(
       targetId: order.id,
       paymentId: payment.id,
       description: `Twerk Mongolia · ${order.order_no}`,
-      // Webhook-ийн хаяг нэхэмжлэлд ОРДОГГҮЙ — merchant тохиргоонд
-      // бүртгэгдсэн байдаг (§ lib/payments/README.md).
-      callbackUrl: `${site}/api/payments/webhook`,
+      /* Webhook-ийн хаяг нэхэмжлэл бүрд ОРНО (§ lib/payments/README.md —
+         урьд нь эсрэгээр бичигдсэн байсныг амьд лог няцаав).
+
+         Query нь webhook-д хэрэггүй: гарын үсэг нь ЗӨВХӨН биед тооцогддог
+         тул POST үүнийг зүгээр л үл тоомсорлоно. Харин Bonum ижил хаяг руу
+         хэрэглэгчийг БУЦААВАЛ тэр GET нь хаашаа явахаа эндээс мэднэ
+         (§ api/payments/webhook GET). */
+      callbackUrl: `${site}/api/payments/webhook?order=${encodeURIComponent(order.order_no)}&locale=${locale}`,
       returnUrl: `${site}/${locale}/order/${order.order_no}`,
     })
 
     /* Provider талын дугаарыг хадгална: webhook давхардсан, эсвэл гараар
-       тулгах шаардлага гарвал хоёр талыг холбох цорын ганц утга. */
-    await supabase
-      .from('payments')
-      .update({ provider: getPaymentProvider().name, provider_ref: invoice.providerRef })
-      .eq('id', payment.id)
+       тулгах шаардлага гарвал хоёр талыг холбох цорын ганц утга.
+
+       ⚠️ ЗААВАЛ service-role. `payments` дээрх цорын ганц бичих бодлого нь
+       `payments_staff_write` (§ policies.sql) тул ҮЙЛЧЛҮҮЛЭГЧИЙН client-ээр
+       хийхэд RLS үүнийг ЧИМЭЭГҮЙ хаядаг байв: алдаа ч гарахгүй, мөр ч
+       өөрчлөгдөхгүй. Үүнээс болж бүх `payments` мөр `provider = 'manual'`,
+       `provider_ref = null` хэвээр үлдэж, Bonum-ын нэхэмжлэлтэй тулгах
+       цорын ганц холбоос алга болж байлаа.
+
+       Session байгаа ч энд RLS тойрох нь зөв: бичиж буй утга хэрэглэгчээс
+       ИРЭЭГҮЙ — манай сервер өөрөө Bonum руу дуудаад буцаан авсан дугаар
+       (§ handle-result.ts ижил үндэслэл).
+
+       Өөрийн `try` дотор: энэ бичилт унасан ч хэрэглэгчийг ЗОГСООХГҮЙ.
+       Нэхэмжлэл аль хэдийн үүссэн тул түүн рүү явуулах нь зөв — гадна талын
+       `catch` руу унавал «нэхэмжлэл үүсгэсэнгүй» гэж худал дүгнэж, төлөх
+       боломжтой хүнийг буцаах байлаа. */
+    try {
+      const { error: refError } = await createAdminClient()
+        .from('payments')
+        .update({ provider: getPaymentProvider().name, provider_ref: invoice.providerRef })
+        .eq('id', payment.id)
+      if (refError) throw new Error(refError.message)
+    } catch (cause) {
+      console.error(`[payments] ${order.order_no}: provider_ref хадгалсангүй —`, cause)
+    }
 
     return invoice.redirectUrl
   } catch (cause) {

@@ -187,15 +187,22 @@ export const bonumProvider: PaymentProvider = {
       throw new Error(`Буруу дүн: ${input.amount}. Төгрөг бүхэл тоо байх ёстой.`)
     }
 
-    /* ⚠️ `callback` нь WEBHOOK биш: Bonum-ийн баримтад «URL to redirect after
-       payment» гэсэн буюу ХЭРЭГЛЭГЧИЙГ буцаах хаяг. Webhook хүлээн авах
-       хаягийг нэхэмжлэл бүрд биш merchant тохиргоон дээр нэг удаа бүртгүүлнэ
-       (§ README.md). Тиймээс `input.callbackUrl` энд ЗОРИУД хэрэглэгдэхгүй —
-       харин тэр утга нь бидний хүлээж буй хаяг мөн эсэхийг Bonum-ийн
-       тохиргоотой тулгаж шалгах ёстой. */
+    /* ⚠️ `callback` нь WEBHOOK-ийн хаяг мөн — баримт бичгийн «URL to redirect
+       after payment» гэсэн үг нь төөрөгдүүлсэн.
+
+       Урьд нь энд `input.returnUrl` (захиалгын хуудас) явдаг байв. Bonum-ийн
+       merchant порталын «WebHook Жагсаалт» түүнийг няцаав: 2026-09-28-нд
+       гурван удаа яг ТЭР хуудас руу `{"type":"PAYMENT",…}` POST илгээгээд
+       бүгд 503 буцаасан байна — API биш, HTML хуудас хариулсан учир. Өөрөөр
+       хэлбэл төлбөр бүр амжилттай болсон ч манай тал хэзээ ч мэдээгүй.
+
+       Хэрэглэгчийг буцаах шаардлага энэ хаягт шингэсэн: `callbackUrl` нь
+       `?order=…&locale=…` -тэй ирдэг тул GET хүсэлт өөрөө захиалгын хуудас
+       руу шилжүүлнэ (§ api/payments/webhook). Ингэснээр Bonum энэ хаягийг
+       хоёр утгын аль алинаар нь хэрэглэсэн ч зөв ажиллана. */
     const body = {
       amount: input.amount,
-      callback: input.returnUrl,
+      callback: input.callbackUrl,
       transactionId: input.paymentId,
       expiresIn: input.expiresIn ?? INVOICE_TTL_SECONDS,
       ...(input.items?.length
@@ -250,8 +257,8 @@ export const bonumProvider: PaymentProvider = {
     }
 
     const inner = payload.body
-    if (!inner?.transactionId || !inner.invoiceId) {
-      throw new WebhookVerificationError('Webhook-д transactionId эсвэл invoiceId алга')
+    if (!inner?.transactionId) {
+      throw new WebhookVerificationError('Webhook-д transactionId алга')
     }
 
     /* Төлөв ХОЁР давхарт бичигдэнэ: дугтуй дээр SUCCESS/FAILED, дотор нь
@@ -259,9 +266,28 @@ export const bonumProvider: PaymentProvider = {
        хэлж байвал тэр бол алдаа, төлбөр биш. */
     const paid = payload.status === 'SUCCESS' && inner.status === 'PAID'
 
+    /* ⚠️ `invoiceId` нь ЗӨВХӨН төлөгдсөн мэдэгдэлд ирнэ. Хугацаа дуусахад
+       Bonum-ийн бие иймэрхүү байна — гүйлгээ огт үүсээгүй тул дугаар ч алга:
+
+         { "status": "FAILED",
+           "body": { "transactionId": "…", "amount": 55000,
+                     "invoiceStatus": "EXPIRED", "status": "EXPIRED" } }
+
+       Урьд нь энд `invoiceId` -г ч болзолгүй шаардаж байсан бөгөөд тэр нь
+       EXPIRED бүрийг 401-ээр няцаах байлаа.
+
+       ⚠️ Тэгээд ДАХИН ирэхгүй. Merchant порталын логоос харахад Bonum
+       мэдэгдэл бүрийг ГАНЦ удаа илгээдэг: 2026-09-28-ны гурван мэдэгдэл
+       гурван өөр Trace ID-тай, аль нь ч давтагдаагүй. Өөрөөр хэлбэл
+       няцаагдсан мэдэгдэл бүрмөсөн алдагдана — сэргээх цорын ганц зам нь
+       порталын «Дахин илгээх» товч. */
+    if (paid && !inner.invoiceId) {
+      throw new WebhookVerificationError('Төлөгдсөн webhook-д invoiceId алга')
+    }
+
     return {
       transactionId: inner.transactionId,
-      providerRef: inner.invoiceId,
+      providerRef: inner.invoiceId ?? null,
       status: paid ? 'paid' : 'failed',
       // Дүн нь мөрөөр ирж болзошгүй — тоо болгоно, `handle-result` тулгана.
       amount: Number(inner.amount),

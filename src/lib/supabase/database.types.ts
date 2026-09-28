@@ -378,7 +378,9 @@ export type Database = {
         Args: {
           p_payment_id: string
           p_provider: string
-          p_provider_ref: string
+          /* SQL тал нь `text` — NOT NULL биш. Хугацаа дууссан мэдэгдэлд
+             Bonum нэхэмжлэлийн дугаар явуулдаггүй (§ payments/types.ts). */
+          p_provider_ref: string | null
           p_amount: number
           p_paid: boolean
           p_raw?: unknown

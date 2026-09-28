@@ -45,8 +45,14 @@ export interface CreateInvoiceResult {
 export interface WebhookResult {
   /** Манай `payments.id` */
   transactionId: string
-  /** Provider талын id */
-  providerRef: string
+  /**
+   * Provider талын id.
+   *
+   * Амжилттай төлбөрт үргэлж ирнэ. Хугацаа дууссан мэдэгдэлд Bonum түүнийг
+   * огт явуулдаггүй — нэхэмжлэл төлөгдөөгүй тул гүйлгээ ч үүсээгүй
+   * (§ bonum.ts `verifyWebhook`). Тиймээс `null` байж болно.
+   */
+  providerRef: string | null
   status: 'paid' | 'failed'
   amount: number
   currency: string

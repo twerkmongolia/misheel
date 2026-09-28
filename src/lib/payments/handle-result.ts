@@ -43,9 +43,14 @@ export async function handlePaymentResult(result: WebhookResult): Promise<void> 
   })
 
   if (error) {
-    /* ХАЯХГҮЙ — дээрх route нь алдааг 500 болгож буцаана. Bonum 200-аас
-       өөр хариу авбал webhook-оо ДАХИН илгээнэ, тэр нь яг зөв: түр зуурын
-       асуудал (сүлжээ, DB тасарсан) дараагийн оролдлогод засрах ёстой. */
+    /* ХАЯХГҮЙ — дээрх route нь алдааг 500 болгож буцаана. Ингэснээр
+       мэдэгдэл нь merchant порталын лог дээр АМЖИЛТГҮЙ гэж үлдэнэ.
+
+       ⚠️ Bonum өөрөө дахин оролддоггүй (§ bonum.ts `verifyWebhook`) тул
+       500 нь «дараа засарна» гэсэн үг биш. Гэсэн ч чимээгүй 200 буцаах нь
+       дор: тэгвэл алдагдсан төлбөр хаана ч тэмдэглэгдэхгүй, харин 500 нь
+       порталын лог дээр үлдэж, «Дахин илгээх» товчоор сэргээх боломж
+       нээлттэй байна. */
     console.error(`[payments] ${result.transactionId}: settle_payment амжилтгүй — ${error.message}`)
     throw new Error(`settle_payment: ${error.message}`)
   }
@@ -82,7 +87,8 @@ function handleInMemory(result: WebhookResult): void {
     return
   }
 
-  const invoice = mockInvoices.get(result.providerRef)
+  // Дугааргүй мэдэгдэл (хугацаа дуусcан) нэхэмжлэлээ олохгүй — тулгах юм ч алга.
+  const invoice = result.providerRef ? mockInvoices.get(result.providerRef) : undefined
 
   if (invoice && invoice.amount !== result.amount) {
     console.error(

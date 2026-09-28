@@ -62,7 +62,8 @@ describe('verify', () => {
 
   it('урт нь зөрсөн гарын үсгийг шидэлгүйгээр ТАТГАЛЗАНА', () => {
     // `timingSafeEqual` нь урт зөрвөл алдаа шиддэг — түүнийг барихгүй бол
-    // webhook 500 буцааж, provider дахин дахин илгээнэ.
+    // webhook 401-ийн оронд 500 буцааж, буруу гарын үсэг нь серверийн
+    // алдаа мэт харагдана.
     expect(() => verify(BODY, KEY, 'abc')).not.toThrow()
     expect(verify(BODY, KEY, 'abc')).toBe(false)
   })
