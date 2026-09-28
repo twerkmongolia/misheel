@@ -74,24 +74,20 @@ export default async function AccountPage({ params }: { params: Promise<{ locale
       </header>
 
       {/* ── 2 · Хаана юу ───────────────────────────────────────────────── */}
-      <div className="grid gap-4 sm:grid-cols-3">
+      {/* Хоёр хайрцаг, урьд нь гурав: анги ба хичээл нэг хуудас болсон тул
+          тоо нь ч нэг болно (§ account/courses/page.tsx). */}
+      <div className="grid gap-4 sm:grid-cols-2">
         <Tile
           href={`/${locale}/account/courses`}
           label={t.courses.mine}
-          value={counts.courses}
+          value={counts.courses + counts.bookings}
           delay="60ms"
-        />
-        <Tile
-          href={`/${locale}/account/bookings`}
-          label={t.booking.myBookings}
-          value={counts.bookings}
-          delay="120ms"
         />
         <Tile
           href={`/${locale}/account/orders`}
           label={t.shop.myOrders}
           value={counts.orders}
-          delay="180ms"
+          delay="120ms"
         />
       </div>
 

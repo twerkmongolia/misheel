@@ -39,9 +39,11 @@ export default async function AccountLayout({
 
   const t = getDictionary(locale)
 
+  /* Гурав, урьд нь дөрөв байв. «Миний анги» ба «Миний хичээлүүд» нь нэг
+     хуудас болов — хоёр нэр нь ямар агуулга хаана байгааг хэлэхийн оронд
+     сонголт болж, хүн буруугаа сонгодог байлаа (§ account/courses/page.tsx). */
   const mine = [
     { href: `/${locale}/account/courses`, label: t.courses.mine, exact: false },
-    { href: `/${locale}/account/bookings`, label: t.booking.myBookings, exact: false },
     { href: `/${locale}/account/orders`, label: t.shop.myOrders, exact: false },
     { href: `/${locale}/account`, label: t.auth.profile, exact: true },
   ]

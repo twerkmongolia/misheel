@@ -222,7 +222,10 @@ const mn = {
     myBookings: 'Миний хичээлүүд',
     myBookingsShort: 'Хичээл',
     upcoming: 'Ирэх хичээлүүд',
-    past: 'Өнгөрсөн',
+    /* «Өнгөрсөн» ганцаараа байсан нь өөрийн хуудсан дээр ойлгомжтой байв.
+       Одоо дээр нь «Дууссан ба цуцлагдсан» гэсэн АНГИйн хэсэг сууж байгаа
+       тул юуны өнгөрсөн болохыг нэрлэх ёстой (§ account/courses/page.tsx). */
+    past: 'Өнгөрсөн хичээл',
     cancelBooking: 'Цуцлах',
     noBookings: 'Та одоогоор хичээлд бүртгүүлээгүй байна.',
     errors: {
@@ -287,15 +290,18 @@ const mn = {
     note: 'Нэмэлт тайлбар',
     notePlaceholder: 'Асуух зүйл, эсвэл анхаарууштай зүйл байвал',
     submit: 'Элсэлт баталгаажуулах',
-    /* ── Миний анги ──────────────────────────────────────────────────── */
-    mine: 'Миний анги',
+    /* ── Миний хичээлүүд ─────────────────────────────────────────────────
+       Элссэн анги БА захиалсан хичээл хоёр нэг хуудсан дээр сууна
+       (§ account/courses/page.tsx). Тиймээс нэр нь «анги» гэж нарийсахаа
+       больж, хүн юу гэж хайдгаараа — «хичээл» — нэрлэгдэв. */
+    mine: 'Миний хичээлүүд',
     /** Утасны доод самбарт — урт нэр дөрвөн баганад багтахгүй. */
-    mineShort: 'Анги',
-    mineLead: 'Элссэн танхим болон онлайн ангиуд.',
-    mineEmpty: 'Та ямар ч ангид элсээгүй байна.',
+    mineShort: 'Хичээл',
+    mineLead: 'Элссэн ангиуд болон захиалсан хичээлүүд.',
+    mineEmpty: 'Та одоогоор анги, хичээлд бүртгүүлээгүй байна.',
     mineEmptyHint: 'Нээлттэй ангиудыг хараад өөрт тохирохыг нь сонгоорой.',
     browse: 'Ангиуд харах',
-    sectionActive: 'Идэвхтэй',
+    sectionActive: 'Идэвхтэй анги',
     sectionPending: 'Төлбөр хүлээгдэж буй',
     sectionClosed: 'Дууссан ба цуцлагдсан',
     statusPending: 'Төлбөр хүлээж байна',
@@ -668,8 +674,8 @@ const en: Dictionary = {
     cancelled: 'Booking cancelled.',
     myBookings: 'My classes',
     myBookingsShort: 'Classes',
-    upcoming: 'Upcoming',
-    past: 'Past',
+    upcoming: 'Upcoming classes',
+    past: 'Past classes',
     cancelBooking: 'Cancel',
     noBookings: 'You have no bookings yet.',
     errors: {
@@ -729,13 +735,13 @@ const en: Dictionary = {
     note: 'Note',
     notePlaceholder: 'Anything you want us to know',
     submit: 'Confirm enrolment',
-    mine: 'My courses',
-    mineShort: 'Courses',
-    mineLead: 'The studio and online courses you have joined.',
-    mineEmpty: 'You have not joined any course yet.',
+    mine: 'My classes',
+    mineShort: 'Classes',
+    mineLead: 'The courses you have joined and the classes you have booked.',
+    mineEmpty: 'You have not joined a course or booked a class yet.',
     mineEmptyHint: 'Have a look at what is open and pick the one that fits.',
     browse: 'Browse courses',
-    sectionActive: 'Active',
+    sectionActive: 'Active courses',
     sectionPending: 'Awaiting payment',
     sectionClosed: 'Finished and cancelled',
     statusPending: 'Awaiting payment',

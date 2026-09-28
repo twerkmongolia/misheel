@@ -62,7 +62,7 @@ export async function bookSession(formData: FormData): Promise<void> {
   }
 
   revalidatePath(`/${locale}/schedule`)
-  revalidatePath(`/${locale}/account/bookings`)
+  revalidatePath(`/${locale}/account/courses`)
   redirect(`${back}?booked=1`)
 }
 
@@ -137,6 +137,7 @@ export async function cancelBooking(formData: FormData): Promise<void> {
   }
 
   revalidatePath(`/${locale}/schedule`)
-  revalidatePath(`/${locale}/account/bookings`)
+  // Захиалсан хичээл нь одоо элссэн ангитай нэг хуудсан дээр (§ account/courses).
+  revalidatePath(`/${locale}/account/courses`)
   redirect(`${back}?cancelled=1`)
 }
