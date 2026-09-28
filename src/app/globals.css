@@ -132,6 +132,28 @@
   --danger: #FFFFFF;
   --danger-soft: #242424;
 
+  /* ── График — монохром дүрмийн ЦОРЫН ГАНЦ үл хамаарах зүйл ───────────
+     Дээрх төлөвүүд өнгөгүй байх нь зөв: тэдгээр нь нэг зэрэг хоёроос
+     олноор гарч ирдэггүй тул хэлбэр, жин хоёр хангалттай.
+
+     Давхарласан багана өөр. Зэрэгцээ таван эгнээг ЗӨВХӨН гэрлээр ялгах
+     гэвэл хамгийн бүдэг нь дэвсгэртэйгээ, хамгийн тод нь текстэйгээ
+     нийлнэ — таван шатыг хооронд нь ялгах зай байхгүй. Өнгө нь энд
+     чимэглэл биш, уншигдах болзол.
+
+     Сонголт: өнгөний ая ялгаатай АТЛАА гэрэлтүүлэг нь ч ялгаатай. Тиймээс
+     хар цагаанаар хэвлэгдсэн ч, өнгө ялгадаггүй хүн харсан ч эгнээнүүд
+     салангид хэвээр — өнгө нь ганц тулгуур биш, хоёр дахь нь.
+
+     Эхнийх нь бараг цагаан: гол эгнээ нь интерфейсийн дуу хоолойгоо
+     хадгална, өнгө нь түүний ард орно. */
+  --chart-1: #ECECEC;
+  --chart-2: #7EA6F0;
+  --chart-3: #E8A33D;
+  --chart-4: #5FBFA0;
+  --chart-5: #C98BDB;
+  --chart-6: #E0707A;
+
   /* Бүрхүүл — гар утасны цэсний ард */
   --scrim: rgba(0, 0, 0, 0.74);
 
@@ -1935,7 +1957,9 @@ textarea.ctl { resize: vertical; min-height: 7rem; }
 
    Хоёр эх сурвалж:
      · ГҮЙЛТ  — `[data-rv]`. Жижиг ажиглагч (§ site/Reveal.tsx) элемент
-       харагдах хэсэгт орохад `.is-in` нэмнэ. IntersectionObserver нь бүх
+       харагдах хэсэгт орохад `data-in` атрибут нэмнэ (анги БИШ — React
+       `className` -ийг hydration үед тулгадаг тул анги нэмэх нь
+       «didn't match» алдаа өгнө). IntersectionObserver нь бүх
        хөтөч дээр ажилладаг тул scroll-timeline -аас найдвартай.
      · HOVER  — зөвхөн CSS шилжилт.
 
@@ -1965,7 +1989,7 @@ html.rv-on [data-rv] {
 }
 
 /* Анхдагч — доороос мандаж, тодрох */
-html.rv-on [data-rv]:not(.is-in) {
+html.rv-on [data-rv]:not([data-in]) {
   opacity: 0;
   transform: translate3d(0, 1.75rem, 0);
 }
@@ -1980,25 +2004,25 @@ html.rv-on [data-rv='clip'] {
   clip-path: inset(0 0 0 0);
 }
 
-html.rv-on [data-rv='clip']:not(.is-in) {
+html.rv-on [data-rv='clip']:not([data-in]) {
   opacity: 1;
   transform: none;
   clip-path: inset(0 0 101% 0);
 }
 
-html.rv-on [data-rv='scale']:not(.is-in) {
+html.rv-on [data-rv='scale']:not([data-in]) {
   opacity: 0;
   transform: scale(0.965);
 }
 
-html.rv-on [data-rv='left']:not(.is-in) {
+html.rv-on [data-rv='left']:not([data-in]) {
   opacity: 0;
   transform: translate3d(-1.75rem, 0, 0);
 }
 
 /* Шугам — зүүнээс баруун тийш татагдана */
 html.rv-on [data-rv='line'] { transform-origin: left; }
-html.rv-on [data-rv='line']:not(.is-in) { opacity: 1; transform: scaleX(0); }
+html.rv-on [data-rv='line']:not([data-in]) { opacity: 1; transform: scaleX(0); }
 
 /* ── Ачаалалтын нэвтрэлт ─────────────────────────────────────────────────
    Баатрын хэсэг дэлгэц нээгдмэгц ХАРАГДДАГ — тиймээс түүнийг гүйлтэд уях нь
@@ -2078,7 +2102,7 @@ html.rv-on [data-rv='mask'] .mask-line > span {
   transition: transform var(--t-4) var(--ease) var(--rv-d, 0ms);
 }
 
-html.rv-on [data-rv='mask'].is-in .mask-line > span { transform: none; }
+html.rv-on [data-rv='mask'][data-in] .mask-line > span { transform: none; }
 
 html.rv-on [data-rv='mask'] .mask-line:nth-child(2) > span { transition-delay: calc(var(--rv-d, 0ms) + 90ms); }
 html.rv-on [data-rv='mask'] .mask-line:nth-child(3) > span { transition-delay: calc(var(--rv-d, 0ms) + 180ms); }
@@ -2172,7 +2196,7 @@ html.rv-on [data-rv='mask'] .mask-line:nth-child(4) > span { transition-delay: c
   .group:focus-visible .card-media { transform: none; }
 
   html.rv-on [data-rv],
-  html.rv-on [data-rv]:not(.is-in) {
+  html.rv-on [data-rv]:not([data-in]) {
     opacity: 1 !important;
     transform: none !important;
     clip-path: none !important;

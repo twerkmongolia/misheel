@@ -135,7 +135,16 @@ export default async function ShopPage({
 
   return (
     <>
-      <PageBanner page="shop" title={t.shop.title} lead={t.home.shopNote} />
+      {/* Тууз БҮТНЭЭР харагдана — зураг нь шалан дээр сууж буй бүтэн биеийн
+          зураг тул нарийн зурваст тайрвал толгой, гар хоёул гадна үлдэнэ.
+          Харьцаа нь `banners/shop.jpg` -ийнх (2400×1600); зургийг солихдоо
+          энэ тоог ч солино. */}
+      <PageBanner
+        page="shop"
+        title={t.shop.title}
+        lead={t.home.shopNote}
+        ratio="aspect-[3/2]"
+      />
 
       <div className="shell flex flex-col gap-10 pt-10 sm:pt-12">
         {/* Худалдан авалт бүтэлгүйтвэл хүн ЭНД буцаж ирнэ (§ actions/orders.ts).

@@ -33,12 +33,26 @@ export function PageBanner({
   lead,
   eyebrow,
   fallbackSrc,
+  ratio,
 }: {
   /** `public/media/banners/<page>.jpg` — файлын нэр. */
   page: string
   title: ReactNode
   lead?: ReactNode
   eyebrow?: ReactNode
+  /**
+   * Зургийг БҮТНЭЭР нь харуулах үед түүний өөрийнх нь харьцаа
+   * (ж: `aspect-[3/2]`).
+   *
+   * Өгөөгүй үед тууз нь `clamp(15rem,34vw,26rem)` өндөртэй нарийн зурвас
+   * хэвээр — зураг нь `object-cover` -оор тайрагдана. Энэ нь ихэнх тохиолдолд
+   * зөв: тууз бол хуудасны ТОЛГОЙ, гэрэл зураг биш.
+   *
+   * Гэвч зарим зураг тайрагдаж болохгүй (бүжигчдийн толгой, гутал зурвасын
+   * гадна үлдэнэ). Тэр үед энэ харьцааг өгнө: тууз өндөр болох ч агуулга нь
+   * бүтэн үлдэнэ.
+   */
+  ratio?: string
   /**
    * Хуудсанд аль хэдийн өөрийн гэсэн нээлтийн зураг байсан бол түүнийг
    * заана — тууз нь `banners/<page>.jpg` олдоогүй үед түүн рүү буцна.
@@ -86,17 +100,33 @@ export function PageBanner({
           Тууз нь зөвхөн ЭНД хөдөлнө — хуудсан дээрх бүх зураг өөр өөр
           хурдтай хөдөлбөл гүйлт нь сэлгэцэж, унших боломжгүй болно. */}
       <div className="relative col-start-1 row-start-1 overflow-hidden">
-        <div className="drift absolute inset-0 -top-[6%] h-[112%]">
+        {ratio ? (
+          /* Бүтэн зураг: өндрийг ЗУРГИЙН харьцаа тогтооно, параллакс БАЙХГҮЙ.
+             `drift` нь зургийг хүрээнээсээ 12% өндөр болгож дотор нь
+             гулсуулдаг — өөрөөр хэлбэл ажиллах ёсоороо тасалдаг. Бүтэн
+             харуулах шаардлага түүнийг үгүйсгэнэ. */
           <Media
             src={src!}
             alt=""
-            ratio=""
-            className="h-full rounded-none"
+            ratio={ratio}
+            className="rounded-none"
             sizes="100vw"
             priority
             overlay
           />
-        </div>
+        ) : (
+          <div className="drift absolute inset-0 -top-[6%] h-[112%]">
+            <Media
+              src={src!}
+              alt=""
+              ratio=""
+              className="h-full rounded-none"
+              sizes="100vw"
+              priority
+              overlay
+            />
+          </div>
+        )}
       </div>
 
       {/* `pt-20` — гарчиг ургахдаа дээшээ ургана. Наалдмал навбарын доогуур
@@ -111,8 +141,13 @@ export function PageBanner({
         Тиймээс гарчиг зургийн ДООР үлдэж, зураг ачаалж дуустал л
         харагдаад дараа нь бүрэн далдлагдаж байв.
       */}
+      {/* Харьцаа өгсөн үед доод хязгаар ХЭРЭГГҮЙ: өндрийг зураг тогтоосон
+          тул текст зүгээр давхарлана. Хоёуланд нь өндөр зааж өгвөл хоёр өөр
+          тоо өрсөлдөж, аль нь ялахыг зургийн хэмжээ шийдэх болно. */}
       <div
-        className="shell relative z-10 col-start-1 row-start-1 flex min-h-[clamp(15rem,34vw,26rem)] flex-col justify-end gap-4 pt-20 pb-8 sm:pb-11"
+        className={`shell relative z-10 col-start-1 row-start-1 flex flex-col justify-end gap-4 pt-20 pb-8 sm:pb-11 ${
+          ratio ? '' : 'min-h-[clamp(15rem,34vw,26rem)]'
+        }`}
       >
         {/*
           Тууз нь ҮРГЭЛЖ дэлгэц нээгдмэгц харагдана — тиймээс гүйлтийн

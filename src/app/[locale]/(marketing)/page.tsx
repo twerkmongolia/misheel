@@ -288,29 +288,33 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
             {/* ── Зураг ───────────────────────────────────────────────────
                 Зүсэлтээр нээгдэнэ: бүтэн зураг доороос дээш илчлэгдэнэ.
-                Дотор нь параллакс — хуудас гүйхэд зураг өөрийн хүрээндээ
-                удаанаар хөдөлж, гүн үүсгэнэ. Зөвхөн ЭНЭ зурагт: бүх зүйл
-                өөр хурдтай хөдөлбөл хуудас сэлгэцэлж уншихад хэцүү болно.
 
-                4:3 харьцаа санаатай — зураг нь хэвтээ, өргөн эгнээтэй тул
-                босоо хүрээнд хийвэл урд талын бүжигчин тасарна. */}
+                Харьцаа нь ЗУРГИЙН ӨӨРИЙНХ (2008×2560) — хүрээг зурагт нь
+                тааруулсан тул `object-cover` юу ч тасалдаггүй.
+
+                Урьд нь 4:3 байв, учир нь тэр үеийн зураг ХЭВТЭЭ, өргөн
+                эгнээтэй байсан: босоо хүрээнд хийвэл урд талын бүжигчин
+                тасардаг байлаа. Шинэ зураг босоо тул тэр үндэслэл эргэв —
+                одоо эсрэгээрээ хэвтээ хүрээ нь дээд, доод талыг нь иддэг.
+
+                Параллакс (`drift`) ХАСАГДСАН. Тэр нь зургийг хүрээнээсээ
+                12% өндөр болгож дотор нь гулсуулдаг — өөрөөр хэлбэл ажиллах
+                ёсоороо ЗААВАЛ тасалдаг. Зургийг бүтнээр нь харуулах
+                шаардлага түүнийг үгүйсгэнэ: гүн үүсгэх эффект нь агуулгаа
+                иддэг бол эффект нь буруу. */}
             <div
               className="enter-clip bleed-r col-span-12 lg:col-span-6"
               style={{ '--d': '260ms' } as CSSProperties}
             >
-              <div className="media aspect-[4/3]">
-                {/* Параллаксын хүрээ — зураг өөрийн цонхноос 12% өндөр тул
-                    гүйлтийн туршид дотроо гулсах зайтай. Зөвхөн энэ зурагт. */}
-                <div className="drift absolute inset-0 -top-[6%] h-[112%]">
-                  <Media
-                    src="/media/hero.jpg"
-                    alt={String(hero.title ?? '')}
-                    ratio="h-full w-full"
-                    className="rounded-none"
-                    sizes="(max-width: 1024px) 100vw, 50vw"
-                    priority
-                  />
-                </div>
+              <div className="media aspect-[2008/2560]">
+                <Media
+                  src="/media/hero.jpg"
+                  alt={String(hero.title ?? '')}
+                  ratio="h-full w-full"
+                  className="rounded-none"
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                  priority
+                />
               </div>
             </div>
           </div>
@@ -476,17 +480,24 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           note={t.home.instructorsNote}
           action={<More href={`/${locale}/instructors`}>{t.common.all}</More>}
         >
-          <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-3" data-stagger>
-            {instructors.slice(0, 3).map((instructor, index) => (
+          <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4" data-stagger>
+            {instructors.slice(0, 4).map((instructor, index) => (
               <Link
                 key={instructor.id}
                 href={`/${locale}/instructors/${instructor.slug}`}
                 data-rv
                 className={`group relative block ${
-                  /* Утсан дээр хоёр багана — гурав дахь нь бүтэн өргөнөөр.
-                     Шатлал зөвхөн өргөн дэлгэцэд утгатай. */
-                  index === 2 ? 'col-span-2 lg:col-span-1' : ''
-                } ${index === 1 ? 'lg:mt-14' : index === 2 ? 'lg:mt-28' : ''}`}
+                  /* Шатлал: багана бүр өмнөхөөсөө доогуур эхэлснээр эгнээ нь
+                     хэвтээ зураас биш диагональ болно. Зөвхөн ӨРГӨН дэлгэцэд —
+                     утсан дээр хоёр багана тул шатлал нь зүгээр л цоорхой
+                     үүсгэнэ.
+
+                     Урьд нь гурван багш байсан бөгөөд сондгой тоо нь утсан
+                     дээр ганцаар үлдэх карт үүсгэдэг тул гурав дахийг нь
+                     бүтэн өргөнөөр тавьдаг байв. Дөрөв бол тэгш: 2×2 болж
+                     өөрөө тэнцэнэ, тэр онцгой тохиолдол хэрэггүй болов. */
+                  ['', 'lg:mt-14', 'lg:mt-28', 'lg:mt-44'][index] ?? ''
+                }`}
               >
                 <div className="media sheen aspect-[4/5] border border-line transition-colors duration-300 group-hover:border-line-strong">
                   <Media

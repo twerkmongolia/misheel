@@ -5,7 +5,7 @@ import { useEffect } from 'react'
 /**
  * Гүйлтийн хөдөлгөөний ажиглагч.
  *
- * `[data-rv]` тэмдэгтэй элемент харагдах хэсэгт орж ирэхэд `.is-in` нэмнэ —
+ * `[data-rv]` тэмдэгтэй элемент харагдах хэсэгт орж ирэхэд `data-in` нэмнэ —
  * цаашдын бүх хөдөлгөөнийг CSS хийнэ (§ globals.css § 6). Энэ хуваарилалт
  * санаатай: JS нь ХЭЗЭЭ гэдгийг л шийднэ, ЮУ БОЛОХЫГ загварын хуудас
  * шийднэ. Тиймээс хөдөлгөөний хэлийг өөрчлөхөд энэ файл хөндөгдөхгүй.
@@ -15,7 +15,7 @@ import { useEffect } from 'react'
  * (`usePathname`). Гэвч шүүлтүүр нь замыг ӨӨРЧИЛДӨГГҮЙ — зөвхөн асуултыг:
  * `/mn/courses?mode=studio` → `?mode=online`. Карт бүр `key` -тэй тул React
  * тэднийг ДАХИН ашиглахгүй, ШИНЭ элемент үүсгэнэ — шинэ элемент нь
- * `.is-in` -гүй, ажиглагдаагүй, тиймээс `opacity: 0` дээрээ ҮҮРД үлдэнэ.
+ * `data-in` -гүй, ажиглагдаагүй, тиймээс `opacity: 0` дээрээ ҮҮРД үлдэнэ.
  * Анги, дэлгүүрийн жагсаалт шүүсний дараа ХООСОН харагдах шалтгаан яг энэ
  * байлаа.
  *
@@ -49,7 +49,20 @@ export function Reveal() {
     // агуулга аль хэдийн харагдаж байгаа тул хийх зүйл алга.
     if (!root.classList.contains('rv-on')) return
 
-    const show = (el: Element) => el.classList.add('is-in')
+    /* Анги БИШ, data-атрибут — энэ нь чимэг биш, ЗААВАЛ ийм байх ёстой.
+
+       `className` -ийг React өөрөө render хийдэг тул hydration үед серверийн
+       HTML-тэй тулгадаг. Ажиглагч нь тухайн модыг hydrate хийж дуусахаас
+       ӨМНӨ `.is-in` нэмчихвэл React «A tree hydrated but some attributes of
+       the server rendered HTML didn't match» гэж хашгираад «This won't be
+       patched up» гэж тэр модыг ЗАСАХГҮЙ орхино — өөрөөр хэлбэл тэр
+       хэсгийн интерактив байдал эрсдэлд орно.
+
+       `data-in` -ийг React хэзээ ч render хийдэггүй тул props дотор
+       байхгүй, тулгах зүйлгүй: hydration нь DOM дээр нэмэгдсэн илүү
+       атрибутыг үл тоомсорлодог. Тиймээс CSS нь `:not([data-in])` гэж
+       уншина (§ globals.css § 6). */
+    const show = (el: Element) => el.setAttribute('data-in', '')
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -70,19 +83,17 @@ export function Reveal() {
       },
     )
 
-    const targets = () => document.querySelectorAll('[data-rv]:not(.is-in)')
+    const targets = () => document.querySelectorAll('[data-rv]:not([data-in])')
 
     const watch = (el: Element) => {
-      if (!el.classList.contains('is-in')) observer.observe(el)
+      if (!el.hasAttribute('data-in')) observer.observe(el)
     }
 
     /** Зангилаа ӨӨРӨӨ ажиглагдах зүйл байж ч болно, дотроо агуулж ч болно. */
     const scan = (node: Element) => {
       if (node.matches('[data-rv]')) watch(node)
-      node.querySelectorAll('[data-rv]:not(.is-in)').forEach(watch)
+      node.querySelectorAll('[data-rv]:not([data-in])').forEach(watch)
     }
-
-    targets().forEach(watch)
 
     /* Шинээр орж ирсэн агуулгыг барина (§ файлын толгой). Зөвхөн НЭМЭГДСЭН
        зангилааг шалгана — бүх DOM-ыг дахин шүүрдэх нь мутаци бүр дээр
@@ -96,7 +107,27 @@ export function Reveal() {
       // Зөөгдсөн (шинэ биш) элементүүдийг барих — дээрх тайлбарыг үзнэ үү.
       schedule()
     })
-    mutations.observe(document.body, { childList: true, subtree: true })
+
+    /* ⚠️ Зэвсэглэхээ ХОЙШЛУУЛНА — hydration дуустал.
+     *
+     * React 18+ нь hydration-ыг ТАСАЛДУУЛЖ хийдэг: үндсэн layout дээрх энэ
+     * effect нь дэд модууд hydrate хийгдэж дуусахаас ӨМНӨ ажиллаж чадна.
+     * `observe()` нь дуудагдмагцаа буцаж дууддаг тул тэр агшинд ажиглагч
+     * `data-in` нэмбэл React түүнийг «сервер илгээгээгүй илүү атрибут» гэж
+     * үзээд «didn't match … won't be patched up» гэж хашгирна.
+     *
+     * Харагдац нь зөв хэвээр үлддэг (React тэр атрибутыг устгахгүй) тул энэ
+     * нь зөвхөн консолын бохирдол — гэвч жинхэнэ алдааг дарж, урхи болдог.
+     * Хоёр frame нь hydration-д хангалттай бөгөөд нүдэнд мэдэгдэхгүй:
+     * дэлгэц нээгдмэгц харагдах ёстой зүйлийг `.enter` CSS хөдөлгөөн аль
+     * хэдийн гаргачихсан байдаг, ажиглагч нь ЗӨВХӨН гүйлтийн ард ирэх
+     * агуулгыг хариуцдаг (§ globals.css § 6). */
+    let armFrame = requestAnimationFrame(() => {
+      armFrame = requestAnimationFrame(() => {
+        targets().forEach(watch)
+        mutations.observe(document.body, { childList: true, subtree: true })
+      })
+    })
 
     /**
      * Аюулгүйн тор.
@@ -133,6 +164,7 @@ export function Reveal() {
     else window.addEventListener('load', schedule, { once: true })
 
     return () => {
+      cancelAnimationFrame(armFrame)
       observer.disconnect()
       mutations.disconnect()
       window.clearTimeout(timer)

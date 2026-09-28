@@ -55,13 +55,16 @@ const STATS = { years: 4, students: '10 000+', shows: 4 } as const
  * нь бодож ганц тоо болгосон бол байхгүй нарийвчлалыг зохиох байсан — тиймээс
  * баганыг мужаараа нь зурна: дүүрэн хэсэг = доод хязгаар, цайвар сүүл = дээд.
  *
- * Volume 4-ийн тоог мэдэхгүй тул ХООСОН. Таамаглаж бөглөхгүй.
+ * `max` нь ХООСОН мөр нь нээлттэй дээд хязгаартай гэсэн үг: «1000+». Volume 4
+ * яг ийм — доод хязгаар нь мэдэгдэж байгаа ч дээд нь тоологдоогүй. Таамгаар
+ * дээд хязгаар зохиохын оронд нээлттэйг нь ил үлдээнэ; мужаа мэдэхгүй бол
+ * хоёуланг нь хоосон орхиод «тоо бүртгэгдээгүй» гэж хэлнэ.
  */
 const SHOWS = [
   { key: 'v1' as const, name: 'Volume 1', date: null, min: 400, max: 500, women: 90 },
   { key: 'v2' as const, name: 'Volume 2', date: '2023.06.30', min: 600, max: 700, women: 80 },
   { key: 'v3' as const, name: 'Volume 3', date: null, min: 900, max: 1000, women: null },
-  { key: 'v4' as const, name: 'Volume 4', date: null, min: null, max: null, women: null },
+  { key: 'v4' as const, name: 'Volume 4', date: null, min: 1000, max: null, women: null },
 ]
 
 /** Хамгийн өндөр багана дэлгэцийн 100% -ийг эзэлнэ. */
@@ -115,6 +118,13 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
         title="Twerk"
         lead={t.about.lead}
         fallbackSrc={photo(PHOTOS.lineup) ?? undefined}
+        /* Тууз БҮТНЭЭР харагдана: зураг нь өдөөс хөл хүртэл бүтэн биетэй
+           бүжигчид тул нарийн зурваст тайрвал толгойн чимэг, хөл хоёул
+           гадна үлдэнэ. Харьцаа нь `banners/about.jpg` -ийнх (2400×1600).
+           Тэр файл байхгүй үед `fallbackSrc` орох бөгөөд өөр харьцаатай
+           байвал тайрагдана — гэхдээ энэ нь зураг устсан тохиолдол тул
+           зөв харагдацаас өмнө зураг байх нь чухал. */
+        ratio="aspect-[3/2]"
       />
 
       <div className="shell flex flex-col gap-24 pt-12 sm:pt-16">
@@ -204,6 +214,14 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
             const solid = show.min ? (show.min / SCALE) * 100 : 0
             const tail = show.max && show.min ? ((show.max - show.min) / SCALE) * 100 : 0
 
+            /* Гурван төлөв: муж («600–700»), нээлттэй дээд хязгаар («1000+»),
+               эсвэл огт тоогүй. Сүүлийнх нь л «бүртгэгдээгүй» гэж хэлнэ. */
+            const audience = show.min
+              ? show.max
+                ? `${format(show.min)}–${format(show.max)}`
+                : `${format(show.min)}+`
+              : null
+
             return (
               <li
                 key={show.key}
@@ -217,11 +235,11 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
                 </div>
 
                 <div className="flex min-w-0 flex-1 flex-col gap-2">
-                  {show.min && show.max ? (
+                  {audience ? (
                     <>
                       <div className="flex items-baseline gap-2">
                         <span className="text-2xl leading-none font-semibold tabular-nums">
-                          {format(show.min)}–{format(show.max)}
+                          {audience}
                         </span>
                         <span className="t-small text-muted">{t.about.showsAudience}</span>
                       </div>
@@ -231,7 +249,7 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
                       <div
                         className="flex h-2.5 w-full gap-[2px] overflow-hidden rounded-full bg-surface-2"
                         role="img"
-                        aria-label={`${show.min}–${show.max} ${t.about.showsAudience}`}
+                        aria-label={`${audience} ${t.about.showsAudience}`}
                       >
                         <span
                           className="h-full rounded-full bg-foreground"
