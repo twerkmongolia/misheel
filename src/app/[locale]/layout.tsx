@@ -33,10 +33,6 @@ export default async function LocaleLayout({
      Ажилтан, багш нар маркетингийн бүрхүүлээ хадгална: тэдэнд сайт нь
      ажлын хэрэгсэл, тэд түүнийг үйлчлүүлэгчийн нүдээр харах ёстой. */
   const viewer = await getProfile()
-  if (viewer?.role === 'customer') {
-    return <StudentShell locale={locale}>{children}</StudentShell>
-  }
-
   const t = getDictionary(locale)
 
   /* `getSiteContent` нь хүсэлтийн хүрээнд кэшлэгддэг тул хөл, нүүр хуудас
@@ -44,6 +40,32 @@ export default async function LocaleLayout({
      (§ lib/data.ts `allSiteContent`). */
   const site = await getSiteContent(['contact'])
   const channels = contactChannels(content(site.get('contact'), locale), t)
+
+  /* Холбоо барих цонх нь ХОЁУЛАА бүрхүүлд байх ёстой.
+     `ContactTrigger` нь зүгээр л `window` дээр үйл явдал илгээдэг тул
+     сонсогч суугаагүй бол товч дарагдана — гэхдээ ЮУ Ч БОЛОХГҮЙ: алдаа ч,
+     шилжилт ч үгүй. Урьд нь сурагчийн салбар үүнээс дээр эрт буцдаг байсан
+     тул нэвтэрсэн сурагчийн хувьд нүүр, ТБА, «бидний тухай» гурван
+     хуудасны «Холбоо барих» товч бүгд үхмэл байв. Энэ нь `Reveal` -ийн
+     урхи өөр singleton дээр давтагдсан хэлбэр (§ CLAUDE.md). */
+  const contactDialog = (
+    <ContactDialog
+      title={t.contact.title}
+      eyebrow={t.contact.directTitle}
+      note={t.contact.replyNote}
+      closeLabel={t.common.cancel}
+      channels={channels}
+    />
+  )
+
+  if (viewer?.role === 'customer') {
+    return (
+      <>
+        <StudentShell locale={locale}>{children}</StudentShell>
+        {contactDialog}
+      </>
+    )
+  }
 
   return (
     <>
@@ -68,13 +90,7 @@ export default async function LocaleLayout({
           дуудагдана. НЭГ л удаа холбогдоно: товч бүрд өөрийн цонх өгвөл
           нэг хуудсанд хэд хэдэн хувилбар DOM-д зэрэг сууна
           (§ site/ContactDialog.tsx). */}
-      <ContactDialog
-        title={t.contact.title}
-        eyebrow={t.contact.directTitle}
-        note={t.contact.replyNote}
-        closeLabel={t.common.cancel}
-        channels={channels}
-      />
+      {contactDialog}
 
     </>
   )

@@ -18,6 +18,7 @@ import { updateOrderStatus } from '@/actions/admin'
 import { formatDate, formatMnt, nowMs } from '@/lib/format'
 import { createClient } from '@/lib/supabase/server'
 import { isSupabaseConfigured } from '@/lib/supabase/env'
+import { requireStaff } from '@/lib/auth/dal'
 import type { Order, OrderStatus } from '@/lib/supabase/database.types'
 
 /* ───────────────────────────────────────────────────────────────────────────
@@ -108,6 +109,11 @@ export default async function AdminOrdersPage({
 }) {
   const search = await searchParams
   if (!isSupabaseConfigured()) return <Alert tone="warn">Supabase тохируулаагүй байна.</Alert>
+
+  /* Layout-ын `requireStaff` нь client талын шилжилтэд ДАХИН ажилладаггүй:
+     эрх нь хасагдсан ажилтан хуудсыг бүрэн дахин ачаалах хүртэл орсоор
+     байна. Тиймээс хуудас бүр өөрөө ч шалгана. */
+  await requireStaff()
 
   const supabase = await createClient()
 

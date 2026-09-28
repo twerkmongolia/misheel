@@ -23,6 +23,7 @@ import { formatDate, formatMnt, toLocalInput } from "@/lib/format";
 import { getCourses, getInstructors, getLocations, indexBy } from "@/lib/data";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
+import { requireStaff } from "@/lib/auth/dal";
 import type {
   Course,
   CourseAccess,
@@ -63,6 +64,11 @@ export default async function AdminCoursesPage({
   const search = await searchParams;
   if (!isSupabaseConfigured())
     return <Alert tone="warn">Supabase тохируулаагүй байна.</Alert>;
+
+  /* Layout-ын `requireStaff` нь client талын шилжилтэд ДАХИН ажилладаггүй:
+     эрх нь хасагдсан ажилтан хуудсыг бүрэн дахин ачаалах хүртэл орсоор
+     байна. Тиймээс хуудас бүр өөрөө ч шалгана. */
+  await requireStaff();
 
   /* Зурвасын хоёр цэг нэг хуудас руу хөтөлдөг — ялгаа нь энэ шүүлтүүр.
      Шүүлтүүр байхгүй бол (үйлдлийн дараах `?ok=1` гэх мэт) бүгдийг

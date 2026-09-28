@@ -14,7 +14,7 @@ import {
 } from '@/components/admin/ui'
 import { formatMnt, formatTime, weekStart, addDays } from '@/lib/format'
 import { createClient } from '@/lib/supabase/server'
-import { getProfile } from '@/lib/auth/dal'
+import { getProfile, requireStaff } from '@/lib/auth/dal'
 import { getClassTypes, indexBy } from '@/lib/data'
 import { isSupabaseConfigured } from '@/lib/supabase/env'
 
@@ -22,6 +22,11 @@ export default async function AdminDashboard() {
   if (!isSupabaseConfigured()) {
     return <Alert tone="warn">Supabase тохируулаагүй байна.</Alert>
   }
+
+  /* Layout-ын `requireStaff` нь client талын шилжилтэд ДАХИН ажилладаггүй:
+     эрх нь хасагдсан ажилтан хуудсыг бүрэн дахин ачаалах хүртэл орсоор
+     байна. Тиймээс хуудас бүр өөрөө ч шалгана. */
+  await requireStaff()
 
   const supabase = await createClient()
   const now = new Date()

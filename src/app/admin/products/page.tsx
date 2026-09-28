@@ -31,6 +31,7 @@ import {
 import { formatMnt } from '@/lib/format'
 import { getProducts, type ProductView } from '@/lib/data'
 import { isSupabaseConfigured } from '@/lib/supabase/env'
+import { requireStaff } from '@/lib/auth/dal'
 
 /** Хэсгийн жижиг гарчиг — цонх доторх блокуудыг ялгана. */
 function SubHead({ children }: { children: React.ReactNode }) {
@@ -104,6 +105,11 @@ export default async function AdminProductsPage({
 }) {
   const search = await searchParams
   if (!isSupabaseConfigured()) return <Alert tone="warn">Supabase тохируулаагүй байна.</Alert>
+
+  /* Layout-ын `requireStaff` нь client талын шилжилтэд ДАХИН ажилладаггүй:
+     эрх нь хасагдсан ажилтан хуудсыг бүрэн дахин ачаалах хүртэл орсоор
+     байна. Тиймээс хуудас бүр өөрөө ч шалгана. */
+  await requireStaff()
 
   const all = await getProducts(true)
 

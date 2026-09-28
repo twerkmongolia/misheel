@@ -807,11 +807,16 @@ export async function deleteProduct(formData: FormData): Promise<void> {
   const supabase = await createClient()
 
   /* Файлуудыг мөр устахаас ӨМНӨ цуглуулна — дараа нь хаягийг нь мэдэх
-     газар үлдэхгүй. */
-  const { data: images } = await supabase
+     газар үлдэхгүй. Уншилт бүтэлгүйтвэл ЗОГСОНО: хоосон жагсаалтыг «зураг
+     байхгүй» гэж үзвэл бараа устаад файлууд нь эзэнгүй хоцорно. */
+  const { data: images, error: imagesError } = await supabase
     .from('product_images')
     .select('url')
     .eq('product_id', id.data)
+
+  if (imagesError) {
+    redirect(`/admin/products?error=${encodeURIComponent(imagesError.message)}`)
+  }
 
   const marker = '/storage/v1/object/public/media/'
   const paths = (images ?? [])
@@ -839,13 +844,26 @@ export async function deleteProductImage(formData: FormData): Promise<void> {
   if (!imageId.success) redirect('/admin/products?error=invalid')
 
   const supabase = await createClient()
-  const { data: image } = await supabase
+  const { data: image, error: readError } = await supabase
     .from('product_images')
     .select('*')
     .eq('id', imageId.data)
     .maybeSingle()
 
+  if (readError) {
+    redirect(`/admin/products?error=${encodeURIComponent(readError.message)}`)
+  }
+
   if (image) {
+    /* Мөрийг ЭХЭЛЖ, файлыг ДАРАА нь — `deleteProduct` -тэй ижил дараалал
+       (§ дээрх «мөр амжилттай устсаны ДАРАА»). Урвуугаар нь хийвэл файл
+       устаад мөр үлдэж, бараа 404 зураг руу заасаар үлдэнэ: нийтийн
+       хуудсан дээр `next/image` алдаа өгч, картыг бүхэлд нь унагана. */
+    const { error } = await supabase.from('product_images').delete().eq('id', imageId.data)
+    if (error) {
+      redirect(`/admin/products?error=${encodeURIComponent(error.message)}`)
+    }
+
     // Storage дотроос ч устгана — эс бөгөөс ашиглагдахгүй файл хуримтлагдана
     const marker = '/storage/v1/object/public/media/'
     const index = image.url.indexOf(marker)
@@ -853,7 +871,6 @@ export async function deleteProductImage(formData: FormData): Promise<void> {
       await supabase.storage.from('media').remove([image.url.slice(index + marker.length)])
     }
 
-    await supabase.from('product_images').delete().eq('id', imageId.data)
     await audit('product_image.delete', 'product_images', imageId.data)
   }
 
@@ -1231,18 +1248,34 @@ export async function deleteCourse(formData: FormData): Promise<void> {
   if (!id.success) redirect(coursesBack(mode, '&error=Анги олдсонгүй'))
 
   const supabase = await createClient()
+
+  /* Хавтасны зургийн хаягийг мөр устахаас ӨМНӨ уншина — дараа нь түүнийг
+     мэдэх газар үлдэхгүй (§ `deleteProduct` ижил дараалалтай). */
+  const { data: course } = await supabase
+    .from('courses')
+    .select('cover_url')
+    .eq('id', id.data)
+    .maybeSingle()
+
   const { error } = await supabase.from('courses').delete().eq('id', id.data)
 
   if (error) {
-    redirect(
-      coursesBack(
-        mode,
-        '&error=' +
-          encodeURIComponent(
-            'Элсэгчтэй ангийг устгах боломжгүй. Оронд нь «Идэвхтэй» тэмдэглэгээг авна уу.',
-          ),
-      ),
-    )
+    /* ЗӨВХӨН гадаад түлхүүрийн зөрчил (23503) нь «элсэгчтэй» гэсэн үг.
+       Бусдыг нь (RLS татгалзал, сүлжээний алдаа) тэр мессежээр далдлах нь
+       ажилтныг байхгүй элсэгч хайлгаж, жинхэнэ шалтгааныг нуудаг. */
+    const message =
+      error.code === '23503'
+        ? 'Элсэгчтэй ангийг устгах боломжгүй. Оронд нь «Идэвхтэй» тэмдэглэгээг авна уу.'
+        : error.message
+    redirect(coursesBack(mode, '&error=' + encodeURIComponent(message)))
+  }
+
+  /* Мөр амжилттай устсаны ДАРАА файлыг. Storage нь DB-г дагаж устдаггүй
+     (§ CLAUDE.md «Storage файл нь DB-г дагаж устдаггүй»). */
+  const marker = '/storage/v1/object/public/media/'
+  const at = course?.cover_url?.indexOf(marker) ?? -1
+  if (course?.cover_url && at !== -1) {
+    await supabase.storage.from('media').remove([course.cover_url.slice(at + marker.length)])
   }
 
   await audit('course.delete', 'courses', id.data, {})

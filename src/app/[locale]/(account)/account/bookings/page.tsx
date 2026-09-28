@@ -48,7 +48,7 @@ export default async function MyBookingsPage({
   if (!isLocale(locale)) notFound()
 
   const t = getDictionary(locale)
-  await requireUser(locale, `/${locale}/account/bookings`)
+  const user = await requireUser(locale, `/${locale}/account/bookings`)
 
   if (!isSupabaseConfigured()) {
     return (
@@ -75,9 +75,15 @@ export default async function MyBookingsPage({
    * авна: харуулах дээд хэмжээнээс (ирэх бүгд + өнгөрсөн 20) хамаагүй
    * илүү, гэхдээ хязгаартай.
    */
+  /* `user_id` -г ИЛ шүүнэ. RLS дээр найдаж болохгүй: `bookings_read_own` нь
+     `user_id = auth.uid() OR public.is_staff()` (§ policies.sql) тул ажилтан
+     ӨӨРИЙН «миний бүртгэл» хуудсаа нээхэд БҮХ хүний бүртгэл жагсаж, мөр
+     бүр дээр нь цуцлах товч ажиллана — нэг андуурсан товшилт төлбөр төлсөн
+     хүний ангийг цуцална. */
   const { data: bookings } = await supabase
     .from('bookings')
     .select('*')
+    .eq('user_id', user.id)
     .order('created_at', { ascending: false })
     .limit(200)
 

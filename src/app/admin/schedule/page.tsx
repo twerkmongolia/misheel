@@ -23,6 +23,7 @@ import { formatDate, formatMnt, formatTime, weekStart, addDays } from '@/lib/for
 import { getClassTypes, getInstructors, getLocations, getSessionsBetween } from '@/lib/data'
 import { createClient } from '@/lib/supabase/server'
 import { isSupabaseConfigured } from '@/lib/supabase/env'
+import { requireStaff } from '@/lib/auth/dal'
 
 const LEVELS: Record<string, string> = {
   beginner: 'Анхан шат',
@@ -48,6 +49,11 @@ export default async function AdminSchedulePage({
 }) {
   const search = await searchParams
   if (!isSupabaseConfigured()) return <Alert tone="warn">Supabase тохируулаагүй байна.</Alert>
+
+  /* Layout-ын `requireStaff` нь client талын шилжилтэд ДАХИН ажилладаггүй:
+     эрх нь хасагдсан ажилтан хуудсыг бүрэн дахин ачаалах хүртэл орсоор
+     байна. Тиймээс хуудас бүр өөрөө ч шалгана. */
+  await requireStaff()
 
   const offset = Math.max(-8, Math.min(12, Number(search.w ?? 0) || 0))
   const from = weekStart(offset)

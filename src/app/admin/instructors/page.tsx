@@ -20,6 +20,7 @@ import { AdminIcon } from '@/components/admin/AdminIcon'
 import { createInstructor, updateInstructor, toggleActive } from '@/actions/admin'
 import { getInstructors } from '@/lib/data'
 import { isSupabaseConfigured } from '@/lib/supabase/env'
+import { requireStaff } from '@/lib/auth/dal'
 import type { Instructor } from '@/lib/supabase/database.types'
 
 /**
@@ -148,6 +149,11 @@ export default async function AdminInstructorsPage({
 }) {
   const search = await searchParams
   if (!isSupabaseConfigured()) return <Alert tone="warn">Supabase тохируулаагүй байна.</Alert>
+
+  /* Layout-ын `requireStaff` нь client талын шилжилтэд ДАХИН ажилладаггүй:
+     эрх нь хасагдсан ажилтан хуудсыг бүрэн дахин ачаалах хүртэл орсоор
+     байна. Тиймээс хуудас бүр өөрөө ч шалгана. */
+  await requireStaff()
 
   const instructors = await getInstructors(true)
 

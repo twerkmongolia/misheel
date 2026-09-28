@@ -177,9 +177,10 @@ function Tile({
  * `head: true` — мөрүүдийг татахгүй, зөвхөн тоолно. Профайлын хуудсанд
  * бүртгэлийн бүх мөрийг татах шалтгаан алга.
  *
- * `bookings`, `orders` дээр `user_id` шүүлт БАЙХГҮЙ нь санаатай: тэдгээрийг
- * RLS өөрөө эзэмшигчээр нь хязгаарладаг (§ табуудын хуудсууд ч мөн адил).
- * `course_enrollments` нь `getMyEnrollments` -тэй ижил дүрмээр ил шүүгдэнэ.
+ * Гурвуулаа `user_id` -гээр ИЛ шүүгдэнэ. Өмнө нь `bookings`, `orders` хоёр
+ * RLS дээр найдаж байсан нь ЭНДҮҮРЭЛ байв: `*_read_own` бодлогууд нь
+ * `user_id = auth.uid() OR public.is_staff()` тул ажилтны хувьд тоолуур нь
+ * БҮХ хүний бүртгэл, захиалгыг тоолж байлаа (§ policies.sql).
  */
 async function getCounts(userId: string) {
   if (!isSupabaseConfigured()) return { courses: 0, bookings: 0, orders: 0 }
@@ -189,8 +190,8 @@ async function getCounts(userId: string) {
 
   const [courses, bookings, orders] = await Promise.all([
     supabase.from('course_enrollments').select('id', head).eq('user_id', userId),
-    supabase.from('bookings').select('id', head),
-    supabase.from('orders').select('id', head),
+    supabase.from('bookings').select('id', head).eq('user_id', userId),
+    supabase.from('orders').select('id', head).eq('user_id', userId),
   ])
 
   return {

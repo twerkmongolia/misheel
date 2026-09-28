@@ -24,16 +24,20 @@ export default async function MyOrdersPage({ params }: { params: Promise<{ local
   if (!isLocale(locale)) notFound()
 
   const t = getDictionary(locale)
-  await requireUser(locale, `/${locale}/account/orders`)
+  const user = await requireUser(locale, `/${locale}/account/orders`)
 
   /* Хамгийн сүүлийн 100 захиалга. Хуудаслалт хийх хүртэл энэ нь хязгаар:
      хязгааргүй жагсаалт нь мөр олшрох тусам чимээгүй удаашрах бөгөөд
      эвдрэх мөч нь хамгийн идэвхтэй үйлчлүүлэгч дээр ирнэ. */
   const orders = isSupabaseConfigured()
     ? ((
+        /* `user_id` -г ИЛ шүүнэ — `orders_read_own` нь `is_staff()` -д ч
+           нээлттэй тул үүнгүйгээр ажилтан бүх хүний захиалгыг өөрийн
+           хуудаснаас хардаг (§ policies.sql). */
         await (await createClient())
           .from('orders')
           .select('*')
+          .eq('user_id', user.id)
           .order('created_at', { ascending: false })
           .limit(100)
       ).data ?? [])
