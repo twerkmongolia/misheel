@@ -2,23 +2,30 @@ import Link from 'next/link'
 import {
   Alert,
   Badge,
-  ButtonLink,
   EmptyState,
+  FilterChip,
   Panel,
   PageHeader,
   StatCard,
   StatRow,
-  Table,
-  Td,
-  Th,
 } from '@/components/admin/ui'
-import { formatMnt, formatTime, weekStart, addDays } from '@/lib/format'
+import { RevenueBars } from '@/components/admin/charts/RevenueBars'
+import { InstructorDonut } from '@/components/admin/charts/InstructorDonut'
+import { RANGES, toRange } from '@/lib/admin/revenue'
+import { loadRevenue } from '@/lib/admin/revenue-query'
+import { formatMnt, weekStart, addDays } from '@/lib/format'
 import { createClient } from '@/lib/supabase/server'
 import { getProfile, requireStaff } from '@/lib/auth/dal'
-import { getClassTypes, indexBy } from '@/lib/data'
+import { indexBy } from '@/lib/data'
 import { isSupabaseConfigured } from '@/lib/supabase/env'
 
-export default async function AdminDashboard() {
+export default async function AdminDashboard({
+  searchParams,
+}: {
+  searchParams: Promise<{ range?: string }>
+}) {
+  const search = await searchParams
+  const range = toRange(search.range)
   if (!isSupabaseConfigured()) {
     return <Alert tone="warn">Supabase тохируулаагүй байна.</Alert>
   }
@@ -45,7 +52,7 @@ export default async function AdminDashboard() {
     { data: prevOrders },
     { data: newOrders },
     { data: lowStock },
-    classTypes,
+    report,
     profile,
   ] = await Promise.all([
     supabase
@@ -75,7 +82,7 @@ export default async function AdminDashboard() {
       .order('created_at', { ascending: true })
       .limit(5),
     supabase.from('product_variants').select('*').lte('stock_qty', 3).order('stock_qty').limit(8),
-    getClassTypes(true),
+    loadRevenue(range),
     getProfile(),
   ])
 
@@ -88,7 +95,6 @@ export default async function AdminDashboard() {
     : { data: [] as { id: string; name_mn: string }[] }
   const productName = indexBy(lowProducts ?? [], 'id')
 
-  const byClass = indexBy(classTypes, 'id')
   const earned = (rows: { total: number; status: string }[] | null) =>
     (rows ?? [])
       .filter((order) => ['paid', 'preparing', 'shipped', 'delivered'].includes(order.status))
@@ -119,14 +125,10 @@ export default async function AdminDashboard() {
             ? `${waiting} зүйл таны шийдвэрийг хүлээж байна.`
             : 'Шийдвэр хүлээсэн зүйл алга. Өнөөдрийн байдал доор.'
         }
-        actions={
-          <>
-            <ButtonLink href="/admin/schedule">Хуваарь нэмэх</ButtonLink>
-            <ButtonLink href="/admin/orders" variant="primary">
-              Захиалга шалгах
-            </ButtonLink>
-          </>
-        }
+        /* Гарчгийн хажуугийн хоёр товч (》Хуваарь нэмэх《, 》Захиалга шалгах《)
+           хасагдав: хоёулангийнх нь очих газар доорх үзүүлэлтийн хайрцгууд
+           дээрээс аль хэдийн дарагддаг бөгөөд зүүн талын зурвас мөн тэр
+           хоёр хуудсыг байнга барьж байдаг. Нэг зүйл рүү гурван зам. */
       />
 
       <StatRow>
@@ -163,48 +165,53 @@ export default async function AdminDashboard() {
       </StatRow>
 
       <Panel
-        title="Өнөөдрийн хичээлүүд"
+        title={`Орлого · ${range.label}`}
+        description="Багана дээр хулгана аваачихад задаргаа гарна. Дарвал бүтэн тайлан."
+        /* Цонх нь ХАЯГАНД үлдэнэ (`?range=`) тул сэргээх, буцах, хуваалцах
+           гурвуулаа ажиллана — JavaScript-гүй ч сонголт солигдоно. */
         actions={
-          <Link
-            href="/admin/schedule"
-            className="lnk t-meta text-muted hover:text-foreground"
-          >
-            Бүтэн хуваарь →
-          </Link>
+          <div className="flex flex-wrap gap-1.5">
+            {RANGES.map((row) => (
+              <FilterChip
+                key={row.key}
+                href={`/admin?range=${row.key}`}
+                active={row.key === range.key}
+              >
+                {row.label}
+              </FilterChip>
+            ))}
+          </div>
         }
-        flush
       >
-        {!todaySessions || todaySessions.length === 0 ? (
-          <EmptyState icon="calendar" title="Өнөөдөр хичээл алга" hint="Хуваарь хэсгээс шинээр нэмнэ." />
+        <RevenueBars
+          range={range}
+          buckets={report.buckets}
+          days={report.days}
+          totals={report.totals}
+          previous={report.previous}
+        />
+      </Panel>
+
+      <Panel
+        title="Танхимын орлого · багшаар"
+        description="Багшийн хөтөлдөг АНГИас орсон мөнгө. Дарвал бүтэн хүснэгт."
+      >
+        {/* ⚠️ `instructors.length` -ээр шалгахад ХАНГАЛТГҮЙ.
+            Зөвхөн ганц хичээл заасан багш нар энэ жагсаалтад ордог ч тэдэнд
+            танхимын КУРСын орлого байхгүй — бөгж зурах юмгүй болж, самбар
+            бүхэлдээ хоосон гарна. Тиймээс бөгжинд юу орохыг нь шалгана. */}
+        {report.instructors.some((row) => row.studio > 0) ? (
+          <InstructorDonut rows={report.instructors} range={range} />
         ) : (
-          <Table minWidth={520}>
-            <thead>
-              <tr>
-                <Th>Цаг</Th>
-                <Th>Хичээл</Th>
-                <Th align="right">Суудал</Th>
-                <Th>Төлөв</Th>
-              </tr>
-            </thead>
-            <tbody>
-              {todaySessions.map((session) => (
-                <tr key={session.id}>
-                  <Td className="font-medium">{formatTime(session.starts_at)}</Td>
-                  <Td label="Хичээл">{byClass.get(session.class_type_id)?.name_mn ?? '—'}</Td>
-                  <Td align="right" label="Суудал">
-                    {session.booked_count}/{session.capacity}
-                  </Td>
-                  <Td label="Төлөв">
-                    {session.status === 'cancelled' ? (
-                      <Badge tone="danger">Цуцлагдсан</Badge>
-                    ) : (
-                      <Badge tone="good">Товлогдсон</Badge>
-                    )}
-                  </Td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
+          <EmptyState
+            icon="users"
+            title="Танхимын орлого алга"
+            hint={
+              report.instructors.length > 0
+                ? `Сүүлийн ${range.in} зөвхөн ганц хичээлийн орлого орсон байна.`
+                : `Сүүлийн ${range.in} танхимын анги зарагдаагүй байна.`
+            }
+          />
         )}
       </Panel>
 
