@@ -10,6 +10,8 @@ export type StudentEnrollment = {
   id: string
   course: string
   online: boolean
+  /** Танхимын ангийн багш. Онлайн ангид ҮРГЭЛЖ null — тэр нь багшаар салдаггүй. */
+  teacher: string | null
   status: EnrollmentStatus
   price_paid: number | null
   created_at: string
@@ -26,17 +28,47 @@ export type StudentRow = {
 }
 
 const statuses: Record<EnrollmentStatus, string> = {
-  pending_payment: 'Төлбөр хүлээж буй',
+  // Явцад буй нь хуудсанд ирэхээсээ өмнө шүүгдсэн — үлдсэн нь амжилтгүй.
+  pending_payment: 'Төлбөр амжилтгүй',
   active: 'Идэвхтэй',
   completed: 'Дууссан',
   cancelled: 'Цуцлагдсан',
 }
 
 const tones: Record<EnrollmentStatus, Tone> = {
-  pending_payment: 'warn',
+  pending_payment: 'danger',
   active: 'good',
   completed: 'neutral',
   cancelled: 'danger',
+}
+
+/** «Танхим · Мишээл», «Онлайн» — ажилтны асуудаг хоёр зүйл: хаана, хэнтэй. */
+function kindLabel(item: StudentEnrollment): string {
+  if (item.online) return 'Онлайн'
+  return item.teacher ? `Танхим · ${item.teacher}` : 'Танхим'
+}
+
+type Chip = { label: string; pending: boolean; count: number }
+
+/**
+ * Мөрөнд гарах шошгууд: явж буй (идэвхтэй, дууссан) ба төлбөр хүлээж буй
+ * элсэлтийг ТӨРЛӨӨР нь бүлэглэнэ. Нэг багшийн хоёр танхимын анги нь
+ * «Танхим · Мишээл ×2» гэж нэг шошго болно — хоёр ижил шошго зэрэгцэвэл
+ * давхардал мэт харагдана. Цуцлагдсан нь мөрөнд гарахгүй (цонхонд бий).
+ */
+function summarize(enrollments: StudentEnrollment[]): Chip[] {
+  const chips = new Map<string, Chip>()
+  for (const item of enrollments) {
+    if (item.status === 'cancelled') continue
+    const pending = item.status === 'pending_payment'
+    const label = kindLabel(item)
+    const key = `${pending ? 'p' : 'l'}:${label}`
+    const chip = chips.get(key)
+    if (chip) chip.count += 1
+    else chips.set(key, { label, pending, count: 1 })
+  }
+  // Явж буй нь эхэнд: «одоо юу сурч байна» гэдэг нь эхний асуулт.
+  return [...chips.values()].sort((a, b) => Number(a.pending) - Number(b.pending))
 }
 
 /**
@@ -48,9 +80,13 @@ const tones: Record<EnrollmentStatus, Tone> = {
  * үргэлж хүнээр эхэлдэг — «энэ хүн юу авсан бэ» — тиймээс хүн нэг мөр,
  * авсан зүйл нь цонхон дотор.
  *
- * ── Төлөв нь ХУРААНГУЙГААР харагдана ───────────────────────────────────
- * Мөр дээр зөвхөн идэвхтэйн тоо гарна: ажилтны хайдаг зүйл нь «одоо хэд нь
- * явж байна» гэдэг. Цуцлагдсан, дууссаныг нь цонх дотор бүтнээр нь үзнэ.
+ * ── Мөр дээр тоо биш ТӨРӨЛ харагдана ───────────────────────────────────
+ * Урьд нь зөвхөн идэвхтэйн тоо («2») гардаг байв — ажилтан тэр хоёр нь юу
+ * болохыг мэдэхийн тулд мөр бүрийг нээх шаардлагатай болдог. Одоо шошго
+ * бүр «Танхим · Мишээл» эсвэл «Онлайн» гэж хэлнэ: танхимын анги нь багш
+ * бүрийн хичээл, онлайн анги нь багшгүй нэг бүтээгдэхүүн (§ `summarize`).
+ * Өнгө нь ТӨЛВИЙГ хэлнэ (саарал = явж буй, улаан = төлбөр амжилтгүй), төрлийг
+ * текст хэлнэ — өнгө дангаараа утга дамжуулахгүй. Цуцлагдсаныг цонхонд үзнэ.
  */
 export function StudentTable({ students }: { students: StudentRow[] }) {
   const ref = useRef<HTMLDialogElement>(null)
@@ -74,12 +110,7 @@ export function StudentTable({ students }: { students: StudentRow[] }) {
         </thead>
         <tbody>
           {students.map((student) => {
-            const live = student.enrollments.filter(
-              (item) => item.status === 'active' || item.status === 'completed',
-            ).length
-            const pending = student.enrollments.filter(
-              (item) => item.status === 'pending_payment',
-            ).length
+            const chips = summarize(student.enrollments)
 
             return (
               <tr
@@ -101,14 +132,23 @@ export function StudentTable({ students }: { students: StudentRow[] }) {
                   {student.phone ?? '—'}
                 </Td>
                 <Td label="Анги">
-                  {/* Хүлээгдэж буй төлбөрийг ИЛ нэрлэнэ. Урьд нь «0 / 2» гэж
+                  {/* Амжилтгүй төлбөрийг ИЛ нэрлэнэ. Урьд нь «0 / 2» гэж
                       бичдэг байсан нь хоёр дахь тоо юу болохыг тайлбаргүй
-                      орхиж, «төлбөр хүлээгдэж байна» гэсэн ХАМГИЙН чухал
-                      мэдээлэл алга болдог байв — яг тэр хүн рүү залгах
-                      шаардлагатай байдаг. */}
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="tabular-nums">{live}</span>
-                    {pending > 0 && <Badge tone="warn">{pending} хүлээгдэж буй</Badge>}
+                      орхиж, «төлбөр ороогүй» гэсэн ХАМГИЙН чухал мэдээлэл
+                      алга болдог байв — яг тэр хүн рүү залгах шаардлагатай
+                      байдаг. «Хүлээгдэж буй» гэж байхгүй (§ payment-outcome). */}
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    {chips.length === 0 ? (
+                      <span className="text-muted">—</span>
+                    ) : (
+                      chips.map((chip) => (
+                        <Badge key={`${chip.pending}:${chip.label}`} tone={chip.pending ? 'danger' : 'neutral'}>
+                          {chip.label}
+                          {chip.count > 1 ? ` ×${chip.count}` : ''}
+                          {chip.pending ? ' · төлбөр амжилтгүй' : ''}
+                        </Badge>
+                      ))
+                    )}
                   </div>
                 </Td>
                 <Td align="right" className="whitespace-nowrap text-foreground-soft" label="Сүүлд авсан">
@@ -160,7 +200,7 @@ export function StudentTable({ students }: { students: StudentRow[] }) {
                         <div className="flex min-w-0 flex-col gap-0.5">
                           <span className="text-sm font-medium">{item.course}</span>
                           <span className="text-xs text-muted">
-                            {item.online ? 'Онлайн' : 'Танхим'} ·{' '}
+                            {kindLabel(item)} ·{' '}
                             {formatDate(item.created_at, 'mn')}
                           </span>
                         </div>

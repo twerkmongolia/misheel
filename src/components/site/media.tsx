@@ -91,7 +91,14 @@ export function Media({
           src={versioned(src)}
           alt={alt}
           fill
-          priority={priority}
+          /* Next 16-д `priority` хуучирсан бөгөөд одоо ЗӨВХӨН preload хийдэг —
+             `fetchpriority="high"`-ийг өмнөх шигээ нэмэхээ больсон. Тэгэхээр
+             баатрын зураг эрт preload-лагдсан ч хөтөч түүнийг бага зэрэглэлээр
+             фонт, скриптийн ард дараалуулж, Lighthouse-оор LCP-гийн «Load
+             Delay» 1.6–2.0 сек гарч байв. `fetchPriority` нь preload линк дээр
+             ч, <img> дээр ч очдог (next/dist/client/image-component.js). */
+          preload={priority}
+          fetchPriority={priority ? 'high' : undefined}
           sizes={sizes}
           className="card-media object-cover"
         />

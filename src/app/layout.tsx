@@ -1,6 +1,8 @@
+import type { CSSProperties } from 'react'
 import type { Metadata, Viewport } from 'next'
 import { headers } from 'next/headers'
 import { Inter, Manrope } from 'next/font/google'
+import localFont from 'next/font/local'
 import { Reveal } from '@/components/site/Reveal'
 import { defaultLocale, isLocale, LOCALE_HEADER } from '@/lib/i18n/config'
 import './globals.css'
@@ -27,7 +29,7 @@ import './globals.css'
  */
 const display = Manrope({
   variable: '--font-display',
-  subsets: ['latin', 'cyrillic'],
+  subsets: ['latin', 'cyrillic', 'cyrillic-ext'],
   display: 'swap',
 })
 
@@ -43,14 +45,56 @@ const display = Manrope({
  * зөрөхгүй — «Cardio Twerk чиглэлээр» гэх мэт холимог мөр жигд суудаг.
  *
  * ── Дэд олонлог (subset) ───────────────────────────────────────────────
- * Зөвхөн `latin` + `cyrillic`. `next/font` нь олонлог бүрийг тусад нь файл
- * болгож, БҮГДИЙГ нь урьдчилан татдаг тул хэрэггүй олонлог бүр эхний
- * зурагдалтыг шууд саатуулна.
+ * `subsets` нь аль файлыг УРЬДЧИЛАН (preload) татахыг л сонгодог — CSS дотор
+ * Google-ийн БҮХ олонлогийн @font-face `unicode-range`-тайгаа үлддэг. Тэгэхээр
+ * хуудсан дээр гарсан тэмдэгт аль файлд байна, тэр файл ЯМАР Ч БАЙСАН татагдана;
+ * жагсаалтад байхгүй бол зүгээр л ХОЦОРЧ (CSS задлагдсаны дараа) татагдана.
+ *
+ * Монголын Ө ө Ү ү (U+04E8/9, U+04AE/F) нь `cyrillic`-д биш `cyrillic-ext`-д
+ * байдаг. Өмнө нь зөвхөн `latin` + `cyrillic` байсан тул бараг бүх хуудас
+ * cyrillic-ext файлыг хоцорч татаж, эдгээр үсэг эхлээд өөр фонтоор гараад
+ * дараа нь солигддог байв (2026-10-05, Lighthouse). Одоо урьдчилан татна.
+ *
+ * `₮` (U+20AE) нь `latin-ext`-д (Inter-д 84KB) — үүнийг доорх `tugrik*`
+ * шийднэ.
  */
 const body = Inter({
   variable: '--font-body',
-  subsets: ['latin', 'cyrillic'],
+  subsets: ['latin', 'cyrillic', 'cyrillic-ext'],
   display: 'swap',
+})
+
+/**
+ * `₮` ганц тэмдэгтийн Inter, Manrope — тус бүр ~1KB.
+ *
+ * Үнэ гарах хуудас бүр `₮`-ийн төлөө Inter-ийн `latin-ext` файлыг бүхэлд нь
+ * (84KB) татдаг байв. Энэ хоёр файл бол яг тэр глифийг Google-ийн файлаас
+ * `pyftsubset --unicodes=U+20AE`-аар тайрсан хувилбар (жингийн тэнхлэг
+ * хадгалагдсан, OFL лиценз тайрахыг зөвшөөрдөг) — тиймээс тэмдэгт нь ЯГ
+ * адилхан харагдана.
+ *
+ * `unicode-range: U+20AE` тул бусад тэмдэгт энэ фонтыг алгасаж Inter рүү
+ * ордог; `adjustFontFallback: false` ЗААВАЛ — эс бөгөөс next/font нь
+ * unicode-range-гүй Arial нөөц фонт үүсгэж, БҮХ текстийг Inter-ээс өмнө
+ * барьж авна. Доор `<html>` дээр `--font-body`, `--font-display`-ийн өмнө
+ * залгагдана.
+ */
+const tugrikBody = localFont({
+  src: './fonts/inter-tugrik.woff2',
+  weight: '100 900',
+  display: 'swap',
+  preload: false,
+  adjustFontFallback: false,
+  declarations: [{ prop: 'unicode-range', value: 'U+20AE' }],
+})
+
+const tugrikDisplay = localFont({
+  src: './fonts/manrope-tugrik.woff2',
+  weight: '200 800',
+  display: 'swap',
+  preload: false,
+  adjustFontFallback: false,
+  declarations: [{ prop: 'unicode-range', value: 'U+20AE' }],
 })
 
 export const metadata: Metadata = {
@@ -151,6 +195,14 @@ export default async function RootLayout({ children }: LayoutProps<'/'>) {
       lang={lang}
       suppressHydrationWarning
       className={`${display.variable} ${body.variable} h-full`}
+      /* Ангийн тодорхойлсон хувьсагчийг ижил элемент дээрх inline style
+         давж бичнэ — `₮`-ийн жижиг фонт стекийн хамгийн эхэнд орно. */
+      style={
+        {
+          '--font-body': `${tugrikBody.style.fontFamily}, ${body.style.fontFamily}`,
+          '--font-display': `${tugrikDisplay.style.fontFamily}, ${display.style.fontFamily}`,
+        } as CSSProperties
+      }
     >
       <body className="flex min-h-full flex-col">
         <InlineScript html={bootScript} nonce={nonce} />

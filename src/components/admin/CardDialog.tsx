@@ -67,7 +67,7 @@ export function CardDialog({
            даяар дарагддаг карт бүр ЯГ ижил хариу өгөх ёстой — бараа нь
            үзүүлэлтийн картаас өөрөөр хөдөлбөл «эдгээр өөр төрлийн зүйл юм
            болов уу» гэсэн худал дохио үүснэ (§ globals.css). */
-        className="admin-card admin-card-link w-full overflow-hidden text-left"
+        className="admin-card admin-card-link block w-full overflow-hidden text-left"
       >
         {card}
       </button>

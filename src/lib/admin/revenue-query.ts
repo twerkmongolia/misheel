@@ -29,7 +29,7 @@ import { assemble, dayRange, emptyDay, type Range, type RevenueReport } from './
 
 /* Захиалга ОРЛОГО болох төлөв. `pending_payment` энд байхгүй: төлбөр
    онлайн тул хүн төлсөн эсвэл төлөөгүй, дунд төлөв гэж үгүй. */
-const EARNED_ORDER: OrderStatus[] = ['paid', 'preparing', 'shipped', 'delivered']
+export const EARNED_ORDER: OrderStatus[] = ['paid', 'preparing', 'shipped', 'delivered']
 
 /* Ганц хичээлийн орлого. `pending` нь «суудал барьсан, мөнгө ирээгүй» —
    түүнийг орлогод тооцвол ирээгүй мөнгө тайланд гарна. */

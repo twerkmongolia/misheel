@@ -4,22 +4,38 @@ import type { Stream } from '@/lib/admin/revenue'
    ГРАФИКИЙН ӨНГӨ — НЭГ ЖАГСААЛТ, ХОЁР ХЭРЭГЛЭГЧ
 
    Өнгө нь график ба ТАЙЛБАР хоёрын хооронд таарах ёстой: тайлбар дээрх
-   дугуй нь баганынхаас өөр өнгөтэй бол график уншигдахаа болино. Тиймээс
+   дугуй нь нумынхаас өөр өнгөтэй бол график уншигдахаа болино. Тиймээс
    өнгө нь аль ч бүрэлдэхүүнд бичигдэхгүй, зөвхөн эндээс уншигдана.
+   Утгууд нь токен — § globals.css «Удирдлагын хэсэг».
    ─────────────────────────────────────────────────────────────────────── */
 
-/** Багш нарын эргэлддэг өнгө. Эхнийх нь бараг цагаан — § globals.css. */
-export const SERIES = [
-  'var(--chart-1)',
-  'var(--chart-2)',
-  'var(--chart-3)',
-  'var(--chart-4)',
-  'var(--chart-5)',
-  'var(--chart-6)',
+/**
+ * Багш нарын эргэлддэг өнгө.
+ *
+ * Дараалал нь хөрш хоёр нумыг ӨНГӨНИЙ АЯГААР хол байлгана (ногоон →
+ * цэнхэр → улаан → шар …): бөгжинд хамгийн том хоёр багш ихэвчлэн
+ * зэрэгцэн суудаг бөгөөд хоёр цэнхэр зэрэгцвэл хил нь алга болно.
+ *
+ * `ink` — тухайн өнгөн дээрх үсэг. Цагаан үсэг цэнхэр, улаан дээр 3.5:1
+ * орчим (жижиг үсэгт AA хүрэхгүй), бараан үсэг 5:1-ээс дээш. Зөвхөн нил
+ * ягаан хангалттай бараан тул цагаан үсэгтэй.
+ */
+const SERIES = [
+  { color: 'var(--chart-3)', ink: '#0F1114' },
+  { color: 'var(--chart-1)', ink: '#0F1114' },
+  { color: 'var(--chart-4)', ink: '#0F1114' },
+  { color: 'var(--chart-5)', ink: '#0F1114' },
+  { color: 'var(--chart-6)', ink: '#FFFFFF' },
+  { color: 'var(--chart-7)', ink: '#0F1114' },
+  { color: 'var(--chart-2)', ink: '#0F1114' },
 ]
 
 export function seriesColor(index: number): string {
-  return SERIES[index % SERIES.length]!
+  return SERIES[index % SERIES.length]!.color
+}
+
+export function seriesInk(index: number): string {
+  return SERIES[index % SERIES.length]!.ink
 }
 
 /**
@@ -27,11 +43,11 @@ export function seriesColor(index: number): string {
  *
  * Эргэлддэг өнгө хэрэглэвэл нэг өдөр дэлгүүрийн орлого тэгээс дээш болоход
  * бусад бүх урсгалын өнгө шилжиж, өчигдрийн графиктай харьцуулах боломжгүй
- * болно. Танхим нь хамгийн том учир цагаан — гол дуу хоолой нь түүнд.
+ * болно.
  */
 export const STREAM_COLOR: Record<Stream, string> = {
-  studio: 'var(--chart-1)',
-  online: 'var(--chart-2)',
-  session: 'var(--chart-4)',
-  shop: 'var(--chart-3)',
+  online: 'var(--chart-1)',
+  studio: 'var(--chart-3)',
+  session: 'var(--chart-5)',
+  shop: 'var(--chart-2)',
 }

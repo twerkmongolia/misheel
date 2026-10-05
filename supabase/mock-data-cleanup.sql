@@ -1,7 +1,7 @@
 -- ═══════════════════════════════════════════════════════════════════════════
 -- Twerk Mongolia — ТҮР ӨГӨГДЛИЙГ УСТГАХ
 --
--- `mock-data.sql` -ээр оруулсан БҮХ мөрийг устгана. Өөр юу ч хөндөхгүй:
+-- `mock-data.sql`, `mock-studio.sql`, `mock-buyers.sql` -ээр оруулсан БҮХ мөрийг устгана. Өөр юу ч хөндөхгүй:
 -- бүх нөхцөл нь `id::text like 'dddddddd-%'` — түр өгөгдөл ганцаараа энэ
 -- хэлбэрийн id -тай.
 --
@@ -29,10 +29,21 @@
 
 begin;
 
+-- 0 · Танхимын ангийн элсэлт, төлбөр (`mock-studio.sql`). Элсэлт нь
+--     `courses` руу `restrict`-ээр холбогдсон тул ангиас ӨМНӨ; төлбөр нь
+--     захиалга руу гадаад түлхүүргүй (`target_id`) тул дагаж устахгүй —
+--     ил устгана.
+delete from course_enrollments where id::text like 'dddddddd-%';
+delete from payments           where id::text like 'dddddddd-%';
+
 -- 1 · Дэлгүүрийн захиалга. `orders` нь `profiles` руу `restrict` -ээр
 --     холбогдсон тул хэрэглэгчээс ӨМНӨ арилах ёстой.
 delete from order_items where id::text like 'dddddddd-%';
 delete from orders      where id::text like 'dddddddd-%';
+
+-- 1б · Түр ангиуд. Элсэлт нь дээр арилсан тул одоо чөлөөтэй
+--      (`course_access` нь cascade-аар дагана).
+delete from courses     where id::text like 'dddddddd-%';
 
 -- 2 · Хичээлийн бүртгэл ба хүлээлгийн жагсаалт. Хуваарь устахад cascade -аар
 --     дагах ч ил бичсэн нь тоологдож буй мөрийг харуулна.
@@ -61,7 +72,7 @@ delete from auth.users where id::text like 'dddddddd-%';
 commit;
 
 -- ── Шалгах ─────────────────────────────────────────────────────────────────
--- Арван гурван мөр буцаж, «мөр» багана бүхэлдээ 0 байх ёстой. Аль нэг нь
+-- Арван зургаан мөр буцаж, «мөр» багана бүхэлдээ 0 байх ёстой. Аль нэг нь
 -- 0-ээс их бол тэр хүснэгтэд гараар нэмсэн, id нь `dddddddd-` -ээр эхэлдэг
 -- мөр үлдсэн гэсэн үг.
 
@@ -77,4 +88,7 @@ union all select 'profiles',         count(*) from profiles         where id::te
 union all select 'bookings',         count(*) from bookings         where id::text like 'dddddddd-%'
 union all select 'waitlist',         count(*) from waitlist         where id::text like 'dddddddd-%'
 union all select 'orders',           count(*) from orders           where id::text like 'dddddddd-%'
-union all select 'order_items',      count(*) from order_items      where id::text like 'dddddddd-%';
+union all select 'order_items',      count(*) from order_items      where id::text like 'dddddddd-%'
+union all select 'courses',          count(*) from courses          where id::text like 'dddddddd-%'
+union all select 'course_enrollments', count(*) from course_enrollments where id::text like 'dddddddd-%'
+union all select 'payments',         count(*) from payments         where id::text like 'dddddddd-%';

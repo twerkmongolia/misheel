@@ -13,6 +13,25 @@ export function formatMnt(amount: number): string {
   return `${mntFormatter.format(amount)}₮`
 }
 
+/**
+ * Графикийн тэнхлэгт зориулсан ТОВЧ дүн: `1.5 сая`, `850 мян`, `900`.
+ *
+ * Бүтэн `1,500,000₮` нь тэнхлэгийн 48px баганад багтахгүй бөгөөд таван
+ * шошго дээр давтагдахад тоо биш тэмдэгтийн хана болно. Тэнхлэг нь
+ * ХЭМЖЭЭГ заана — нарийн дүн нь уншилтын мөрөнд бүтнээрээ бий.
+ *
+ * Аравтын нэг орон хүртэл, сүүлийн `.0` хасагдана («2 сая», «2.0 сая» биш).
+ */
+export function compactMnt(amount: number): string {
+  const round = (value: number) => Math.round(value * 10) / 10
+  const sign = amount < 0 ? '-' : ''
+  const abs = Math.abs(amount)
+  // 999,960 → «1000 мян» биш «1 сая»: шат нь ДУГУЙРУУЛСНЫ ДАРАА сонгогдоно.
+  if (round(abs / 1_000) >= 1_000) return `${sign}${round(abs / 1_000_000)} сая`
+  if (round(abs) >= 1_000) return `${sign}${round(abs / 1_000)} мян`
+  return `${sign}${round(abs)}`
+}
+
 export function formatTime(iso: string): string {
   return formatInTimeZone(new Date(iso), TIMEZONE, 'HH:mm')
 }

@@ -4,7 +4,9 @@ import Link from 'next/link'
 import { usePathname, useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 import { logout } from '@/actions/auth'
+import { RAIL_COOKIE } from '@/lib/admin/rail'
 import { AdminIcon, type NavIcon } from './AdminIcon'
+import { AdminSearch } from './AdminSearch'
 
 export type NavItem = {
   href: string
@@ -17,40 +19,60 @@ export type NavItem = {
 }
 export type NavGroup = { label?: string; items: NavItem[] }
 
+export type ShellProfile = { name: string; role: string }
+
+/** Толгой мөрийн тоолуурууд — ажилтны шийдвэр хүлээж буй зүйлс. */
+export type ShellAlerts = { toPrepare: number; lowStock: number }
+
 /**
- * Удирдлагын бүрхүүл — зүүн тал дүрсний зурвас, дээр толгой мөр.
+ * Удирдлагын бүрхүүл — зүүн талд бүтэн цэс, дээр толгой мөр, доор хөл.
  *
- * ── Зурвас нь ХУЛГАНА хүрэхэд нээгдэнэ ─────────────────────────────────
- * Тайван үедээ 5rem — зөвхөн дүрс. Хулгана хүрмэгц 15.5rem болж нэрсээ
- * дэлгэнэ, холдмогц буцаж хумирна.
+ * ── Зурвас нь анхдагчаар БҮТЭН ─────────────────────────────────────────
+ * Өмнө нь 5rem-ийн дүрсний зурвас байсан бөгөөд зөвхөн хулгана хүрэхэд
+ * нэрсээ дэлгэдэг байв. Долоон ижил хэмжээтэй дүрсийг нэргүй харах нь шинэ
+ * ажилтанд таавар: «аль нь Сурагчид билээ». Одоо нэр ҮРГЭЛЖ харагдана.
  *
- * Өмнө нь энд ГАРААР дардаг «Хумих» товч байсан бөгөөд сонголт нь cookie-д
- * хадгалагддаг байв. Хасагдав: тэр нь ажилтнаас ШИЙДВЭР шаарддаг байсан —
- * «өргөн зурвас нэртэйгээ, эсвэл нарийн зурвас илүү ажлын талбайтай» гэсэн
- * хоёрын аль нэгийг сонгож, дараа нь харамсах. Хулгана хүрэхэд нээгддэг
- * зурвас нь хоёуланг нь өгнө: ажиллах үедээ нарийн, хайх үедээ өргөн.
+ * Ажлын талбай хэрэгтэй хүнд ← товч зурвасыг 4.5rem болгож хумина. Тэр
+ * үед хуучин зан үйл буцаж ирнэ: хулгана хүрэхэд дэлгэгдэж, агуулгын
+ * ДЭЭГҮҮР хөвнө (хуудсыг түлхвэл хүснэгт бүр хулгана зүүн ирмэг дайрах
+ * болгонд дахин эвхэгдэнэ). Сонголт нь cookie-д хадгалагдах тул серверээс
+ * зөв өргөнөөрөө ирж, ачаалах мөчид үсрэхгүй.
  *
- * ── Яагаад агуулгыг ТҮЛХЭХГҮЙ вэ ───────────────────────────────────────
- * Дэлгэсэн самбар нь агуулгын ДЭЭГҮҮР хөвнө. Урьд нь зурвас өргөсөхөд
- * хуудас баруун тийш шахагддаг байсан — тэр нь дарж нээдэг товчид зүгээр,
- * харин хулганы хөдөлгөөнд уягдвал хүснэгт, багана бүр хулгана зүүн ирмэг
- * дайрах болгонд дахин эвхэгдэнэ. Хөвсөн самбар нь зохиомжийг огт
- * хөндөхгүй: доорх хуудас байрандаа зогсоно.
- *
- * Гар ашиглагчид ч мөн адил: `focus` зурвас руу ормогц дэлгэгдэнэ.
+ * ── Хэмжээс нь хоёр төлөвт ЯГ таарна ───────────────────────────────────
+ * Хумигдсан зурвас 72px. Дүрс бүрийн төв нь 12 (nav зай) + 14 (мөрийн
+ * зай) + 10 (дүрсний хагас) = 36px — яг голд. Лого ч мөн адил: 18 + 18.
+ * Тиймээс зурвас нээгдэх, хаагдахад дүрсүүд НЭГ пикселээр ч хөдлөхгүй,
+ * зөвхөн нэрс гарч ирнэ, алга болно.
  */
 export function AdminShell({
   groups,
   profile,
+  alerts,
+  mini: initialMini,
+  year,
+  className = '',
   children,
 }: {
   groups: NavGroup[]
-  profile: { name: string; role: string }
+  profile: ShellProfile
+  alerts: ShellAlerts
+  /** Cookie-оос уншсан анхны төлөв. */
+  mini: boolean
+  /** Хөлийн он — серверээс, рендерийн дотор цаг уншихгүйн тулд. */
+  year: number
+  /** Фонтын хувьсагчийн класс (§ admin/layout.tsx). */
+  className?: string
   children: React.ReactNode
 }) {
-  const [expanded, setExpanded] = useState(false)
-  const collapsed = !expanded
-  // Самбарыг НЭЭСЭН үеийн зам. Хуудас солигдонгуут өөрөө хаагдана —
+  const [mini, setMini] = useState(initialMini)
+  const [hover, setHover] = useState(false)
+  /* ← товч дарсны дараа хулгана зурвас дээрээ л байгаа. Түүнийг «хүрсэн»
+     гэж тооцвол зурвас хумигдаад ТЭР ДОРОО буцаж дэлгэгдэнэ — товч юу ч
+     хийгээгүй мэт. Хулгана гарч, эргэж орох хүртэл дэлгэхгүй. */
+  const [armed, setArmed] = useState(true)
+  const open = !mini || hover
+
+  // «Цэс» самбарыг НЭЭСЭН үеийн зам. Хуудас солигдонгуут өөрөө хаагдана —
   // effect-гүйгээр, шинэ хуудасны дээр өлгөөтэй үлдэхгүй.
   const [sheetPath, setSheetPath] = useState<string | null>(null)
   const pathname = usePathname()
@@ -89,118 +111,95 @@ export function AdminShell({
   const rest = items.filter((item) => !item.tab)
   const restActive = current !== undefined && !current.tab
 
+  const toggle = () => {
+    const next = !mini
+    setMini(next)
+    setHover(false)
+    setArmed(false)
+    // Жилээр. Зам нь `/admin` — нийтийн сайтын хүсэлт бүрд дагаж явахгүй.
+    document.cookie = `${RAIL_COOKIE}=${next ? 'mini' : 'full'}; path=/admin; max-age=31536000; samesite=lax`
+  }
+
   return (
-    <div className="admin-shell flex min-h-screen flex-1 bg-background text-foreground">
+    <div className={`admin-shell flex min-h-screen flex-1 bg-background text-foreground ${className}`}>
       {/* ── Зүүн зурвас ────────────────────────────────────────────────── */}
-      {/* Гадна бүрхүүл нь зохиомжид ҮРГЭЛЖ 5rem эзэлнэ — дотоод самбар нь
-          үүнээс өргөсөхдөө агуулгын дээгүүр гарна, хуудсыг түлхэхгүй.
-          `z-40` нь толгой мөрнөөс (z-30) дээгүүр байх ёстой: дэлгэгдсэн
-          самбар түүний зүүн захыг халхална. */}
+      {/* Гадна бүрхүүл нь зохиомжид эзлэх ӨРГӨНИЙГ барина; дотоод самбар нь
+          хумигдсан үед хулгана хүрэхэд түүнээс өргөсөж агуулгын дээгүүр
+          гарна. `z-40` нь толгой мөрнөөс (z-30) дээгүүр: дэлгэгдсэн самбар
+          түүний зүүн захыг халхална. */}
       <aside
-        onMouseEnter={() => setExpanded(true)}
-        onMouseLeave={() => setExpanded(false)}
-        onFocus={() => setExpanded(true)}
+        onMouseEnter={() => armed && setHover(true)}
+        onMouseLeave={() => {
+          setHover(false)
+          setArmed(true)
+        }}
+        onFocus={() => armed && setHover(true)}
         /* `relatedTarget` нь фокус ОЧИЖ буй элемент. Зурвасын дотор үлдсэн
            бол хумихгүй — эс бөгөөс Tab дарах бүрд самбар анивчина. */
         onBlur={(event) => {
-          if (!event.currentTarget.contains(event.relatedTarget)) setExpanded(false)
+          if (!event.currentTarget.contains(event.relatedTarget)) setHover(false)
         }}
-        className="sticky top-0 z-40 hidden h-screen w-[5rem] shrink-0 lg:block"
+        className={`sticky top-0 z-40 hidden h-screen shrink-0 transition-[width] duration-200 ease-out lg:block ${
+          mini ? 'w-[4.5rem]' : 'w-[16.25rem]'
+        }`}
       >
-        {/* ── Дотоод самбар ──────────────────────────────────────────
-            Хумигдсан үедээ дэвсгэргүй — зурвасыг зөвхөн ШУГАМ тусгаарлана.
-            Дэлгэгдэхэд л нэг шат гэрэлтэж сүүдэр авна: тэр мөчид энэ нь
-            зохиомжийн хэсэг биш, ХӨВЖ буй самбар болно.
-
-            ⚠️ Хажуугийн зай нь ХОЁР төлөвт ИЖИЛ (`px-3`). Өмнө нь 1rem →
-            1.25rem болж хамт хөдөлдөг байсан бөгөөд үр дүнд нь дүрс бүр
-            дэлгэгдэх бүрд 4px хажуу тийш гулсдаг байв. Зурвас нээгдэхэд
-            НЭР нь гарч ирэх ёстой, дүрс нь хөдлөх ёсгүй — хөдөлгөөнгүй
-            дүрс нь нүдэнд тогтвортой тулгуур үлдээнэ.
-
-            `overflow-hidden` нь нэрсийг самбарын ирмэгээр тайрна: нэр нь
-            гарч ирэхдээ өргөнөө тэлэхгүй, зүгээр л ил гарна. */}
         <div
-          className={`flex h-full flex-col overflow-hidden border-r border-line px-3 py-4 transition-[width,background-color,box-shadow] duration-200 ease-out ${
-            collapsed
-              ? 'w-[5rem] bg-background'
-              : 'w-[15.5rem] bg-surface shadow-[var(--shadow-pop)]'
-          }`}
+          className={`flex h-full flex-col overflow-hidden border-r border-line bg-surface transition-[width,box-shadow] duration-200 ease-out ${
+            open ? 'w-[16.25rem]' : 'w-[4.5rem]'
+          } ${mini && hover ? 'shadow-[var(--shadow-pop)]' : ''}`}
         >
-          {/* ── Лого ─────────────────────────────────────────────────────
-              Хоёр хэсэгтэй: ТЭМДЭГ + нэр. Тэмдэг нь дүрсний баганад суудаг
-              тул хумигдсан үед зурвасын яг голд, дэлгэгдсэн үед нэрийнхээ
-              хажууд — хөдлөхгүй.
-
-              Нийтийн сайт дээр «нэр өөрөө тэмдэг» гэсэн дүрэмтэй (тэнд
-              зурвас гэж байхгүй, лого нь мөрийн эхэнд бүтнээрээ суудаг).
-              80px өргөнтэй зурваст тэр дүрэм ажиллахгүй: «TWERK MONGOLIA»
-              багтахгүй, зөвхөн «TM» үлдэх ба тэр нь задгай хоёр үсэг болж
-              унших зүйл мэт харагдана. Дүүрсэн хавтан нь түүнийг ТЭМДЭГ
-              болгож ялгана — зурвас дахь цорын ганц дүүрсэн биет. */}
-          <Link
-            href="/admin"
-            /* `-mx-3 px-3` нь доод зураасыг самбарын ирмэгээс ирмэг хүртэл
-               татна. Агуулгын өргөнөөр зурвал хумигдсан үед 56px-ийн
-               богино зураас болж, тасарсан мэт харагдана. */
-            className="-mx-3 mb-3 flex h-12 shrink-0 items-center border-b border-line px-3 pb-4 transition-opacity duration-300 hover:opacity-70"
-          >
-            <span className="grid w-14 shrink-0 place-items-center">
-              {/* `.wordmark` анги ЗОРИУД хэрэглээгүй: тэр нь давхаргагүй CSS
-                  тул Tailwind-ийн `text-*` утилитыг дардаг бөгөөд хавтан
-                  1.3rem үсгээр дүүрч халина. Энд бүх зүйл утилитээр —
-                  нэг давхаргад, зөрчилгүй. */}
-              <span className="font-display grid h-8 w-8 place-items-center rounded-lg bg-foreground text-[0.78rem] leading-none font-extrabold tracking-[0.01em] text-background uppercase">
-                TM
-              </span>
-            </span>
-            <span
-              className={`min-w-0 leading-tight transition-opacity duration-200 ${
-                collapsed ? 'opacity-0' : 'opacity-100'
-              }`}
+          {/* ── Лого ── Толгой мөртэй ИЖИЛ өндөр (64px): хоёулангийнх нь
+              доод зураас нэг шугамд нийлж, дэлгэцийг хөндлөн огтолно. */}
+          <div className="flex h-16 shrink-0 items-center gap-2 border-b border-line pr-3 pl-[1.125rem]">
+            <Link
+              href="/admin"
+              className="flex min-w-0 items-center gap-3 rounded-md transition-opacity hover:opacity-80"
             >
-              <span className="font-display block truncate text-[0.95rem] leading-none font-extrabold tracking-[0.005em] uppercase">
+              <Logo />
+              <span
+                className={`truncate text-[1.0625rem] font-medium tracking-[-0.01em] whitespace-nowrap transition-opacity duration-200 ${
+                  open ? 'opacity-100' : 'opacity-0'
+                }`}
+              >
                 Twerk Mongolia
               </span>
-              <span className="t-meta mt-0.5 block text-faint">Удирдлага</span>
-            </span>
-          </Link>
+            </Link>
+            <button
+              type="button"
+              onClick={toggle}
+              aria-label={mini ? 'Цэсийг дэлгэх' : 'Цэсийг хумих'}
+              aria-pressed={mini}
+              className={`icon-btn ml-auto shrink-0 transition-opacity duration-200 ${
+                open ? 'opacity-100' : 'pointer-events-none opacity-0'
+              }`}
+            >
+              <AdminIcon
+                name="collapse"
+                className={`transition-transform duration-200 ${mini ? 'rotate-180' : ''}`}
+              />
+            </button>
+          </div>
 
           {/* Бүлгийн гарчиг нь хумигдсан үед ч ЗАЙГАА эзэлсээр байна —
               зөвхөн харагдахаа болино. Ингэснээр зурвас нээгдэхэд мөрүүд
-              босоо тэнхлэгээрээ огт хөдлөхгүй: зөвхөн өргөн, зөвхөн
-              тунгалагшилт өөрчлөгдөнө. Өмнө нь гарчиг нь богино зураасаар
-              солигддог байсан тул мөр бүр дээш доош үсэрдэг байв. */}
-          {/* `-mx-3 px-3` нь ЗААВАЛ. `overflow-y-auto` нь хэвтээ тэнхлэгээр ч
-              тайрдаг (CSS: нэг тэнхлэг `visible` биш бол нөгөө нь `auto`
-              болно) — тиймээс идэвхтэй мөрийн `-left-3` зураас энэ савны
-              гадна үлдэж, тайрагдана. Сав нь самбарын БҮТЭН өргөнийг эзэлж,
-              дотоод зайг нь өөрөө буцаан өгснөөр зураас багтана. */}
+              босоо тэнхлэгээрээ огт хөдлөхгүй. */}
           <nav
             aria-label="Удирдлагын цэс"
-            className="-mx-3 flex w-auto flex-1 flex-col gap-4 overflow-y-auto px-3"
+            className="admin-scroll flex flex-1 flex-col overflow-x-hidden overflow-y-auto px-3 pt-3 pb-6"
           >
             {groups.map((group, index) => (
-              <div key={index} className="flex w-full flex-col gap-0.5">
+              <div key={index} className="flex flex-col gap-0.5">
                 {group.label && (
                   <p
-                    /* Мөрийн НЭРСТЭЙ нэг босоо шугамаас эхэлнэ (pl-14 =
-                       дүрсний баганын өргөн). Дүрснүүд захад унжиж, текст
-                       нь цэвэр багана үүсгэнэ. */
-                    className={`t-label mb-1.5 pl-14 text-faint transition-opacity duration-200 ${
-                      collapsed ? 'opacity-0' : 'opacity-100'
+                    className={`mt-5 mb-2 truncate px-[0.875rem] text-[0.75rem] font-medium tracking-[0.06em] whitespace-nowrap text-muted uppercase transition-opacity duration-200 ${
+                      open ? 'opacity-100' : 'opacity-0'
                     }`}
                   >
                     {group.label}
                   </p>
                 )}
                 {group.items.map((item) => (
-                  <RailLink
-                    key={item.href}
-                    item={item}
-                    collapsed={collapsed}
-                    active={item === current}
-                  />
+                  <RailLink key={item.href} item={item} open={open} active={item === current} />
                 ))}
               </div>
             ))}
@@ -210,62 +209,62 @@ export function AdminShell({
 
       <div className="flex min-w-0 flex-1 flex-col">
         {/* ── Толгой мөр ──────────────────────────────────────────────── */}
-        <header className="sticky top-0 z-30 border-b border-line bg-background/80 backdrop-blur-xl">
-          <div className="flex h-14 items-center gap-3 px-4 sm:px-6">
-            {/* Утсан дээр толгой мөр = хуудасны нэр (апп шиг).
-                Дэлгэцэн дээр хаана байгааг сануулах зам. */}
-            <span className="t-h3 truncate lg:hidden">{current?.label ?? 'Удирдлага'}</span>
-            <span className="t-label hidden items-center gap-2.5 text-faint lg:flex">
-              Удирдлага
-              <span aria-hidden="true">/</span>
-              <span className="text-foreground">{current?.label ?? '—'}</span>
+        <header className="sticky top-0 z-30 border-b border-line bg-surface">
+          <div className="flex h-16 items-center gap-3 px-4 sm:px-6">
+            {/* Утсан дээр зурвас байхгүй тул лого ба хуудасны нэр энд. */}
+            <Link href="/admin" aria-label="Хяналтын самбар" className="shrink-0 lg:hidden">
+              <Logo />
+            </Link>
+            <span className="truncate text-[1rem] font-medium md:hidden">
+              {current?.label ?? 'Удирдлага'}
             </span>
 
-            {/* Баруун булан = ХЭН нэвтэрсэн, тэгээд ГАРАХ. Өмнө нь энд
-                «Сайт руу ↗» гэсэн холбоос байсан — хасагдав: зүүн дээд
-                булангийн лого аль хэдийн нийтийн сайт руу хөтөлдөг тул тэр
-                нь давхардал байсан бөгөөд ажилтны хамгийн их хайдаг зүйл
-                болох гарах товчны байрыг эзэлж байв. */}
-            <div className="ml-auto flex items-center gap-1">
-              <div className="flex items-center gap-2.5">
-                <span className="hidden text-right text-[13px] leading-tight sm:block">
-                  <span className="block font-medium">{profile.name}</span>
-                  <span className="block text-[11px] text-muted">{profile.role}</span>
-                </span>
-                <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-line-strong text-xs font-semibold">
-                  {profile.name.slice(0, 1).toUpperCase()}
-                </span>
-              </div>
+            <AdminSearch
+              pages={items.map(({ href, label, icon }) => ({ href, label, icon }))}
+              className="hidden w-full max-w-[28rem] md:block"
+            />
 
-              {/* Хэн нэвтэрсэн бэ — гарахаас зураасаар зааглагдана. */}
-              <span aria-hidden="true" className="mx-1 h-5 w-px bg-line" />
+            <div className="ml-auto flex items-center gap-0.5 sm:gap-1">
+              {/* Утсан дээр нуугдана — хуудасны нэрэнд зай хэрэгтэй, «Сайт руу»
+                  нь хэрэглэгчийн цэсэнд ч бий. Нуухыг ГАДНА савд хийнэ:
+                  `.icon-btn` -ийн `display: grid` нь давхаргагүй тул
+                  `hidden` утилитыг дарна. */}
+              <span className="contents max-sm:hidden">
+                <HeaderLink href="/mn" icon="external" label="Сайт руу" />
+              </span>
+              {/* Тоолуур нь ҮЙЛДЭЛ хүлээж буй зүйлийг л тоолно. «Шинэ
+                  мэдэгдэл» гэх мэт уншаад өнгөрөх зүйл энд байхгүй — улаан
+                  тоо бүр «чамайг хүлээж байна» гэсэн утгатай байх ёстой. */}
+              <HeaderLink
+                href="/admin/products"
+                icon="box"
+                label="Дуусаж буй нөөц"
+                count={alerts.lowStock}
+              />
+              <HeaderLink
+                href="/admin/orders?status=paid"
+                icon="bell"
+                label="Бэлтгэх захиалга"
+                count={alerts.toPrepare}
+              />
 
-              {/* Гарах нь хэнийхээ хажууд зогсоно: «энэ бол ТА, эндээс
-                  гарна». Утсан дээр зөвхөн дүрс — нэр, эрх аль хэдийн
-                  нуугдсан бөгөөд бүтэн цэс нь доод таазны самбарт байна. */}
-              <form action={logout}>
-                {/* Удирдлага зөвхөн монголоор ажилладаг тул гарсны дараа
-                    `/mn` руу буцна (§ actions/auth.ts `localeFrom`). */}
-                <input type="hidden" name="locale" value="mn" />
-                <button
-                  type="submit"
-                  className="flex h-9 items-center gap-1.5 rounded-lg px-2.5 text-[13px] text-muted transition-colors hover:bg-surface-2 hover:text-foreground sm:px-3"
-                >
-                  <AdminIcon name="logout" className="h-4 w-4 shrink-0" />
-                  <span className="hidden sm:inline">Гарах</span>
-                  <span className="sr-only sm:hidden">Гарах</span>
-                </button>
-              </form>
+              <span aria-hidden="true" className="mx-2 hidden h-9 w-px bg-line sm:block" />
+
+              <UserMenu profile={profile} />
             </div>
           </div>
         </header>
 
-        <main className="min-w-0 flex-1 px-4 py-5 sm:px-6 sm:py-8">
+        <main className="min-w-0 flex-1 px-4 py-5 sm:px-6 sm:py-6">
           {/* Доод тааз агуулгыг дарахгүйн тулд зай үлдээнэ */}
-          <div className="mx-auto flex w-full max-w-[1360px] flex-col gap-5 pb-24 sm:gap-6 lg:pb-0">
+          <div className="mx-auto flex w-full max-w-[1600px] flex-col gap-6 pb-24 lg:pb-0">
             {children}
           </div>
         </main>
+
+        <footer className="hidden border-t border-line bg-surface px-6 py-3.5 text-center text-[0.8125rem] text-muted lg:block">
+          © {year} Twerk Mongolia. Бүх эрх хуулиар хамгаалагдсан.
+        </footer>
       </div>
 
       {/* ── Утасны доод тааз ───────────────────────────────────────────── */}
@@ -282,7 +281,7 @@ export function AdminShell({
             onClick={() => setSheetPath(pathname)}
             aria-expanded={sheetOpen}
             className={`flex min-w-0 flex-1 flex-col items-center gap-1 py-2 transition-colors ${
-              restActive || sheetOpen ? 'text-foreground' : 'text-muted'
+              restActive || sheetOpen ? 'text-primary' : 'text-muted'
             }`}
           >
             <AdminIcon name="menu" className="h-[22px] w-[22px]" />
@@ -304,9 +303,7 @@ export function AdminShell({
             <div className="mx-auto mt-2.5 h-1 w-9 rounded-full bg-line-strong" />
 
             <div className="flex items-center gap-3 px-4 py-4">
-              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-line-strong text-sm font-semibold">
-                {profile.name.slice(0, 1).toUpperCase()}
-              </span>
+              <Avatar name={profile.name} size="lg" />
               <span className="min-w-0 leading-tight">
                 <span className="block truncate font-medium">{profile.name}</span>
                 <span className="block text-xs text-muted">{profile.role}</span>
@@ -319,10 +316,10 @@ export function AdminShell({
                   key={item.href}
                   href={item.href}
                   aria-current={item === current ? 'page' : undefined}
-                  className={`flex h-12 items-center gap-3 rounded-lg px-3 text-[15px] transition-colors ${
+                  className={`flex h-12 items-center gap-3 rounded-md px-3 text-[15px] transition-colors ${
                     item === current
-                      ? 'font-medium text-foreground'
-                      : 'text-foreground active:bg-surface-2'
+                      ? 'bg-surface-3 font-medium text-foreground'
+                      : 'text-foreground-soft active:bg-surface-2'
                   }`}
                 >
                   <AdminIcon name={item.icon} className="h-5 w-5 shrink-0" />
@@ -336,7 +333,7 @@ export function AdminShell({
                 <input type="hidden" name="locale" value="mn" />
                 <button
                   type="submit"
-                  className="flex h-12 w-full items-center gap-3 rounded-lg px-3 text-[15px] text-foreground transition-colors active:bg-surface-2"
+                  className="flex h-12 w-full items-center gap-3 rounded-md px-3 text-[15px] text-foreground-soft transition-colors active:bg-surface-2"
                 >
                   <AdminIcon name="logout" className="h-5 w-5 shrink-0" />
                   Гарах
@@ -350,6 +347,148 @@ export function AdminShell({
   )
 }
 
+/**
+ * Тэмдэг — `app/icon.svg` -тэй ЯГ ижил зурлага (цагаан хавтан, хар «TM»).
+ * Фонтоор биш замаар зурсан: хөтчийн таб, зурвас хоёр дээр нэг тэмдэг.
+ */
+function Logo() {
+  return (
+    <svg viewBox="0 0 32 32" aria-hidden="true" className="h-9 w-9 shrink-0">
+      <rect width="32" height="32" rx="8" fill="#FFFFFF" />
+      <g fill="none" stroke="#0F1114" strokeWidth="2.6" strokeLinecap="square" strokeLinejoin="miter">
+        <path d="M5.5 10.2h8M9.5 10.2V22" />
+        <path d="M17.5 22V10.2L22 17l4.5-6.8V22" />
+      </g>
+    </svg>
+  )
+}
+
+/**
+ * Нэрийн эхний үсэг. Зураг (`avatar_url`) зориуд ашиглаагүй: Google-ийн
+ * профайл зураг `lh3.googleusercontent.com` -оос ирдэг бөгөөд CSP-ийн
+ * `img-src` түүнийг хаана (§ proxy.ts) — эвдэрсэн зургийн дүрс гарна.
+ */
+function Avatar({ name, size = 'md' }: { name: string; size?: 'md' | 'lg' }) {
+  return (
+    <span
+      aria-hidden="true"
+      className={`grid shrink-0 place-items-center rounded-full bg-[linear-gradient(135deg,#008CFF,#8932EF)] font-medium text-white ${
+        size === 'lg' ? 'h-10 w-10 text-sm' : 'h-9 w-9 text-[0.8125rem]'
+      }`}
+    >
+      {name.slice(0, 1).toUpperCase()}
+    </span>
+  )
+}
+
+/** Толгой мөрийн дүрст холбоос — тоолууртай бол улаан тэмдэг. */
+function HeaderLink({
+  href,
+  icon,
+  label,
+  count = 0,
+}: {
+  href: string
+  icon: NavIcon
+  label: string
+  count?: number
+}) {
+  return (
+    <Link
+      href={href}
+      title={label}
+      aria-label={count > 0 ? `${label}: ${count}` : label}
+      className="icon-btn relative"
+    >
+      <AdminIcon name={icon} />
+      {count > 0 && (
+        <span
+          aria-hidden="true"
+          className="absolute top-0.5 right-0.5 grid h-[1.125rem] min-w-[1.125rem] place-items-center rounded-full bg-danger px-1 text-[0.6875rem] leading-none font-medium text-white tabular-nums ring-2 ring-surface"
+        >
+          {count > 99 ? '99+' : count}
+        </span>
+      )}
+    </Link>
+  )
+}
+
+/**
+ * Хэрэглэгчийн цэс — хэн нэвтэрсэн, тэгээд ГАРАХ.
+ *
+ * Гарах нь доош унждаг цэсэнд орсон: толгой мөрөнд одоо хайлт, гурван
+ * тоолуур суудаг бөгөөд гарах товч тэдний дунд зогсвол хамгийн ховор
+ * хийдэг үйлдэл хамгийн их байр эзэлнэ. Хүн «гарах» -ыг үргэлж өөрийн
+ * НЭРЭН дээрээс хайдаг — тэр нь энд.
+ */
+function UserMenu({ profile }: { profile: ShellProfile }) {
+  const pathname = usePathname()
+  // Нээсэн үеийн зам — хуудас солигдоход өөрөө хаагдана (§ «Цэс» самбар).
+  const [openAt, setOpenAt] = useState<string | null>(null)
+  const open = openAt === pathname
+
+  return (
+    <div
+      className="relative"
+      onBlur={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) setOpenAt(null)
+      }}
+      onKeyDown={(event) => {
+        if (event.key === 'Escape') setOpenAt(null)
+      }}
+    >
+      <button
+        type="button"
+        aria-expanded={open}
+        onClick={() => setOpenAt(open ? null : pathname)}
+        className="flex items-center gap-3 rounded-md py-1 pr-1.5 pl-1 text-left transition-colors hover:bg-surface-2 sm:pr-2"
+      >
+        <Avatar name={profile.name} />
+        <span className="hidden min-w-0 leading-tight sm:block">
+          <span className="block max-w-[10rem] truncate text-[0.9375rem] font-medium">{profile.name}</span>
+          <span className="block text-[0.8125rem] text-muted">{profile.role}</span>
+        </span>
+        <AdminIcon
+          name="chevronDown"
+          className={`hidden h-4 w-4 shrink-0 text-muted transition-transform duration-200 sm:block ${
+            open ? 'rotate-180' : ''
+          }`}
+        />
+      </button>
+
+      {open && (
+        <div
+          className="absolute top-full right-0 z-50 mt-2 w-60 overflow-hidden rounded-lg border border-line bg-surface py-1.5 shadow-[var(--shadow-pop)]"
+        >
+          <div className="border-b border-line px-4 pt-2 pb-3">
+            <p className="truncate font-medium">{profile.name}</p>
+            <p className="text-[0.8125rem] text-muted">{profile.role}</p>
+          </div>
+          <Link
+            href="/mn"
+            className="mt-1.5 flex items-center gap-3 px-4 py-2 text-foreground-soft transition-colors hover:bg-surface-3 hover:text-foreground"
+          >
+            <AdminIcon name="external" className="h-[1.125rem] w-[1.125rem] shrink-0" />
+            Сайт руу
+          </Link>
+          {/* Удирдлага зөвхөн монголоор ажилладаг тул гарсны дараа `/mn`
+              руу буцна (§ actions/auth.ts `localeFrom`). */}
+          <form action={logout} className="mt-1.5 border-t border-line pt-1.5">
+            <input type="hidden" name="locale" value="mn" />
+            <button
+              type="submit"
+              className="flex w-full items-center gap-3 px-4 py-2 text-left text-foreground-soft transition-colors hover:bg-surface-3 hover:text-danger"
+            >
+              <AdminIcon name="logout" className="h-[1.125rem] w-[1.125rem] shrink-0" />
+              Гарах
+            </button>
+          </form>
+        </div>
+      )}
+    </div>
+  )
+}
+
 /** Доод таазны нэг таб — дүрс дээр, богино нэр доор. */
 function TabLink({ item, active }: { item: NavItem; active: boolean }) {
   return (
@@ -357,14 +496,11 @@ function TabLink({ item, active }: { item: NavItem; active: boolean }) {
       href={item.href}
       aria-current={active ? 'page' : undefined}
       className={`relative flex min-w-0 flex-1 flex-col items-center gap-1 py-2 transition-colors ${
-        active ? 'text-foreground' : 'text-muted'
+        active ? 'text-primary' : 'text-muted'
       }`}
     >
       {active && (
-        <span
-          aria-hidden="true"
-          className="absolute top-0 h-[2px] w-8 bg-foreground"
-        />
+        <span aria-hidden="true" className="absolute top-0 h-[2px] w-8 rounded-b-full bg-primary" />
       )}
       <AdminIcon name={item.icon} className="h-[22px] w-[22px]" />
       <span className="max-w-full truncate text-[10px] leading-none font-medium">
@@ -377,63 +513,27 @@ function TabLink({ item, active }: { item: NavItem; active: boolean }) {
 /**
  * Зурвасын нэг мөр.
  *
- * ── Идэвхтэйг ЮУ заах вэ ───────────────────────────────────────────────
- * Өмнө нь зүүн зураас нь `-left-5` дээр байсан бөгөөд ЗӨВХӨН дэлгэгдсэн
- * үед зурагддаг байв. Гэтэл зурвас нь ихэнх хугацаанд ХУМИГДСАН байдаг —
- * өөрөөр хэлбэл «би хаана байна» гэдэг тэмдэг нь хамгийн хэрэгтэй үедээ
- * байхгүй байлаа. Ажилтан долоон ижил дүрсийг хараад аль нь нээлттэй
- * байгааг таамаглах ёстой болдог.
- *
- * Одоо гурван дохио зэрэг ажиллана:
- *   · дэвсгэр    — мөр өөрөө нэг шат гэрэлтэнэ
- *   · зураас     — зурвасын ЗҮҮН ИРМЭГ дээр, хоёр төлөвт ч харагдана
- *   · жин, өнгө  — тод, 500 жинтэй
- *
- * Зураас нь `-left-3` дээр: хажуугийн зай тогтмол 3 нэгж тул энэ нь яг
- * самбарын ирмэгт таарна. Зай нь өөрчлөгддөг байсан бол энэ тоо хоёр
- * төлөвийн аль нэгэнд нь буруу болох байв.
+ * Идэвхтэй мөр нь бүтэн саарал ХАВТАН — хумигдсан үед ч (48×44 дөрвөлжин
+ * дүрсийг тойрно) харагдана. Өмнөх нимгэн зүүн зураас нь хумигдсан
+ * зурваст бараг үл үзэгдэх байсан: «би хаана байна» гэдэг тэмдэг хамгийн
+ * хэрэгтэй үедээ байхгүй байлаа.
  */
-function RailLink({
-  item,
-  collapsed,
-  active,
-}: {
-  item: NavItem
-  collapsed: boolean
-  active: boolean
-}) {
+function RailLink({ item, open, active }: { item: NavItem; open: boolean; active: boolean }) {
   return (
     <Link
       href={item.href}
       aria-current={active ? 'page' : undefined}
-      className={`relative flex h-10 w-full items-center rounded-lg text-[13px] whitespace-nowrap transition-colors duration-150 ${
+      className={`flex h-11 w-full items-center gap-3.5 rounded-md px-[0.875rem] text-[0.9375rem] whitespace-nowrap transition-colors duration-150 ${
         active
-          ? 'bg-surface-2 font-medium text-foreground'
+          ? 'bg-surface-3 font-medium text-foreground'
           : 'text-foreground-soft hover:bg-surface-2 hover:text-foreground'
       }`}
     >
-      {active && (
-        <span
-          aria-hidden="true"
-          className="absolute top-2 bottom-2 -left-3 w-[2px] rounded-r-full bg-foreground"
-        />
-      )}
-
-      {/* Дүрсний багана — хумигдсан самбарын АГУУЛГЫН өргөнтэй яг тэнцүү
-          (5rem − 2×0.75rem = 3.5rem). Тиймээс дүрс нь хумигдсан үед
-          зурвасын голд, дэлгэгдсэн үед нэрийнхээ өмнө — хоёр тохиолдолд
-          ЯГ НЭГ цэгт зогсоно. */}
-      <span className="grid w-14 shrink-0 place-items-center">
-        <AdminIcon name={item.icon} className="h-[18px] w-[18px]" />
-      </span>
-
+      <AdminIcon name={item.icon} className="h-5 w-5 shrink-0" />
       {/* Нэр нь ҮРГЭЛЖ зурагдана — зөвхөн харагдахаа болино. Нөхцөлт
-          зурагдалт нь өргөн 200ms гүйж байхад текстийг НЭГ ХҮРЭЭНД
-          үсрүүлж гаргадаг байв. */}
+          зурагдалт нь өргөн гүйж байхад текстийг НЭГ ХҮРЭЭНД үсрүүлдэг. */}
       <span
-        className={`min-w-0 truncate pr-3 transition-opacity duration-200 ${
-          collapsed ? 'opacity-0' : 'opacity-100'
-        }`}
+        className={`min-w-0 truncate transition-opacity duration-200 ${open ? 'opacity-100' : 'opacity-0'}`}
       >
         {item.label}
       </span>

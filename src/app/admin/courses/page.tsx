@@ -586,7 +586,7 @@ function CourseForm({
             байв. Одоо хэрэгтэй нэг л газраа, нэг дарахад нээгдэнэ. */}
         <details className="admin-card group overflow-hidden">
           <summary className="flex cursor-pointer list-none items-center gap-2.5 px-4 py-3 text-sm font-medium transition-colors hover:bg-surface-2 [&::-webkit-details-marker]:hidden">
-            <span className="grid h-6 w-6 shrink-0 place-items-center rounded-[var(--r)] border border-line transition-transform duration-200 group-open:rotate-45">
+            <span className="grid h-6 w-6 shrink-0 place-items-center rounded-md bg-primary/15 text-primary transition-transform duration-200 group-open:rotate-45">
               <AdminIcon name="plus" className="h-3.5 w-3.5" />
             </span>
             Англи хувилбар

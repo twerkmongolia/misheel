@@ -1,6 +1,35 @@
 import type { Metadata } from 'next'
+import { Roboto } from 'next/font/google'
+import { cookies } from 'next/headers'
 import { requireStaff } from '@/lib/auth/dal'
+import { createClient } from '@/lib/supabase/server'
+import { RAIL_COOKIE } from '@/lib/admin/rail'
 import { AdminShell, type NavGroup } from '@/components/admin/AdminShell'
+
+/**
+ * Удирдлагын үсэг — Roboto.
+ *
+ * Нийтийн сайтын хос (Manrope + Inter) нь брэндийн дуу хоолой: гарчиг нь
+ * мэдэгдэл хийж, их бие нь уншуулна. Удирдлагад гарчиг гэж бараг байхгүй —
+ * хүснэгт, тоо, товч, шошго. Roboto нь яг тэр ажилд зориулагдсан нягт,
+ * төвийг сахисан grotesque бөгөөд 14px дээр ч кирилл үсэг бүр салангид.
+ *
+ * Энд, layout-д ачаалагдана: `next/font` нь фонтыг ЗӨВХӨН ашигласан
+ * маршрутад урьдчилан татдаг тул нийтийн сайтын зочин Roboto-г огт
+ * татахгүй.
+ *
+ * ⚠️ `cyrillic-ext` ЗААВАЛ. Google-ийн `cyrillic` олонлог нь U+0400–045F
+ * хүрээг л хамардаг — монгол «Ө ө Ү ү» (U+04E8, U+04AE …) тэнд БАЙХГҮЙ.
+ * Тэдгээр нь `cyrillic-ext` -д байдаг; урьдчилан татахгүй бол хуудас
+ * эхлээд өөр фонтоор «ө» -г зурж, дараа нь солигдон анивчина.
+ */
+const roboto = Roboto({
+  variable: '--font-admin',
+  subsets: ['latin', 'cyrillic', 'cyrillic-ext'],
+  display: 'swap',
+})
+
+const ROLE_LABEL: Record<string, string> = { admin: 'Админ', staff: 'Ажилтан' }
 
 /**
  * Цэсийг бүлэглэв — холбоосууд нэг урт багана болвол нүд алдана.
@@ -46,6 +75,9 @@ const groups: NavGroup[] = [
     items: [
       { href: '/admin/products', label: 'Бараа', icon: 'tag', tab: true },
       { href: '/admin/orders', label: 'Захиалга', icon: 'receipt', tab: true },
+      /* Худалдан авагч нь «Хэрэглэгч» -ээс ТУСДАА (§ «Сурагчид» ижил):
+         тэр нь бүртгүүлсэн бүх хүн, энэ нь БАРАА авсан хүмүүс. */
+      { href: '/admin/buyers', label: 'Худалдан авагч', icon: 'cart' },
       { href: '/admin/customers', label: 'Хэрэглэгч', icon: 'person' },
     ],
   },
@@ -84,10 +116,32 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   // зөвхөн харагдац — хамгаалалт биш.
   const nav = profile.role === 'admin' ? [...groups, contentGroup, adminGroup] : [...groups, contentGroup]
 
+  /* ── Толгой мөрийн тоолуурууд ───────────────────────────────────────
+     Зөвхөн ТОО (`head: true`) — мөр татахгүй. Layout нь хуудас хооронд
+     client шилжилт хийхэд дахин ажилладаггүй ч Server Action бүрийн дараа
+     (`revalidatePath` / `redirect`) мод бүхэлдээ шинэчлэгддэг: ажилтан
+     захиалгыг «Бэлтгэж эхлэх» болгомогц хонхны тоо буурна. */
+  const supabase = await createClient()
+  const [{ count: toPrepare }, { count: lowStock }, jar] = await Promise.all([
+    supabase.from('orders').select('id', { count: 'exact', head: true }).eq('status', 'paid'),
+    supabase
+      .from('product_variants')
+      .select('id', { count: 'exact', head: true })
+      .lte('stock_qty', 3),
+    cookies(),
+  ])
+
   return (
     <AdminShell
+      className={roboto.variable}
       groups={nav}
-      profile={{ name: profile.full_name ?? 'Админ', role: profile.role }}
+      profile={{
+        name: profile.full_name ?? 'Админ',
+        role: ROLE_LABEL[profile.role] ?? profile.role,
+      }}
+      alerts={{ toPrepare: toPrepare ?? 0, lowStock: lowStock ?? 0 }}
+      mini={jar.get(RAIL_COOKIE)?.value === 'mini'}
+      year={new Date().getFullYear()}
     >
       {children}
     </AdminShell>

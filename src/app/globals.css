@@ -52,9 +52,9 @@
    `prefers-reduced-motion` -д бүгд таслагдана.
 
    ── Удирдлага ──────────────────────────────────────────────────────────
-   `/admin` нь ИЖИЛ палитр, ижил үсэг ашиглана. Тусдаа орчин байхаа больсон
-   — ажилтан хоёрын хооронд өдөрт олон удаа шилждэг тул хоёр өөр ертөнц
-   байх нь өөрөө ачаалал.
+   `/admin` нь ӨӨР палитр, өөр үсэгтэй (Roboto, өнгөт төлөв) — дэлгэрэнгүй
+   шалтгаан нь «Удирдлагын хэсэг» дотор. Бүх ялгаа `.admin-shell` дотор
+   хаагдсан тул энэ файлын бусад хэсэг удирдлагыг тооцохгүйгээр бичигдэнэ.
    ═══════════════════════════════════════════════════════════════════════ */
 
 /* ── Палитр ───────────────────────────────────────────────────────────────
@@ -227,138 +227,172 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   Удирдлагын хэсэг
+   Удирдлагын хэсэг — «ROCKER» ХЭЛБЭР
 
-   Өмнө нь энэ нь ТУСДАА орчин байв: өөрийн палитр, өөрийн cookie, өөрийн
-   горимын товч, анхдагчаар ГЭРЭЛТЭЙ. Тэр бүхэн хасагдав — сайт бүхэлдээ
-   ганц горимтой болсон.
+   Нийтийн сайт монохром хэвээр. Удирдлага бол ӨӨР зорилготой дэлгэц: өдөрт
+   хэдэн цаг ширтэж, олон төлөвийг НЭГ ДОР ялгах ёстой. Монохром шошго нь
+   тэнд ХЭЛБЭРЭЭР (дүүрсэн / тасархай / хүрээтэй) ялгадаг байсан — гүйлгэж
+   харахад «Төлөгдсөн», «Цуцлагдсан» хоёрыг үгийг нь уншиж байж л салгана.
+   Ногоон, улаан өнгө нь үгийг уншихаас ӨМНӨ хэлнэ.
 
-   Ажилтан нийтийн сайт, удирдлага хоёрын хооронд өдөрт олон удаа шилждэг.
-   Хоёр өөр ертөнц байх нь өөрөө ачаалал: нүд бүр шилжилт дээр дахин
-   тохирдог. Тиймээс палитр НЭГ.
+   ── Яагаад бүгд `.admin-shell` дотор вэ ────────────────────────────────
+   Хуудсууд нийтийн сайтын `.btn`, `.tag`, `.chip`, `.ctl` -ийг ашигласаар.
+   Тэдгээрийг энд л дахин хэлбэржүүлнэ — нийтийн сайт нэг пикселээр ч
+   хөндөгдөхгүй, удирдлагын 12 хуудас ч нэг мөр засваргүйгээр шинэ төрх
+   авна. Тусдаа класс (`.a-btn` …) нэвтрүүлбэл хуудас бүрийг гараар
+   шилжүүлэх ёстой бөгөөд мартагдсан нэг товч хуучин хэлбэрээр үлдэнэ.
 
-   Энд үлдсэн зүйл нь зөвхөн ажлын орчны онцлог: үсэг нь зарлалын биш
-   мэдээллийн (Oswald биш Rubik), хүснэгтийн тоо баганадаа эгнэх,
-   ширхэглэгийн давхарга унтрах, цонх сүүдэртэй байх.
+   ⚠️ Эдгээр нь давхаргагүй (unlayered) дүрэм тул Tailwind-ийн утилитыг
+   ДАРНА. Тиймээс энд ӨНГӨ, ХЭМЖЭЭ тавихдаа тухайн элемент дээр утилит
+   давхар бичигдэж болох эсэхийг бодох хэрэгтэй (жишээ нь `.lnk` -д өнгө
+   тавиагүй нь тэр — дуудагч тал `text-muted` өгдөг).
    ═══════════════════════════════════════════════════════════════════════════ */
 
-/* ── Удирдлагын палитр ────────────────────────────────────────────────────
-   Өмнө нь энд палитр бүхэлдээ (32 токен) дахин бичигдсэн байв. Сайт ганц
-   горимтой болмогц тэдгээрийн 31 нь `:root` -тэй ҮСЭГ ҮСГЭЭРЭЭ ижил
-   болсон — өөрөөр хэлбэл цэвэр давхардал, хожим токен өөрчлөхөд нэгийг нь
-   мартах эрсдэл.
-
-   Тиймээс энд ЗӨВХӨН үнэхээр ялгаатай зүйл үлдэнэ.
-
-   `color-scheme` -ийг `body` -д ч тавина: хуудасны суурь өнгө (гүйлтэлт
-   хэтэрсэн үеийн «резинэн» талбай ч мөн) `body` -оос канвас руу дамждаг. */
+/* ── Палитр ───────────────────────────────────────────────────────────────
+   `body` -д ч тавина: хуудасны суурь өнгө (гүйлт хэтэрсэн үеийн «резинэн»
+   талбай ч мөн) `body` -оос канвас руу дамждаг. */
 .admin-shell,
 body:has(.admin-shell) {
   color-scheme: dark;
 
-  /* Цэвэр #FFFFFF БИШ. Хамгийн их ялгаралт нь хамгийн сайн уншигдацтай
-     ижил утга биш: 19.6:1 нь өдөр бүр зургаан цаг ширтэх дэлгэц дээр
-     үсгийн ирмэгээр цацарч нүд ядраана. Нэг шат ухарсан ч 16:1 орчим —
-     AAA босгоос (7:1) хоёр дахин дээгүүр хэвээр.
+  /* Гурван давхар гадарга: суурь (хамгийн бараан) → карт, зурвас, толгой
+     мөр → оролт, hover → идэвхтэй цэс. Хөрш шатны зөрүү ~8 нэгж: үүнээс
+     бага бол харанхуйд ялгарахгүй, их бол «хайрцагны овоо» болно.
 
-     Маркетингийн хуудсанд цэвэр цагаан хэвээр: тэнд текст богино бөгөөд
-     эсрэг тэсрэг нь бүрэн хүчээрээ ажиллах ёстой. */
-  --foreground: #ECECEC;
+     Цэвэр саарал БИШ — өчүүхэн хөх туяатай. Өнгөт график, шошгын дэргэд
+     төвийг сахисан саарал бохир, шаравтар мэт уншигддаг. */
+  --background: #0F1114;
+  --surface: #171A1E;
+  --surface-2: #1F2227;
+  --surface-3: #2A2E34;
+  --line: #262A30;
+  --line-strong: #363B42;
 
-  /* Картын hover — «өргөгдлөө» гэдгийг хэлэх ХАМГИЙН БАГА сүүдэр. `--lift`
-     нь цонхных: карт бүр тэр өндөрт гарвал хуудас хөвсөн хайрцгийн овоо
-     болно. Зөвхөн удирдлагад хэрэглэгддэг тул зөвхөн энд амьдарна. */
-  --lift-soft:
-    0 6px 16px rgba(0, 0, 0, 0.4),
-    0 0 0 1px rgba(255, 255, 255, 0.05);
+  /* Цэвэр цагаан биш: өдөрт олон цаг ширтэх дэлгэц дээр #FFF нь үсгийн
+     ирмэгээр цацарна. #E9ECEF нь #171A1E дээр ~14:1 — AAA хэвээр. */
+  --foreground: #E9ECEF;
+  --foreground-soft: #C3C8CE;
+  --muted: #959CA4;
+  --faint: #6A7179;
+
+  /* Үйлдлийн ГАНЦ өнгө — үндсэн товч, сонгогдсон шүүлтүүр, фокус. Хоёр
+     дахь «үйлдлийн» өнгө нэмэгдмэгц аль нь гол үйлдэл болохыг нүд
+     таамаглах ёстой болно. */
+  --primary: #008CFF;
+  --primary-hover: #0A7BE0;
+  --primary-soft: rgb(0 140 255 / 0.16);
+
+  /* Төлөв. «Зөөлөн» хувилбар нь шошгын ДЭВСГЭР — цул өнгөт дэвсгэр дээр
+     цагаан үсэг ногоон, шар дээр 2:1 хүрэхгүй; тунгалаг дэвсгэр дээрх
+     өнгөт үсэг харин 5:1-ээс дээш. */
+  --good: #15CA20;
+  --warn: #FFC107;
+  --danger: #FD3550;
+  --info: #0DCEEC;
+  --good-soft: rgb(21 202 32 / 0.14);
+  --warn-soft: rgb(255 193 7 / 0.14);
+  --danger-soft: rgb(253 53 80 / 0.14);
+  --info-soft: rgb(13 206 236 / 0.14);
+
+  /* График. Өнгө бүр бие биеэсээ ӨНГӨНИЙ АЯГААР хол — хөрш хоёр нум,
+     хоёр шугам хэзээ ч нэг гэр бүлийн (цэнхэр/цэнхэр) болохгүй. */
+  --chart-1: #008CFF;
+  --chart-2: #FF6A00;
+  --chart-3: #15CA20;
+  --chart-4: #FD3550;
+  --chart-5: #FFC107;
+  --chart-6: #8932EF;
+  --chart-7: #0DCEEC;
+
+  /* «Халуун» градиент — баганын график. Нэг өнгө биш градиент нь
+     баганыг хавтгай тэгш өнцөгтөөс ЭЗЭЛХҮҮН болгож, өндрийг нь онцолно. */
+  --hot-from: #EE0979;
+  --hot-to: #FF6A00;
+
+  --button: var(--primary);
+  --button-ink: #FFFFFF;
+  --button-hover: var(--primary-hover);
+
+  --scrim: rgb(0 0 0 / 0.6);
+
+  /* Хоёр радиус: удирдлага (товч, оролт) 6px, гадарга (карт, цонх) 10px.
+     Нийтийн сайтын бөмбөлөг товч (999px) энд ХЭРЭГЛЭГДЭХГҮЙ — нэг мөрөнд
+     5-6 товч зэрэгцдэг хүснэгтэд бөмбөлөг хэлбэр нь чип, шошготой
+     андуурагдана. Бөмбөлөг нь ЗӨВХӨН шошго (`.tag`) -д үлдэнэ. */
+  --r: 6px;
+  --r-lg: 10px;
+
+  --lift-soft: 0 10px 24px rgb(0 0 0 / 0.35);
+  --shadow-pop:
+    0 16px 40px rgb(0 0 0 / 0.55),
+    0 0 0 1px rgb(255 255 255 / 0.05);
 }
 
+/* ── Үсэг — Roboto ────────────────────────────────────────────────────────
+   Фонт нь `admin/layout.tsx` -д ачаалагдаж `--font-admin` -аар ирнэ. Сайтын
+   хоёр хувьсагчийг (`--font-body`, `--font-display`) ЭНД дарж бичсэнээр
+   тэднийг уншдаг бүх класс (`.t-h2`, `.btn`, `.tag` …) автоматаар Roboto
+   болно — ганц ч класс гараар солигдохгүй.
+
+   Их бие 14px: хүснэгт, форм, жагсаалт зонхилсон дэлгэц. Сайтын 16px нь
+   урт текст уншихад зориулсан — энд нэг дэлгэцэнд аль болох их мөр. */
 .admin-shell {
-  /* Тайван гадаргад сүүдэр байхгүй — гүнийг шугам барина.
-     Сүүдэр нь ГАНЦ зорилготой: хөвж буй давхарга (цонх, самбар). */
-  --shadow-pop: var(--lift);
-}
-
-/* ── Удирдлагын үсэг ──────────────────────────────────────────────────────
-   Нийтийн сайт ХОЁР үсгийн зурлагатай: Oswald (нарийссан, том үсэг) нь
-   мэдэгдэл хийж, Rubik нь мэдээлэл дамжуулна. Тэр эсрэг тэсрэг нь
-   маркетингийн хуудсанд яг зөв — гарчиг нь дуу хоолой, доорх текст нь
-   агуулга.
-
-   ── Гэвч удирдлагад тэр дүрэм эргэж хазаж эхэлдэг ──────────────────────
-   Энд «гарчиг» гэж юу ч байхгүй. Хуудасны нэр («Захиалга»), самбарын нэр
-   («Бүх захиалга»), баганын толгой («ХҮЛЭЭН АВАГЧ»), үзүүлэлтийн шошго —
-   эдгээр нь бүгд МЭДЭЭЛЭЛ, зүгээр л өөр өөр хэмжээтэй. Тэднийг нарийссан
-   том үсгээр бичих нь дэлгэц бүр дээр 10-15 хашгирсан блок үүсгэнэ.
-   Ажилтан үүнийг өдөрт зургаан цаг хардаг: хурц зурлага нь хэдэн секунд
-   гоё, хэдэн цаг ядаргаатай.
-
-   Тиймээс удирдлага даяар ГАНЦ зурлага — Rubik. Эрэмбийг үсэг биш ХЭМЖЭЭ,
-   ЖИН, ГЭРЭЛТҮҮЛЭЛТ гурав барина.
-
-   ⚠️ Хэмжээ нь ЗААВАЛ дагаж буурна. Oswald нь нарийссан тул 2.9rem дээр
-   ч багана дүүргэдэггүй; Rubik тэр хэмжээнд хоёр дахин өргөн зай эзэлж,
-   гарчиг нь хуудсаа дарна. Зурлага солих ба хэмжээ буулгах хоёр нь нэг
-   шийдвэрийн хоёр тал.
-
-   Лого (`.wordmark`) нь Oswald ХЭВЭЭР: тэр бол текст биш ТЭМДЭГ. */
-
-.admin-shell :is(.t-h1, .t-h2, h1, h2) {
+  --font-body: var(--font-admin);
+  --font-display: var(--font-admin);
+  --font-sans: var(--font-admin), system-ui, sans-serif;
   font-family: var(--font-sans);
-  font-weight: 600;
-  text-transform: none;
-  /* Rubik нь том хэмжээнд бага зэрэг сулхан суудаг — сөрөг зай нь үгийг
-     нэг биет болгож нягтруулна. */
-  letter-spacing: -0.012em;
-  line-height: 1.22;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  accent-color: var(--primary);
 }
 
-/* Хэмжээний шат: хуудас 28px → самбар 19px → их бие 15px → шошго 11px.
-   Хөрш алхмуудын харьцаа 1.4 орчим — нүд ялгахад хангалттай, гэхдээ
-   хуудсыг хоёр өөр ертөнц болгож хуваахааргүй. */
-.admin-shell .t-h1 { font-size: clamp(1.5rem, 2.6vw, 1.9rem); }
-.admin-shell .t-h2 { font-size: clamp(1.4rem, 2.4vw, 1.75rem); }
+/* Ширхэглэгийн давхарга — маркетингийн хуудсанд гүн нэмдэг ч, өгөгдлийн
+   дэлгэц дээр зүгээр л бохирдол. */
+body:has(.admin-shell)::before { display: none; }
+
+/* Фокус — цэнхэр цагираг. Сайтын цагаан хүрээ энд цагаан текст, цагаан
+   шугамын дунд алга болно. */
+.admin-shell :focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Эрэмбэ: хуудас 22px → карт 16px → их бие 14px → шошго 13px. Жин нь
+   500-аас хэтрэхгүй — Roboto 600-700 дээр кирилл үсгүүд бөөгнөрч, урт
+   монгол үг (`Хэрэглэгчид`) хар толбо болдог. */
+.admin-shell :is(.t-h1, .t-h2) {
+  font-size: 1.375rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 1.3;
+  text-transform: none;
+}
 
 .admin-shell .t-h3 {
-  font-family: var(--font-sans);
-  font-size: 1.1875rem;
-  font-weight: 600;
-  letter-spacing: -0.006em;
-  line-height: 1.35;
-}
-
-/* Том тоо. Нарийссан зурлага нь тоог самбарын оноо мэт харагдуулдаг —
-   энд тоо бол мэдээлэл, шоу биш. */
-.admin-shell .t-num {
-  font-family: var(--font-sans);
-  font-weight: 600;
-  text-transform: none;
-  letter-spacing: -0.02em;
-  line-height: 1.1;
-}
-
-/* Шошго — хамгийн олон давтагддаг тул хамгийн их «хурц» мэдрэмж
-   төрүүлдэг элемент. Том үсэг нь ҮЛДЭНЭ (энэ нь гарчиг биш гэдгийг
-   хэлэх ёстой) ч зурлага зөөлөрч, өргөн зай (0.2em) хагасаас бага
-   болно: 0.2em нь editorial зурвасын хэмнэл, өгөгдлийн хүснэгтийнх биш. */
-.admin-shell .t-label,
-.admin-shell .admin-table td[data-label]::before {
-  font-family: var(--font-sans);
-  font-size: 0.6875rem;
-  font-weight: 600;
-  letter-spacing: 0.07em;
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: 0;
   line-height: 1.4;
 }
 
-/* Товч, шошго — 700 жин нь Oswald-ийн хажууд тэнцвэртэй байсан ч Rubik
-   дээр дангаараа бүдүүн харагдана. */
-.admin-shell .btn { font-weight: 600; }
-
-.admin-shell .tag {
-  padding: 0.1875rem 0.6875rem;
-  font-size: 0.75rem;
-  font-weight: 600;
+.admin-shell .t-num {
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
 }
+
+/* Шошго — ТОМ ҮСЭГГҮЙ, зайгүй. Баганын толгой, талбарын нэр зэрэг нь
+   хуудсанд хамгийн олон давтагддаг: тэднийг хашгируулбал дэлгэц бүр
+   арав гаруй хашгирсан блоктой болно. */
+.admin-shell .t-label,
+.admin-shell .admin-table td[data-label]::before {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 1.4;
+}
+
+.admin-shell .t-small { font-size: 0.875rem; line-height: 1.55; }
 
 /* Тоо БҮР баганадаа эгнэнэ — хүснэгт, үзүүлэлт, үнэ.
    Эгнэхгүй тоо бол харьцуулж болохгүй тоо. */
@@ -366,33 +400,207 @@ body:has(.admin-shell) {
   font-variant-numeric: tabular-nums;
 }
 
-/* Ширхэглэгийн давхарга — маркетингийн хуудсанд гүн нэмдэг ч, өгөгдлийн
-   дэлгэц дээр зүгээр л бохирдол. */
-body:has(.admin-shell)::before { display: none; }
+/* ── Товч ─────────────────────────────────────────────────────────────────
+   Сайтын товч 48px, бөмбөлөг, hover дээр өргөгдөнө. Удирдлагын хүснэгтийн
+   мөр бүрд 1-2 товч суудаг тул тэр хэмжээ, тэр хөдөлгөөн нь хүснэгтийг
+   товчны овоо болгоно. Энд 38px, 6px булан, хөдөлгөөнгүй — зөвхөн өнгө
+   солигдоно. */
+.admin-shell .btn {
+  min-height: 2.375rem;
+  padding-inline: 1rem;
+  border-width: 1px;
+  border-radius: var(--r);
+  font-size: 0.875rem;
+  font-weight: 500;
+  gap: 0.5rem;
+}
+
+.admin-shell .btn:is(:hover, :focus-visible, :active) { transform: none; }
+
+.admin-shell .btn-sm {
+  min-height: 2rem;
+  padding-inline: 0.75rem;
+  font-size: 0.8125rem;
+}
+
+.admin-shell .btn-solid {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #FFFFFF;
+}
+
+.admin-shell .btn-solid:is(:hover, :focus-visible) {
+  background: var(--primary-hover);
+  border-color: var(--primary-hover);
+  box-shadow: 0 4px 14px rgb(0 140 255 / 0.28);
+}
+
+.admin-shell .btn-line {
+  border-color: var(--line-strong);
+  background: transparent;
+  color: var(--foreground);
+}
+
+.admin-shell .btn-line:is(:hover, :focus-visible) {
+  border-color: #474D55;
+  background: var(--surface-3);
+  color: var(--foreground);
+}
+
+.admin-shell .btn-bare { color: var(--muted); }
+
+.admin-shell .btn-bare:is(:hover, :focus-visible) {
+  background: var(--surface-3);
+  color: var(--foreground);
+}
+
+/* Устгах/цуцлах — тайван үедээ зөвхөн УЛААН хүрээ, hover дээр л дүүрнэ.
+   Хүснэгтийн мөр бүрд цул улаан товч байвал дэлгэц бүхэлдээ түгшүүр болно. */
+.admin-shell .btn-risk {
+  border-style: solid;
+  border-color: rgb(253 53 80 / 0.45);
+  background: transparent;
+  color: var(--danger);
+}
+
+.admin-shell .btn-risk:is(:hover, :focus-visible) {
+  border-color: var(--danger);
+  background: var(--danger);
+  color: #FFFFFF;
+}
+
+.admin-shell .icon-btn {
+  width: 2.375rem;
+  height: 2.375rem;
+  border: 0;
+  border-radius: var(--r);
+  color: var(--muted);
+}
+
+.admin-shell .icon-btn:is(:hover, :focus-visible) {
+  background: var(--surface-3);
+  color: var(--foreground);
+}
+
+/* Сайтынх 18px — бөмбөлөг хүрээн дотор тэнцвэртэй. Хүрээгүй толгой мөрд
+   тэр нь хэт жижиг: дүрс нь товч биш, цэг мэт харагдана. */
+.admin-shell .icon-btn svg { width: 1.3125rem; height: 1.3125rem; }
+
+/* Толгой мөрийн хайлт — фокусыг ХҮРЭЭ нь (цэнхэр) хэлнэ. Оролтын өөрийн
+   цагираг давхар гарвал хайрцаг дотор хайрцаг болно. */
+.admin-search input:focus-visible { outline: none; }
+.admin-search input::-webkit-search-cancel-button { display: none; }
+
+/* ── Шүүлтүүр ─────────────────────────────────────────────────────────────
+   Жижиг хүрээтэй товчны эгнээ. Сонгогдсон нь ЦЭНХЭР дүүрнэ — хуудсан дээрх
+   үндсэн товчтой нэг өнгө: «энэ бол одоо идэвхтэй» гэдэг нэг л дуу хоолой. */
+.admin-shell .chip {
+  min-height: 2rem;
+  padding-inline: 0.75rem;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--foreground-soft);
+}
+
+.admin-shell .chip:is(:hover, :focus-visible) {
+  border-color: #474D55;
+  background: var(--surface-3);
+  color: var(--foreground);
+  transform: none;
+}
+
+.admin-shell .chip-on,
+.admin-shell .chip-on:is(:hover, :focus-visible) {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: #FFFFFF;
+}
+
+/* ── Шошго ────────────────────────────────────────────────────────────────
+   Бөмбөлөг, тунгалаг өнгөт дэвсгэр + өнгөт үсэг. Төлөвийг ӨНГӨ хэлнэ,
+   утгыг ҮГ хэлнэ — өнгө ялгадаггүй хүн текстээ уншина (WCAG 1.4.1). */
+.admin-shell .tag {
+  gap: 0.3125rem;
+  padding: 0.1875rem 0.625rem;
+  border: 0;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.admin-shell .tag-mute { background: var(--surface-3); color: var(--foreground-soft); }
+.admin-shell .tag-info { background: var(--primary-soft); color: #4DB0FF; }
+.admin-shell .tag-good { background: var(--good-soft); color: #3EDC48; }
+.admin-shell .tag-warn { background: var(--warn-soft); color: var(--warn); }
+.admin-shell .tag-danger { background: var(--danger-soft); color: #FF5C72; }
+
+/* ── Оролт ────────────────────────────────────────────────────────────────
+   Сайтынх 52px, дэвсгэртэйгээ ижил өнгөтэй хайрцаг. Энд 38px, гадаргаас
+   НЭГ ШАТ цайвар — картын дотор суудаг тул картаас ялгарах ёстой. */
+.admin-shell .ctl {
+  min-height: 2.375rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r);
+  background: var(--surface-2);
+  font-size: 0.875rem;
+}
+
+.admin-shell .ctl:hover { border-color: #474D55; }
+
+.admin-shell .ctl:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgb(0 140 255 / 0.22);
+}
+
+/* Алдааг одоо ӨНГӨ хэлнэ — тасархай хүрээ нь монохром системийн арга байв. */
+.admin-shell .ctl:user-invalid,
+.admin-shell .ctl:user-invalid:focus {
+  border-style: solid;
+  border-color: var(--danger);
+}
+
+.admin-shell .ctl:user-invalid:focus { box-shadow: 0 0 0 3px rgb(253 53 80 / 0.22); }
+
+.admin-shell select.ctl {
+  padding-right: 2.25rem;
+  background-position: right 0.75rem center;
+}
+
+.admin-shell textarea.ctl { min-height: 6rem; }
+
+/* iOS дээр 16px -ээс жижиг оролт фокуслахад хуудас томордог. Дээрх 14px нь
+   сайтын ижил дүрмийг дарж байгаа тул энд ДАХИН буцаана. */
+@media (max-width: 767px) {
+  .admin-shell .ctl { font-size: 16px; min-height: 2.75rem; }
+}
 
 /* ── Гадарга ──────────────────────────────────────────────────────────────
-   Хайрцаг биш ШУГАМ. Сайтын `.card` -тай ижил: нимгэн хүрээ, 3px радиус,
-   сүүдэргүй, дээд ирмэг дээрээ нэг пикселийн гэрэл. */
+   Хүрээ нь бараг үл үзэгдэх (4% цагаан) — гадаргын ялгааг дэвсгэрийн өнгө
+   хийнэ. Хүрээ нь зөвхөн хоёр карт зэрэгцсэн газарт ирмэгийг хурцална. */
 .admin-card {
   background: var(--surface);
+  border: 1px solid rgb(255 255 255 / 0.045);
+  border-radius: var(--r-lg);
+  box-shadow: 0 2px 6px rgb(0 0 0 / 0.18);
+}
+
+/* Карт ДОТОРХ карт (үзүүлэлтийн хавтан) — дэвсгэр нь эцэгтэйгээ ижил тул
+   ялгааг ганцхан хүрээ хийнэ. */
+.admin-tile {
   border: 1px solid var(--line);
-  border-radius: var(--r);
-  box-shadow: inset 0 1px 0 var(--edge);
+  border-radius: var(--r-lg);
+  background: var(--surface);
 }
 
 /* ── Дарж болох карт ──────────────────────────────────────────────────────
-   Тайван үедээ энгийн картаас ЯЛГАРАХГҮЙ. Ялгаа нь зөвхөн хулгана хүрэхэд
-   гарна: хүрээ тодорч, гадарга нэг шат хөдөлж, доор нь өчүүхэн уналт үүснэ.
-
-   Яагаад тайван үедээ ялгарахгүй вэ: хуудсан дээр 8 карт байхад тав нь
-   дарагддаг бол «дарагддаг» гэсэн байнгын дохио нь чимэг болж хувирдаг —
-   таван карт гэрэлтэж, нүд юуг эхлээд харахаа мэдэхээ болино. Харин
-   хулганы доорх ГАНЦ карт хөдлөх нь эргэлзээгүй: «энэ, яг энэ».
-
-   `translateY` нь 1px — 4px өргөх нь хуудсыг үсэрхэг болгоно. Сүүдэр нь
-   өндрийг хэлж өгөх тул хөдөлгөөн нь зөвхөн сануулга байхад хангалттай. */
+   Тайван үедээ энгийн картаас ЯЛГАРАХГҮЙ — 8 картын 5 нь дарагддаг бол
+   байнгын дохио нь чимэг болж хувирдаг. Хулганы доорх ГАНЦ карт л хөдөлнө. */
+/* `display` ЭНД ТАВИХГҮЙ: энэ нь давхаргагүй дүрэм тул дуудагч талын `flex`
+   утилитыг дарж, үзүүлэлтийн картын доод мөрийг (`mt-auto`) эвддэг байв. */
 .admin-card-link {
-  display: block;
   transition:
     border-color var(--t-1) linear,
     background-color var(--t-1) linear,
@@ -402,20 +610,18 @@ body:has(.admin-shell)::before { display: none; }
 
 .admin-card-link:is(:hover, :focus-visible) {
   border-color: var(--line-strong);
-  background: var(--surface-2);
-  box-shadow: inset 0 1px 0 var(--edge-strong), var(--lift-soft);
-  transform: translateY(-1px);
+  background: #1B1E23;
+  box-shadow: var(--lift-soft);
+  transform: translateY(-2px);
 }
 
-/* Дарагдах агшинд буцаж суух — хуруу/хулганы дор биет хөдөлж байгаа мэт */
 .admin-card-link:active {
   transform: translateY(0);
   transition-duration: 90ms;
 }
 
-/* Картын доторх мөр — хуудасны жагсаалтууд (шинэ захиалга, дуусаж буй
-   нөөц …). Картаас ӨӨР дүрэм: эдгээр нь өргөгдөхгүй, зөвхөн дэвсгэрээ
-   сольдог. Мөр өргөгдвөл доод хөршөө түлхэж жагсаалт бүхэлдээ чичирнэ. */
+/* Картын доторх мөр — өргөгдөхгүй, зөвхөн дэвсгэрээ сольдог. Мөр өргөгдвөл
+   доод хөршөө түлхэж жагсаалт бүхэлдээ чичирнэ. */
 .admin-row {
   transition: background-color var(--t-1) linear, color var(--t-1) linear;
 }
@@ -424,28 +630,34 @@ body:has(.admin-shell)::before { display: none; }
   background: var(--surface-2);
 }
 
+/* Зурвасын гүйлт — нарийн, бараг үл үзэгдэх. Цэс урт болоход л хэрэгтэй
+   бөгөөд тэр үед ч агуулгаас анхаарал татах ёсгүй. */
+.admin-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--surface-3) transparent;
+}
+
 /* ── Харилцах цонх ────────────────────────────────────────────────────────
    `<dialog>` -ийг `showModal()` -ээр нээнэ: фокусын урхи, Esc товч, дэвсгэр
    бүрхүүл — бүгд хөтчөөс бэлнээр ирнэ. Дээд давхаргад (top layer) зурагдах ч
    DOM-ын хувьд `.admin-shell` -ийн ХҮҮХЭД тул өнгө, үсэг өвлөгдөнө.
    ─────────────────────────────────────────────────────────────────────── */
-
 .admin-dialog {
   margin: auto;
   width: min(46rem, calc(100vw - 2rem));
   max-height: min(85vh, 52rem);
   padding: 0;
   border: 1px solid var(--line-strong);
-  border-radius: var(--r);
+  border-radius: var(--r-lg);
   background: var(--surface);
   color: var(--foreground);
-  box-shadow: inset 0 1px 0 var(--edge-strong), var(--lift);
+  box-shadow: var(--shadow-pop);
 }
 
 /* `::backdrop` нь эх элементээсээ өнгө өвлөх нь хөтчөөс хамаарна — тиймээс
    энд токен биш, шууд утга. */
 .admin-dialog::backdrop {
-  background: rgb(0 0 0 / 0.7);
+  background: rgb(0 0 0 / 0.6);
   backdrop-filter: blur(3px);
 }
 
@@ -457,7 +669,7 @@ body:has(.admin-shell)::before { display: none; }
     max-height: 92vh;
     margin: auto auto 0;
     border-bottom: 0;
-    border-radius: var(--r) var(--r) 0 0;
+    border-radius: var(--r-lg) var(--r-lg) 0 0;
   }
 }
 
@@ -532,23 +744,17 @@ form:has(select[name='class_type_id'] option[value='new']:checked) .new-class-fi
     gap: 1.25rem;
   }
 
-  /* Шошго нь сайтын `.t-label` -тай ижил хэмнэлтэй — 0.06em нь хэт нягт,
-     хажуудах утгаасаа ялгарахгүй байв. */
   .admin-table td[data-label]::before {
     content: attr(data-label);
     flex: none;
-    font-size: 0.6875rem;
-    font-weight: 600;
-    line-height: 1.35;
-    letter-spacing: 0.01em;
-    color: var(--faint);
+    color: var(--muted);
   }
 
   /* Шошгогүй нүд = мөрийн гарчиг (эхний) эсвэл үйлдэл (сүүлийн) */
   .admin-table td:first-child {
     padding-bottom: 0.5rem;
     font-size: 0.9375rem;
-    font-weight: 600;
+    font-weight: 500;
   }
   .admin-table td:not([data-label]):not(:first-child) { padding-top: 0.75rem; }
 
@@ -557,11 +763,8 @@ form:has(select[name='class_type_id'] option[value='new']:checked) .new-class-fi
   .admin-table td:not([data-label]):not(:first-child) form { flex: 1 1 auto; }
   .admin-table td:not([data-label]):not(:first-child) form .btn { width: 100%; }
 
-  /* Хуруунд тохирсон хэмжээ. 16px нь iOS дээр фокуслахад хуудас
-     томордоггүй болгох цорын ганц арга (Safari-ийн дүрэм). */
-  .admin-shell :is(input, select, textarea) { font-size: 16px; }
-  .admin-shell :is(input:not([type='file']), select) { min-height: 2.5rem; }
-  .admin-shell .admin-btn { min-height: 2.5rem; }
+  /* Хуруунд тохирсон хэмжээ */
+  .admin-shell .btn { min-height: 2.75rem; }
 }
 @theme inline {
   --color-background: var(--background);
@@ -583,6 +786,10 @@ form:has(select[name='class_type_id'] option[value='new']:checked) .new-class-fi
   --color-danger: var(--danger);
   --color-danger-soft: var(--danger-soft);
   --color-scrim: var(--scrim);
+  /* Зөвхөн удирдлагад утгатай (§ «Удирдлагын хэсэг») — гадна тодорхойгүй
+     хувьсагч тул сайт дээр санамсаргүй хэрэглэгдвэл өнгө огт гарахгүй. */
+  --color-primary: var(--primary);
+  --color-info: var(--info);
 
   --color-button-hover: var(--button-hover);
 

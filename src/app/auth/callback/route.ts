@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 import type { EmailOtpType } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/server'
 import { defaultLocale, isLocale } from '@/lib/i18n/config'
+import { landingAfterSignIn } from '@/lib/auth/landing'
 
 /**
  * OAuth болон и-мэйл баталгаажуулалтын буцах цэг.
@@ -120,22 +121,9 @@ export async function GET(request: NextRequest): Promise<Response> {
     return NextResponse.redirect(`${origin}/${locale}/reset-password`)
   }
 
-  /* Зам заагаагүй бол эрхээс нь хамаарна — нэвтрэх маягттай ЯГ ижил дүрэм
-     (§ actions/auth.ts `login`): ажилтан удирдлага руу, сурагч өөрийн
-     хичээл рүү. Google талд «нэвтрэх» ба «бүртгүүлэх» гэсэн ялгаа байхгүй
-     тул шинэ хүн ч, хуучин хүн ч энэ замаар ирнэ. */
-  const userId = data.session?.user.id
-  if (userId) {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', userId)
-      .maybeSingle()
-
-    if (profile?.role === 'staff' || profile?.role === 'admin') {
-      return NextResponse.redirect(`${origin}/admin`)
-    }
-  }
-
-  return NextResponse.redirect(`${origin}/${locale}/account/courses`)
+  /* Зам заагаагүй бол эрхээс нь хамаарна — шууд Google урсгалтай НЭГ функц
+     (§ lib/auth/landing.ts). */
+  return NextResponse.redirect(
+    await landingAfterSignIn(supabase, data.session?.user.id, origin, locale, ''),
+  )
 }

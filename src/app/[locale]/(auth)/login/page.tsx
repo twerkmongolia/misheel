@@ -15,6 +15,8 @@ const authErrors: Record<string, keyof Dictionary['auth']['errors']> = {
   oauth_start: 'oauthStart',
   provider: 'provider',
   missing_code: 'missingCode',
+  // Шууд Google урсгалын буцалт таараагүй (§ auth/google/callback) — дахин оролдвол болно.
+  oauth_state: 'missingCode',
   exchange: 'exchange',
 }
 

@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import type { ComponentProps, ReactNode } from 'react'
+import type { ComponentProps, CSSProperties, ReactNode } from 'react'
 import { AdminIcon, type NavIcon } from './AdminIcon'
 
 /**
@@ -7,14 +7,15 @@ import { AdminIcon, type NavIcon } from './AdminIcon'
  *
  * Яагаад `@/components/ui` -г дахин ашиглаагүй вэ: нийтийн сайт МОНОХРОМ
  * бөгөөд төлөвийг хэлбэрээр (дүүрсэн / хүрээтэй / тасархай) заадаг. Тэр
- * шийдэл маркетингийн хуудсанд зөв ч, удирдлагад алдаа болдог — «Төлөгдсөн»
- * ба «Цуцлагдсан» хоёр яг ижил хар бөмбөлөг болж, хүснэгтийг гүйлгэж
- * харахад ялгагдахаа больдог. Энд өнгө бол чимэг биш, МЭДЭЭЛЭЛ.
+ * шийдэл маркетингийн хуудсанд зөв ч, удирдлагад алдаа болдог — хүснэгтийг
+ * гүйлгэж харахад «Төлөгдсөн», «Цуцлагдсан» хоёрыг үгийг нь уншиж байж л
+ * салгана. Энд өнгө бол чимэг биш, МЭДЭЭЛЭЛ (§ globals.css «Удирдлагын
+ * хэсэг»).
  *
  * Хэмжээсийн систем (нягтрал):
- *   радиус  — карт 14px, товч/оролт 8px  (сайт 20px — тэр нь агуулгын хуудас)
- *   өндөр   — товч 36px, жижиг товч 30px, хүснэгтийн мөр ~44px
- *   зай     — хэсэг хооронд 24px, хэсэг доторх 12-16px
+ *   радиус  — карт 10px, товч/оролт 6px, шошго бөмбөлөг
+ *   өндөр   — товч 38px, жижиг товч 32px, хүснэгтийн мөр ~46px
+ *   зай     — карт хооронд 24px, карт доторх 20px
  */
 
 /* ── Товч ──────────────────────────────────────────────────────────────── */
@@ -23,18 +24,16 @@ type Variant = 'primary' | 'secondary' | 'ghost' | 'danger'
 type Size = 'sm' | 'md'
 
 /**
- * Товч нь НИЙТИЙН САЙТЫН товч (§ globals.css `.btn`). Өмнө нь удирдлага
- * өөрийн гэсэн дугуйрсан, ногоон, сүүдэртэй товчтой байв — өөр өнгө, өөр
- * хэлбэр нь хоёр өөр програм мэт мэдрүүлдэг.
- *
- * Hover дээр дүүргэлт доороос дээш ЭРГЭНЭ: цагаан товч хар болж, хар товч
- * цагаан болно. Монохром системд боломжтой цорын ганц жинхэнэ өөрчлөлт.
+ * Товч нь нийтийн сайтын `.btn` класс — удирдлага дотор л 38px, 6px булан,
+ * цэнхэр болж дахин хэлбэржинэ (§ globals.css `.admin-shell .btn`). Нэг
+ * класс, хоёр орчин: хуудсууд гараар бичсэн `btn btn-solid` -ээ ч сольж
+ * бичих шаардлагагүй.
  */
 const variants: Record<Variant, string> = {
   primary: 'btn-solid',
   secondary: 'btn-line',
   ghost: 'btn-bare',
-  // Тасархай хүрээ — санамсаргүй дарахаас ХЭЛБЭРЭЭРЭЭ сэргийлнэ.
+  // Улаан хүрээ — hover дээр л дүүрнэ.
   danger: 'btn-risk',
 }
 
@@ -73,6 +72,9 @@ export function ButtonLink({
  * Хуудас бүр ижил бүтэцтэй эхэлнэ: нэр → нэг мөр тайлбар → үйлдэл.
  * Тайлбар нь чимэг биш — «энэ дэлгэц юу хийдэг вэ» гэдгийг шинэ ажилтанд
  * зааж өгнө.
+ *
+ * Доод зураас хасагдсан: доор нь шууд КАРТ эхэлдэг бөгөөд картын ирмэг
+ * аль хэдийн тусгаарлаж байна. Зураас + картын ирмэг = хоёр давхар хил.
  */
 export function PageHeader({
   title,
@@ -84,25 +86,19 @@ export function PageHeader({
   actions?: ReactNode
 }) {
   return (
-    <header className="flex flex-col gap-5">
-      <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-4">
-        <div className="min-w-0">
-          {/* Гарчиг нь serif — нийтийн сайттай нэг дуу хоолой. Тайлбар нь
-              чимэг биш: «энэ дэлгэц юу хийдэг вэ» гэдгийг шинэ ажилтанд
-              зааж өгнө. */}
-          <h1 className="t-h2">{title}</h1>
-          {description && <p className="t-small mt-2 max-w-[68ch] text-muted">{description}</p>}
-        </div>
-        {/* Утсан дээр үйлдэл нь БҮТЭН ӨРГӨН болно. Гарчгийн хажууд шахагдсан
-            жижиг товч нь хамгийн олон дардаг зүйл байтал хамгийн бага бай
-            болдог — 44px хүрэлцээний доод хэмжээнд ч хүрэхгүй. */}
-        {actions && (
-          <div className="flex w-full shrink-0 flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center">
-            {actions}
-          </div>
-        )}
+    <header className="flex flex-wrap items-end justify-between gap-x-8 gap-y-4">
+      <div className="min-w-0">
+        <h1 className="t-h2">{title}</h1>
+        {description && <p className="mt-1 max-w-[72ch] text-[0.875rem] text-muted">{description}</p>}
       </div>
-      <div className="hr" />
+      {/* Утсан дээр үйлдэл нь БҮТЭН ӨРГӨН болно. Гарчгийн хажууд шахагдсан
+          жижиг товч нь хамгийн олон дардаг зүйл байтал хамгийн бага бай
+          болдог — 44px хүрэлцээний доод хэмжээнд ч хүрэхгүй. */}
+      {actions && (
+        <div className="flex w-full shrink-0 flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center">
+          {actions}
+        </div>
+      )}
     </header>
   )
 }
@@ -126,37 +122,33 @@ export function Panel({
   className?: string
 }) {
   return (
-    /* ── Яагаад одоо КАРТ болов ──────────────────────────────────────────
-       Өмнө нь самбар нь зөвхөн дээд гарчиг + доод зураастай, дэвсгэргүй
-       блок байв. Тэр нь editorial хуудсанд зөв — нэг баганат текстэд
-       хайрцаг хэрэггүй. Харин удирдлагад нэг дэлгэц дээр 3-5 самбар
-       зэрэгцэн суудаг бөгөөд заримд нь хүснэгт, заримд нь форм байдаг:
-       зураас дангаараа «энэ хаана дуусаж, дараагийнх хаанаас эхэлж
-       байна» гэдгийг хэлж чадахаа болино.
-
-       Карт нь ХИЛ өгнө. Гадарга нь дэвсгэрээс нэг шат ялгарч, доторх
-       бүх зүйл нэг биетийн эд анги болж уншигдана.
+    /* Карт нь ХИЛ өгнө: нэг дэлгэц дээр 3-5 самбар зэрэгцэн суудаг бөгөөд
+       заримд нь хүснэгт, заримд нь форм байдаг. Гадарга нь дэвсгэрээс нэг
+       шат ялгарч, доторх бүх зүйл нэг биетийн эд анги болж уншигдана.
 
        `overflow-hidden` нь ЗААВАЛ: доторх хүснэгт, жагсаалт ирмэг хүртэл
-       дүүрдэг тул тэдгээрийн булан картын радиусаар тайрагдах ёстой. */
+       дүүрдэг тул тэдгээрийн булан картын радиусаар тайрагдах ёстой.
+
+       Их бие нь `flex-1`: торонд хөрш хоёр карт ижил өндөртэй зогсох ба
+       богино нь доороо хоосон зай үлдээхээс биш, ирмэгээ тайрахгүй. */
     <section className={`admin-card flex flex-col overflow-hidden ${className}`}>
       {(title || actions) && (
-        <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2 border-b border-line px-5 py-4">
+        <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 border-b border-line px-5 py-4">
           <div className="min-w-0">
-            {/* Хуудсанд ГУРВАН түвшний эрэмбэ байх ёстой:
-                  хуудасны нэр  → `t-h2`, serif, 28-44px
-                  хэсгийн нэр   → `t-h3`, sans, 17-21px   ← энэ
-                  баганын нэр   → `t-label`, 11px
-                Эхний оролдлогод хэсгийн нэрийг 11px шошго болгосон нь
-                дунд түвшинг бүхэлд нь алгасаж, гарчиг ба хүснэгтийн толгой
-                хоёрыг ижил жинтэй болгож байв. */}
+            {/* Хуудсанд ГУРВАН түвшний эрэмбэ:
+                  хуудасны нэр  → `t-h2`, 22px
+                  картын нэр    → `t-h3`, 16px   ← энэ
+                  баганын нэр   → `t-label`, 13px */}
             {title && <h2 className="t-h3">{title}</h2>}
-            {description && <p className="t-meta mt-1.5 text-muted">{description}</p>}
+            {description && <p className="mt-0.5 text-[0.8125rem] text-muted">{description}</p>}
           </div>
-          {actions && <div className="flex shrink-0 items-center gap-3">{actions}</div>}
+          {/* `shrink-0` БИШ `min-w-0`: утсан дээр таван чип нэг мөрөнд
+              багтахгүй — агшиж чадахгүй сав нь тэднийг картын ирмэгээс
+              гадагш түлхэж, `overflow-hidden` тайрдаг байв. */}
+          {actions && <div className="flex min-w-0 flex-wrap items-center gap-2">{actions}</div>}
         </div>
       )}
-      <div className={flush ? '' : 'p-5'}>{children}</div>
+      <div className={`min-h-0 flex-1 ${flush ? '' : 'p-5'}`}>{children}</div>
     </section>
   )
 }
@@ -184,13 +176,13 @@ export function Disclosure({
 }) {
   return (
     <details open={defaultOpen} className="admin-card group overflow-hidden">
-      <summary className="flex cursor-pointer list-none items-center gap-2.5 px-5 py-3.5 text-sm font-semibold transition-colors hover:bg-surface-2 [&::-webkit-details-marker]:hidden">
+      <summary className="flex cursor-pointer list-none items-center gap-3 px-5 py-3.5 text-[0.9375rem] font-medium transition-colors hover:bg-surface-2 [&::-webkit-details-marker]:hidden">
         <span
-          className={`grid h-6 w-6 shrink-0 place-items-center rounded-[var(--r)] border border-line text-foreground ${
+          className={`grid h-7 w-7 shrink-0 place-items-center rounded-md bg-primary/15 text-primary ${
             icon === 'plus' ? 'transition-transform duration-200 group-open:rotate-45' : ''
           }`}
         >
-          <AdminIcon name={icon} className="h-3.5 w-3.5" />
+          <AdminIcon name={icon} className="h-4 w-4" />
         </span>
         {summary}
       </summary>
@@ -201,46 +193,113 @@ export function Disclosure({
 
 /* ── Үзүүлэлт ──────────────────────────────────────────────────────────── */
 
+/** Үзүүлэлтийн картын өнгө — дүрс, жижиг график хоёр хуваалцана. */
+export type StatTone = 'primary' | 'good' | 'danger' | 'warn' | 'info' | 'orange' | 'purple'
+
+const statColor: Record<StatTone, string> = {
+  primary: 'var(--primary)',
+  good: 'var(--good)',
+  danger: 'var(--danger)',
+  warn: 'var(--warn)',
+  info: 'var(--info)',
+  orange: 'var(--chart-2)',
+  purple: 'var(--chart-6)',
+}
+
+/**
+ * Үзүүлэлтийн карт: нэр, тоо, өнгөт дүрс — доор нь ЧИГ ХАНДЛАГА.
+ *
+ * Тоо ганцаараа мэдээлэл биш: «24 захиалга» гэдэг нь сайн уу, муу юу гэдгийг
+ * зөвхөн өмнөхтэй нь харьцуулж мэдэх боломжтой. Тиймээс доод мөр нь гурван
+ * хэлбэрийн аль нэгээр ТҮҮХ хэлнэ:
+ *
+ *   `spark`    — сүүлийн өдрүүдийн жижиг багана (сүүлийнх нь баруун талд)
+ *   `progress` — дүүргэлт гэх мэт хувь
+ *   `hint`     — дээрх хоёр утгагүй үед нэг мөр тайлбар
+ *
+ * Баруун талд нь `delta` (өмнөх үетэй харьцуулсан хувь, ногоон/улаан) эсвэл
+ * `aside` (төвийг сахисан тоо). График байгаа үед `hint` нь тооны доор
+ * гарна.
+ *
+ * Жижиг график нь ЗОРИУД тэнхлэггүй: энд асуулт нь «хэд вэ» биш «өсөж
+ * байна уу». Нарийн тоо хэрэгтэй бол дээрх том график бий.
+ */
 export function StatCard({
   icon,
   label,
   value,
   hint,
   href,
+  tone = 'primary',
+  spark,
+  progress,
+  delta,
+  aside,
 }: {
   icon: NavIcon
   label: string
   value: string | number
   hint?: ReactNode
   href?: string
+  tone?: StatTone
+  spark?: number[]
+  /** 0–100 */
+  progress?: number
+  /** Өмнөх үетэй харьцуулсан хувь. `null` = өмнөх үе хоосон, хувь тооцох аргагүй. */
+  delta?: number | null
+  aside?: ReactNode
 }) {
-  /* Тоо нь serif — нийтийн сайтын «том тоо» -той нэг дуу хоолой (§ `.t-num`).
+  const color = statColor[tone]
 
-     Өмнө нь эдгээр нь хайрцаггүй, зөвхөн босоо зураасаар тусгаарлагдсан
-     НЭГ зурвас байв. Тэр нь тайван ч нэг сул талтай: зурваст холбоос
-     байгааг нүд олж хардаггүй. Дөрвөөс хоёр нь дарагдаж хуудас нээдэг
-     атлаа гуравдугаарынхтайгаа яг ижил харагддаг байлаа.
+  const visual = spark !== undefined || progress !== undefined
 
-     Одоо тус бүр өөрийн карттай. Дарагддаг нь `admin-card-link` авна —
-     тайван үедээ ялгарахгүй ч хулгана хүрмэгц өргөгдөж, «энэ хаа нэгтээ
-     хөтөлнө» гэдгээ хэлнэ (§ globals.css). */
   const body = (
     <>
-      <span className="t-label flex items-center gap-2 text-muted">
-        <AdminIcon name={icon} className="h-3.5 w-3.5 shrink-0" />
-        {label}
+      <span className="flex items-start justify-between gap-3">
+        <span className="min-w-0">
+          <span className="block truncate text-[0.9375rem] text-foreground-soft">{label}</span>
+          <span className="t-num mt-1.5 block truncate text-[1.5rem] tnum">{value}</span>
+          {/* График байгаа үед тайлбар тооны ДООР — доод мөрийг график,
+              хувь хоёр эзэлнэ. */}
+          {visual && hint && <span className="mt-1 block truncate text-[0.75rem] text-muted">{hint}</span>}
+        </span>
+        <span className="shrink-0 pt-0.5" style={{ color }}>
+          <AdminIcon name={icon} className="h-7 w-7" />
+        </span>
       </span>
-      <span className="t-num mt-3 block text-[2rem] sm:text-[2.5rem]">{value}</span>
-      {/* Тогтмол өндөр: тайлбаргүй карт хажуугийнхаасаа намхан болвол
-          дөрвөн тоо нэг шугам дээр эгнэхээ болино. */}
-      <span className="t-meta mt-2 block h-4 text-muted">{hint}</span>
+
+      {/* Доод мөр нь `mt-auto` -оор картын ЁРООЛД наалдана: нэг эгнээний
+          хоёр карт торонд ижил өндөртэй тул график, зураас, текстийн аль
+          нь ч байсан нэг шугамд дуусна. */}
+      <span className="mt-auto flex h-8 items-end justify-between gap-4 pt-4 box-content">
+        {spark ? (
+          <Sparkline values={spark} color={color} />
+        ) : progress !== undefined ? (
+          <span className="flex h-full min-w-0 flex-1 items-center">
+            <span className="h-1.5 w-full overflow-hidden rounded-full bg-surface-3">
+              <span
+                className="block h-full rounded-full"
+                style={{ width: `${Math.min(Math.max(progress, 0), 100)}%`, background: color }}
+              />
+            </span>
+          </span>
+        ) : (
+          <span className="min-w-0 flex-1 truncate pb-0.5 text-[0.8125rem] text-muted">{hint}</span>
+        )}
+
+        {delta !== undefined ? (
+          <Delta value={delta} className="pb-0.5 text-[0.875rem]" />
+        ) : aside !== undefined ? (
+          <span className="shrink-0 pb-0.5 text-[0.875rem] font-medium tnum text-foreground-soft">{aside}</span>
+        ) : null}
+      </span>
     </>
   )
 
-  const shell = 'admin-card px-4 py-4 sm:px-5 sm:py-5'
+  const shell = 'admin-tile flex flex-col p-5'
 
   return href ? (
-    <Link href={href} className={`${shell} admin-card-link group`}>
+    <Link href={href} className={`${shell} admin-card-link`}>
       {body}
     </Link>
   ) : (
@@ -249,15 +308,64 @@ export function StatCard({
 }
 
 /**
+ * Өсөлтийн хувь — өсвөл ногоон, буурвал улаан.
+ *
+ * ⚠️ `null` нь «өмнөх үе тэг» — хувь тооцох боломжгүй. «+100%» эсвэл «∞»
+ * гэж бичих нь хоёулаа худал; зураас нь «харьцуулах зүйл алга» гэдгийг
+ * шударгаар хэлнэ.
+ */
+export function Delta({ value, className = '' }: { value: number | null; className?: string }) {
+  if (value === null) {
+    return (
+      <span className={`shrink-0 text-faint ${className}`} title="Өмнөх үе хоосон">
+        —
+      </span>
+    )
+  }
+  const tone = value > 0 ? 'text-good' : value < 0 ? 'text-danger' : 'text-muted'
+  return (
+    <span className={`shrink-0 font-medium tnum ${tone} ${className}`}>
+      {value > 0 ? '+' : ''}
+      {value}%
+    </span>
+  )
+}
+
+/**
+ * Жижиг баганан график.
+ *
+ * Багана бүр 4px хүртэл ургаж, зай багадвал 1px хүртэл НАРИЙСНА — хэзээ ч
+ * тайрагдахгүй. Тайрах нь хамгийн хуучин эсвэл хамгийн шинэ (өнөөдөр)
+ * өдрийг чимээгүй хаяна гэсэн үг. Тэг өдөр ч бүдэг ёроолтой — «өгөгдөл
+ * алга» биш «энэ өдөр юу ч болоогүй» гэдгийг хэлнэ.
+ */
+export function Sparkline({ values, color }: { values: number[]; color: string }) {
+  const peak = Math.max(...values, 0)
+  return (
+    <span aria-hidden="true" className="flex h-full min-w-0 flex-1 items-end gap-[2px]">
+      {values.map((value, index) => (
+        <span
+          key={index}
+          className="max-w-1 min-w-px flex-1 rounded-t-[1px]"
+          style={{
+            height: `${peak > 0 && value > 0 ? Math.max((value / peak) * 100, 10) : 5}%`,
+            background: color,
+            opacity: value > 0 ? 1 : 0.3,
+          }}
+        />
+      ))}
+    </span>
+  )
+}
+
+/**
  * Үзүүлэлтийн тор — `StatCard` -уудыг багтаана.
  *
- * Урьд нь эдгээр нь хоорондоо зураасаар наалдсан НЭГ зурвас байв. Карт
- * болсны дараа наалдуулах нь утгагүй: хоёр хөрш картын хүрээ зэрэгцвэл
- * 2px зузаан давхар зураас үүсдэг. Тиймээс зай нь тэднийг тусгаарлана —
- * `gap` бол хамгийн цэвэр тусгаарлагч.
+ * Хоёр хөрш картын хүрээ зэрэгцвэл 2px зузаан давхар зураас үүсдэг тул
+ * зай нь тэднийг тусгаарлана — `gap` бол хамгийн цэвэр тусгаарлагч.
  */
-export function StatRow({ children }: { children: ReactNode }) {
-  return <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{children}</div>
+export function StatRow({ children, className = '' }: { children: ReactNode; className?: string }) {
+  return <div className={`grid gap-4 sm:grid-cols-2 ${className}`}>{children}</div>
 }
 
 /* ── Төлөв ─────────────────────────────────────────────────────────────── */
@@ -265,83 +373,53 @@ export function StatRow({ children }: { children: ReactNode }) {
 export type Tone = 'neutral' | 'good' | 'warn' | 'danger' | 'info'
 
 /**
- * Төлөвийн шошго.
+ * Төлөвийн шошго — тунгалаг өнгөт дэвсгэр, өнгөт үсэг.
  *
- * Монохром систем дээр өнгө байхгүй тул ялгааг ХЭЛБЭР үүсгэнэ — нийтийн
- * сайттай яг ижил дүрэм (§ globals.css `.tag`):
+ *   neutral → саарал   · энгийн мэдээлэл, идэвхгүй
+ *   info    → цэнхэр   · явцад буй
+ *   good    → ногоон   · баталгаажсан, дууссан
+ *   warn    → шар      · анхаарал шаардсан
+ *   danger  → улаан    · цуцлагдсан, боломжгүй
  *
- *   neutral → бүдэг дүүргэлт  · энгийн мэдээлэл
- *   info    → дүүрсэн         · явцад буй, анхаарал татсан
- *   good    → дүүрсэн + ✓     · баталгаажсан, дууссан
- *   warn    → тод хүрээ       · анхаарал шаардсан
- *   danger  → тасархай + ✕    · цуцлагдсан, боломжгүй
- *
- * ── Яагаад хоёр өөрчлөлт орсон бэ ──────────────────────────────────────
- * Өмнө нь `neutral` ба `info` ХОЁУЛАА `tag-mute` байсан — өөрөөр хэлбэл
- * захиалгын «Бэлтгэж буй» ба энгийн мэдээлэл яг ижил харагдана. Таван
- * төлөвт дөрвөн хэлбэр хүрэхгүй байв.
- *
- * Одоо `info` нь дүүрсэн (анхаарал татна), `good` нь дүүрсэн дээр ✓
- * нэмнэ. Тэмдэг нь `::before` -ээр зурагдах тул хандах модонд ордоггүй,
- * утга нь шошгын текстэд аль хэдийн бий (§ globals.css `.tag-mark`).
- *
- * Өнгө дангаараа мэдээлэл дамжуулж БОЛОХГҮЙ (WCAG 1.4.1) — энд өнгө огт
- * байхгүй тул текст ба хэлбэр хоёулаа ажиллана.
+ * Өнгө дангаараа мэдээлэл дамжуулж БОЛОХГҮЙ (WCAG 1.4.1) — утга нь шошгын
+ * ТЕКСТЭД ямагт бий; өнгө нь түүнийг уншихаас өмнө хэлнэ.
  */
 const badgeTones: Record<Tone, string> = {
   neutral: 'tag-mute',
-  info: 'tag-fill',
-  good: 'tag-fill tag-mark',
-  warn: 'tag-line',
-  danger: 'tag-dash tag-mark',
+  info: 'tag-info',
+  good: 'tag-good',
+  warn: 'tag-warn',
+  danger: 'tag-danger',
 }
 
-const badgeMarks: Partial<Record<Tone, string>> = { good: '\u2713', danger: '\u2715' }
-
 export function Badge({ tone = 'neutral', children }: { tone?: Tone; children: ReactNode }) {
-  return (
-    <span className={`tag ${badgeTones[tone]}`} data-mark={badgeMarks[tone]}>
-      {children}
-    </span>
-  )
+  return <span className={`tag ${badgeTones[tone]}`}>{children}</span>
 }
 
 /**
- * Мэдэгдэл. Ялгаа нь зүүн ирмэгийн ХЭВ, ДЭВСГЭР ба ДҮРС дээр — өнгөнд биш.
- *
- * Өмнө нь `good` нь 2px тод шугам, `danger` нь 3px тод шугам байв. Нэг
- * пикселийн зөрүү бол ялгаа биш: «Хадгалагдлаа» ба «Алдаа гарлаа» хоёрыг
- * хажуу хажууд нь тавихгүйгээр ялгах боломжгүй. Мөн `neutral` ба `info`
- * хоёр яг ижил байв.
- *
- * Одоо гурван зэрэгцээ дохио: ирмэгийн ЗУЗААН (2 → 4px), ДЭВСГЭР
- * (`surface` → `surface-3`), ДҮРС. Гурвуулаа нэг чиглэлд заана.
+ * Мэдэгдэл — зүүн ирмэгийн зузаан зураас, тунгалаг дэвсгэр, өнгөт дүрс.
+ * Гурвуулаа нэг өнгөөр нэг чиглэлд заана; текст нь харин ҮРГЭЛЖ тод —
+ * мэдэгдлийн гол нь өнгө биш, юу болсон тухай өгүүлбэр.
  *
  * `role`: `status` нь эелдэг — дэлгэц уншигч одоогийн уншилтаа дуусгаад
  * хэлнэ. Алдаа тэр болтол хүлээж болохгүй тул `danger` нь `alert`.
  */
-const alertTones: Record<Tone, { box: string; icon: NavIcon }> = {
-  neutral: { box: 'border-l-2 border-line bg-surface text-foreground-soft', icon: 'info' },
-  info: { box: 'border-l-2 border-line-strong bg-surface text-foreground-soft', icon: 'info' },
-  good: { box: 'border-l-2 border-foreground bg-surface text-foreground', icon: 'success' },
-  warn: {
-    box: 'border-l-2 border-dashed border-line-strong bg-surface text-foreground-soft',
-    icon: 'alert',
-  },
-  danger: {
-    box: 'border-l-4 border-foreground bg-surface-3 font-medium text-foreground',
-    icon: 'alert',
-  },
+const alertTones: Record<Tone, { box: string; icon: NavIcon; ink: string }> = {
+  neutral: { box: 'border-line-strong bg-surface', icon: 'info', ink: 'text-muted' },
+  info: { box: 'border-primary bg-primary/10', icon: 'info', ink: 'text-primary' },
+  good: { box: 'border-good bg-good/10', icon: 'success', ink: 'text-good' },
+  warn: { box: 'border-warn bg-warn/10', icon: 'alert', ink: 'text-warn' },
+  danger: { box: 'border-danger bg-danger/10', icon: 'alert', ink: 'text-danger' },
 }
 
 export function Alert({ tone = 'neutral', children }: { tone?: Tone; children: ReactNode }) {
-  const { box, icon } = alertTones[tone]
+  const { box, icon, ink } = alertTones[tone]
   return (
     <div
-      className={`t-small flex items-start gap-3 px-5 py-4 ${box}`}
+      className={`flex items-start gap-3 rounded-lg border-l-4 px-4 py-3 text-[0.875rem] text-foreground ${box}`}
       role={tone === 'danger' ? 'alert' : 'status'}
     >
-      <AdminIcon name={icon} className="mt-0.5 h-4 w-4 shrink-0" />
+      <AdminIcon name={icon} className={`mt-0.5 h-[1.125rem] w-[1.125rem] shrink-0 ${ink}`} />
       <span className="min-w-0">{children}</span>
     </div>
   )
@@ -350,16 +428,14 @@ export function Alert({ tone = 'neutral', children }: { tone?: Tone; children: R
 export function EmptyState({ icon, title, hint }: { icon: NavIcon; title: ReactNode; hint?: ReactNode }) {
   return (
     /* Гадна хүрээгүй. Хоосон төлөв нь ҮРГЭЛЖ картын дотор суудаг (§ `Panel`)
-       тул тасархай тэгш өнцөгт нь картын хатуу хүрээний дэргэд наалдаж,
-       хоёр давхар хайрцаг үүсгэж байв. «Хоосон» гэдэг дохиог дүрсийг
-       тойрсон тасархай тойрог аль хэдийн хэлж байгаа. */
-    <div className="flex flex-col items-center gap-4 px-5 py-14 text-center">
-      <span className="grid h-11 w-11 place-items-center rounded-full border border-dashed border-line-strong text-muted">
-        <AdminIcon name={icon} className="h-[18px] w-[18px]" />
+       тул хүрээ нь картын ирмэгтэй давхцаж хоёр давхар хайрцаг үүсгэнэ. */
+    <div className="flex flex-col items-center gap-3.5 px-5 py-12 text-center">
+      <span className="grid h-12 w-12 place-items-center rounded-full bg-surface-2 text-muted">
+        <AdminIcon name={icon} className="h-[1.375rem] w-[1.375rem]" />
       </span>
       <div>
-        <p className="t-small font-medium">{title}</p>
-        {hint && <p className="t-small mt-1 max-w-[42ch] text-muted">{hint}</p>}
+        <p className="text-[0.9375rem] font-medium">{title}</p>
+        {hint && <p className="mt-1 max-w-[42ch] text-[0.875rem] text-muted">{hint}</p>}
       </div>
     </div>
   )
@@ -367,8 +443,8 @@ export function EmptyState({ icon, title, hint }: { icon: NavIcon; title: ReactN
 
 /* ── Формын элементүүд ─────────────────────────────────────────────────── */
 
-/* Хайрцаг биш ШУГАМ — фокуслахад доод шугам зүүнээс баруун тийш татагдана
-   (§ globals.css `.ctl`). Нийтийн сайтын формтой яг ижил. */
+/* Сайтын `.ctl` — удирдлага дотор 38px, гадаргаас нэг шат цайвар хайрцаг
+   болж хэлбэржинэ (§ globals.css `.admin-shell .ctl`). */
 const control = 'ctl'
 
 export function Field({
@@ -384,9 +460,9 @@ export function Field({
 }) {
   return (
     <label className={`flex flex-col gap-1.5 ${className}`}>
-      <span className="t-label text-muted">{label}</span>
+      <span className="t-label text-foreground-soft">{label}</span>
       {children}
-      {hint && <span className="t-meta text-faint">{hint}</span>}
+      {hint && <span className="t-meta text-muted">{hint}</span>}
     </label>
   )
 }
@@ -405,9 +481,8 @@ export function Textarea({ className = '', ...props }: ComponentProps<'textarea'
 
 export { FileInput } from './FileInput'
 
-/** Формын доод мөр — үндсэн үйлдэл баруун талд, тусгаарлах зураастай. */
 /**
- * Формын үйлдлийн мөр.
+ * Формын үйлдлийн мөр — үндсэн үйлдэл баруун талд, тусгаарлах зураастай.
  *
  * `sticky` нь УРТ формд: талбар нь дэлгэцэнд багтахгүй үед хадгалах товч
  * доод ирмэгт наалдаж, ажилтан бөглөж дуусаад доош гүйлгэх шаардлагагүй
@@ -454,8 +529,8 @@ export function FilterChip({
     <Link
       href={href}
       aria-current={active ? 'true' : undefined}
-      /* Нийтийн сайтын шүүлтийн чиптэй ижил (§ globals.css `.chip`).
-         Сонгогдсон нь ЭРГЭНЭ — дугуй бөмбөлөг биш, 3px булантай. */
+      /* Сайтын `.chip` — удирдлагад жижиг хүрээтэй товч болж, сонгогдсон нь
+         цэнхэр дүүрнэ (§ globals.css `.admin-shell .chip`). */
       className={`chip ${active ? 'chip-on' : ''}`}
     >
       {children}
@@ -488,10 +563,13 @@ export function SearchBox({
         value ? <input key={name} type="hidden" name={name} value={value} /> : null,
       )}
       <label className="flex min-w-0 flex-1 flex-col gap-1.5">
-        <span className="t-label text-muted">Хайх</span>
+        <span className="t-label text-foreground-soft">Хайх</span>
         <Input name="q" defaultValue={defaultValue} placeholder={placeholder} />
       </label>
-      <Button type="submit">Хайх</Button>
+      <Button type="submit">
+        <AdminIcon name="search" className="h-4 w-4 shrink-0" />
+        Хайх
+      </Button>
       {defaultValue ? (
         <ButtonLink href="?" variant="ghost">
           Цэвэрлэх
@@ -560,11 +638,9 @@ export function Pager({
  * Мөр дээгүүр гүйлгэхэд тодрох (hover) нь урт мөрийг нүдээр дагахад тусална.
  * Сүүлийн мөрийн доод зураасыг авна — картын хүрээтэй давхацдаг.
  *
- * Тодрох өнгө нь `surface-2` — `surface` БИШ. Хүснэгт нь одоо картын дотор
+ * Тодрох өнгө нь `surface-2` — `surface` БИШ. Хүснэгт нь картын дотор
  * (§ `Panel`) суудаг бөгөөд картын дэвсгэр өөрөө `surface` тул тэр нь
- * харагдахгүй болно: hover байгаа ч мэдрэгдэхгүй байх нь hover огт
- * байхгүйгээс ДОР — ажилтан мөр дагаж чадахгүй атлаа систем эвдэрсэн эсэхийг
- * мэдэхгүй.
+ * харагдахгүй болно.
  */
 export function Table({ children, minWidth = 640 }: { children: ReactNode; minWidth?: number }) {
   return (
@@ -573,7 +649,7 @@ export function Table({ children, minWidth = 640 }: { children: ReactNode; minWi
         // `admin-table` нь жижиг дэлгэц дээр мөрийг карт болгож задална
         // (§ globals.css «Утасны төрх»). `--tbl-min` нь зөвхөн md-ээс дээш.
         className="admin-table t-small [&_tbody_tr]:transition-colors [&_tbody_tr]:duration-150 [&_tbody_tr:hover]:bg-surface-2 [&_tbody_tr:last-child>td]:border-b-0"
-        style={{ '--tbl-min': `${minWidth}px` } as React.CSSProperties}
+        style={{ '--tbl-min': `${minWidth}px` } as CSSProperties}
       >
         {children}
       </table>
@@ -592,9 +668,9 @@ export function Th({
 }) {
   return (
     <th
-      /* Дэвсгэргүй. Хүснэгтийн толгойг өнгөөр биш ШУГАМААР тусгаарлана —
-         саарал зурвас нь хүснэгтийг хайрцаг болгодог. */
-      className={`t-label border-b border-line-strong px-4 py-3 text-muted ${
+      /* Толгой мөр нь дэвсгэрээсээ ӨЧҮҮХЭН тод — их биеэс салах хэмжээнд,
+         гэхдээ хүснэгтийг хайрцаг болгохооргүй. */
+      className={`t-label border-b border-line bg-white/[0.02] px-4 py-3 whitespace-nowrap text-foreground-soft ${
         align === 'right' ? 'text-right' : 'text-left'
       } ${className}`}
     >
@@ -625,7 +701,7 @@ export function Td({
     <td
       colSpan={colSpan}
       data-label={label}
-      className={`border-b border-line px-4 py-3.5 align-middle ${
+      className={`border-b border-line px-4 py-3 align-middle ${
         align === 'right' ? 'text-right' : ''
       } ${className}`}
     >

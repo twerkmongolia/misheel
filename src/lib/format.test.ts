@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   addDays,
+  compactMnt,
   dayKey,
   formatDate,
   formatDateTime,
@@ -142,5 +143,24 @@ describe('relativeDay', () => {
     // 2026-09-03T17:00Z = УБ-аар 9-р сарын 4, 01:00. UTC-ээр бодвол
     // «өнөөдөр» гэж хариулах бөгөөд тэр нь буруу.
     expect(relativeDay('2026-09-03T17:00:00.000Z', from)).toBe('tomorrow')
+  })
+})
+
+describe('compactMnt', () => {
+  it('сая, мянгаар товчилж, аравтын нэг орон үлдээнэ', () => {
+    expect(compactMnt(1_500_000)).toBe('1.5 сая')
+    expect(compactMnt(850_000)).toBe('850 мян')
+    expect(compactMnt(12_340)).toBe('12.3 мян')
+    expect(compactMnt(900)).toBe('900')
+  })
+
+  it('бүхэл тоонд «.0» залгахгүй', () => {
+    expect(compactMnt(2_000_000)).toBe('2 сая')
+    expect(compactMnt(0)).toBe('0')
+  })
+
+  it('дугуйруулсны дараа шатаа ахиулна — «1000 мян» гэж гаргахгүй', () => {
+    expect(compactMnt(999_960)).toBe('1 сая')
+    expect(compactMnt(999.96)).toBe('1 мян')
   })
 })

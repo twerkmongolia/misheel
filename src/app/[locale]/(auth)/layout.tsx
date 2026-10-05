@@ -74,7 +74,7 @@ export default async function AuthLayout({
                 width={920}
                 height={587}
                 sizes="(max-width: 1024px) 0px, 26rem"
-                priority
+                preload
                 className="h-auto w-full object-contain"
               />
             </Link>

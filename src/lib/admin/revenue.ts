@@ -90,6 +90,11 @@ export type RevenueReport = {
   all: number
   /** Яг ижил урттай ӨМНӨХ цонхны нийлбэр — өсөлт бодоход. */
   previous: Record<Stream, number> & { all: number }
+  /**
+   * Өмнөх цонхны баганууд — `buckets` -тай ИЖИЛ түлхүүр, ижил тоотой
+   * (§ `alignPrevious`). График дээр «энэ үе» -ийн дэргэд хоёр дахь шугам.
+   */
+  previousBuckets: Bucket[]
 }
 
 export function emptyDay(day: string): DayRevenue {
@@ -168,6 +173,40 @@ export function dayLabel(day: string, withYear = false): string {
   return withYear ? `${year} · ${short}` : short
 }
 
+/**
+ * Тэнхлэгийн богино шошго: өдөр/долоо хоног `9/28`, сар `9-р сар`.
+ *
+ * `dayLabel` -ийн «9-р сар 28» нь уншилтын мөрөнд зөв ч тэнхлэг дээр 6-7
+ * удаа давтагдахад «-р сар» нь шошго бүрийн хагасыг эзэлж, тоонууд
+ * хоорондоо мөргөлдөнө. Тэнхлэгт зөвхөн ТООНЫ хэлбэр л хэрэгтэй.
+ */
+export function axisLabel(key: string): string {
+  const [, month, date] = key.split('-')
+  if (!month) return '—'
+  return date ? `${Number(month)}/${Number(date)}` : `${Number(month)}-р сар`
+}
+
+/**
+ * Өмнөх цонхыг одоогийн цонхны БАГАНУУД руу буулгана.
+ *
+ * Хоёр цонх ижил урттай (span) тул өмнөхийн i дэх өдөр нь одоогийн i дэх
+ * өдрийн «хос». Өмнөх өдөр бүрд ХОСЫН огноог өгөөд ердийн `bucketize` -аар
+ * бүлэглэнэ — ингэснээр долоо хоног, сарын хил ч ЯГ одоогийнхтой таарна.
+ *
+ * ⚠️ Өмнөхийг өөрийн огноогоор бүлэглэж индексээр нь тааруулах нь ЭВДЭРНЭ:
+ * 90 хоногийн цонх нэг үед 13, нөгөө үед 14 долоо хоногт хуваагдана (Даваа
+ * гариг аль өдөр таарахаас хамаарна) — шугам нэг баганаар гулсаж, сүүлийн
+ * цэг нь хоосон үлдэнэ.
+ */
+export function alignPrevious(
+  days: DayRevenue[],
+  before: DayRevenue[],
+  group: 'day' | 'week' | 'month',
+): Bucket[] {
+  const shifted = days.map((day, index) => ({ ...(before[index] ?? emptyDay(day.day)), day: day.day }))
+  return bucketize(shifted, group)
+}
+
 /** `2026-09` → `2026 · 9-р сар`. */
 function monthLabel(key: string): string {
   const [year, month] = key.split('-')
@@ -207,5 +246,6 @@ export function assemble(
     totals,
     all: totals.online + totals.studio + totals.session + totals.shop,
     previous: { ...prev, all: prev.online + prev.studio + prev.session + prev.shop },
+    previousBuckets: alignPrevious(days, before, range.group),
   }
 }

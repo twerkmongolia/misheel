@@ -17,14 +17,14 @@ export type EnrollmentRow = {
 }
 
 const label: Record<EnrollmentStatus, string> = {
-  pending_payment: 'Төлбөр хүлээж байна',
+  pending_payment: 'Төлбөр амжилтгүй',
   active: 'Идэвхтэй',
   completed: 'Дууссан',
   cancelled: 'Цуцлагдсан',
 }
 
 const tone = {
-  pending_payment: 'warn',
+  pending_payment: 'danger',
   active: 'good',
   completed: 'neutral',
   cancelled: 'danger',

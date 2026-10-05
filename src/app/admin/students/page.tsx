@@ -8,6 +8,8 @@ import { createClient } from '@/lib/supabase/server'
 import { requireStaff } from '@/lib/auth/dal'
 import { listAccountEmails } from '@/lib/auth/accounts'
 import { isSupabaseConfigured } from '@/lib/supabase/env'
+import { nowMs } from '@/lib/format'
+import { visibleToAdmin } from '@/lib/admin/payment-outcome'
 
 /* ───────────────────────────────────────────────────────────────────────────
    СУРАГЧИД
@@ -42,27 +44,34 @@ export default async function AdminStudentsPage({
 
      500 мөрийн хязгаар: студийн хэмжээнд энэ нь бүх элсэлтээс хамаагүй их
      бөгөөд хязгааргүй асуулга нь мөр олшрох тусам ЧИМЭЭГҮЙ удааширдаг. */
-  const [{ data: enrollments }, { data: courses }, { data: profiles }, emails] = await Promise.all([
+  const [{ data: enrollments }, { data: courses }, { data: instructors }, { data: profiles }, emails] =
+    await Promise.all([
     supabase
       .from('course_enrollments')
       .select('id, user_id, course_id, status, price_paid, created_at')
       .order('created_at', { ascending: false })
       .limit(500),
-    supabase.from('courses').select('id, name_mn, mode'),
+    supabase.from('courses').select('id, name_mn, mode, instructor_id'),
+    supabase.from('instructors').select('id, name'),
     supabase.from('profiles').select('id, full_name, phone, created_at'),
     listAccountEmails(),
   ])
 
   const byCourse = new Map((courses ?? []).map((course) => [course.id, course]))
   const byProfile = new Map((profiles ?? []).map((profile) => [profile.id, profile]))
+  const byInstructor = new Map((instructors ?? []).map((person) => [person.id, person.name]))
 
   /* Хүнээр бүлэглэнэ. `enrollments` нь шинэ нь эхэнд эрэмбэлэгдсэн тул
      бүлэг доторх дараалал ч шинээсээ хуучин руу явна — цонхон дотор эхний
      мөр нь хамгийн сүүлд авсан анги болно. `Map` нь оруулсан дарааллаа
      хадгалдаг тул сурагчид ч сүүлд элссэнээрээ эрэмбэлэгдэнэ. */
   const grouped = new Map<string, StudentEnrollment[]>()
+  const now = nowMs()
 
   for (const row of enrollments ?? []) {
+    /* Сүүлийн 30 минутын төлбөр хүлээж буй элсэлт — явцад, харуулахгүй;
+       түүнээс хуучин нь амжилтгүй (§ lib/admin/payment-outcome.ts). */
+    if (!visibleToAdmin(row.status, row.created_at, now)) continue
     const course = byCourse.get(row.course_id)
     const list = grouped.get(row.user_id) ?? []
 
@@ -72,6 +81,14 @@ export default async function AdminStudentsPage({
          юу байсан нь ойлгогдохгүй болно. */
       course: course?.name_mn ?? 'Устсан анги',
       online: course?.mode === 'online',
+      /* Багш нь ЗӨВХӨН танхимын ангид утгатай: танхимын анги бүр нэг багшийн
+         хичээл, харин онлайн анги нь багшаар салдаггүй нэг л бүтээгдэхүүн.
+         Онлайнд багш бичвэл ажилтан «тэр багшийн онлайн анги» гэж байхгүй
+         зүйлийг хайна. */
+      teacher:
+        course?.mode === 'studio' && course.instructor_id
+          ? (byInstructor.get(course.instructor_id) ?? null)
+          : null,
       status: row.status,
       price_paid: row.price_paid,
       created_at: row.created_at,

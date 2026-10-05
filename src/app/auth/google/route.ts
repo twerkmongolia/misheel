@@ -2,6 +2,13 @@ import { cookies } from 'next/headers'
 import { NextResponse, type NextRequest } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { defaultLocale, isLocale } from '@/lib/i18n/config'
+import {
+  GOOGLE_CALLBACK_PATH,
+  GOOGLE_COOKIE,
+  GOOGLE_COOKIE_MAX_AGE,
+  googleDirect,
+  startGoogle,
+} from '@/lib/auth/google-direct'
 
 /**
  * Нэг хөтөч дээр зэрэг оршиж болох PKCE түлхүүрийн тоо.
@@ -31,6 +38,13 @@ const VERIFIER_BUDGET = 8
  * `signInWithOAuth` нь PKCE-ийн нууц түлхүүрийг cookie-д бичнэ. Тэр cookie
  * нь `httpOnly` байх ёстой бөгөөд түүнийг зөвхөн сервер бичиж чадна.
  * Буцах цэг нь `/auth/callback` — тэр кодыг session болгож солино.
+ *
+ * ── Хоёр зам ──────────────────────────────────────────────────────────────
+ * `googleDirect()` зөвшөөрвөл Google нь МАНАЙ `/auth/google/callback` руу
+ * буцаж, хаяг сонгох цонх «twerkmongolia.com» гэж нэрлэнэ
+ * (§ lib/auth/google-direct.ts). Үгүй бол (түлхүүргүй орчин, Vercel preview)
+ * доорх Supabase-ийн чиглүүлэлт өөрчлөлтгүй ажиллана — цонх нь Supabase-ийн
+ * домэйныг нэрлэнэ.
  */
 export async function GET(request: NextRequest): Promise<Response> {
   const { searchParams, origin } = request.nextUrl
@@ -80,6 +94,19 @@ export async function GET(request: NextRequest): Promise<Response> {
 
   if (verifiers.length > VERIFIER_BUDGET) {
     for (const cookie of verifiers) jar.delete(cookie.name)
+  }
+
+  if (googleDirect(origin)) {
+    const { url, cookie } = startGoogle(origin, locale, next)
+    jar.set(GOOGLE_COOKIE, cookie, {
+      httpOnly: true,
+      // Lax нь Google-ийн дээд түвшний буцах шилжилтэд cookie-г дагуулна.
+      sameSite: 'lax',
+      secure: origin.startsWith('https://'),
+      path: GOOGLE_CALLBACK_PATH,
+      maxAge: GOOGLE_COOKIE_MAX_AGE,
+    })
+    return NextResponse.redirect(url)
   }
 
   const supabase = await createClient()
